@@ -1,0 +1,62 @@
+export default function Results() {
+  return (
+    <section className="relative" style={{ padding: '130px 0' }} id="results">
+      <div className="w-full max-w-[1180px] mx-auto px-5">
+        <div className="text-[#707070] text-[9px] font-semibold uppercase tracking-[0.15em] mb-[16px]">
+          Traction
+        </div>
+        <h2 className="text-[clamp(35px,5vw,64px)] leading-[0.98] tracking-[-0.06em] max-w-[700px]">
+          Trusted by developers<br />
+          <span className="text-[#626262]">worldwide.</span>
+        </h2>
+        <p className="mt-[20px] max-w-[470px] text-[#747474] text-[12px] leading-[1.7]">
+          From solo founders to enterprise teams, developers use ZanDev
+          to ship production-ready UIs faster.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-[12px] mt-[50px]">
+          {/* Left panel */}
+          <div className="relative min-h-[360px] border border-white/[0.10] rounded-[18px] bg-[#080808] p-[22px] overflow-hidden">
+            <div className="text-[#6c6c6c] text-[9px] mb-[25px]">DEVELOPER GROWTH</div>
+            <div className="text-[60px] leading-none tracking-[-0.08em] font-bold">10x</div>
+            <div className="text-[#626262] mt-[7px] text-[9px]">
+              Faster than building from scratch
+            </div>
+            <div className="absolute right-[25px] top-[35px] p-[17px_20px] rounded-[12px] bg-gradient-to-br from-[#191919] to-[#080808] border border-white/[0.08] rotate-[7deg] shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+              <strong className="block text-[26px]">45K+</strong>
+              <small className="text-[#5d5d5d] text-[7px]">ACTIVE DEVELOPERS</small>
+            </div>
+            <div className="absolute left-[22px] right-[22px] bottom-[25px] h-[100px]">
+              <svg width="100%" height="100%" viewBox="0 0 500 100" preserveAspectRatio="none">
+                <path d="M0 85 C50 80,70 70,110 75 S170 45,210 58 S270 35,310 45 S380 18,420 28 S470 8,500 5" fill="none" stroke="#666" strokeWidth="2" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Right panel */}
+          <div className="min-h-[360px] border border-white/[0.10] rounded-[18px] bg-[#080808] p-[22px]">
+            <div className="text-[#6c6c6c] text-[9px] mb-[25px]">PLATFORM METRICS</div>
+            <div className="grid grid-cols-2 gap-[8px]">
+              <div className="p-[13px] rounded-[10px] bg-white/[0.035] border border-white/[0.055]">
+                <div className="text-[#555] text-[7px]">Designs</div>
+                <div className="mt-[8px] text-[18px] font-semibold">2,400+</div>
+              </div>
+              <div className="p-[13px] rounded-[10px] bg-white/[0.035] border border-white/[0.055]">
+                <div className="text-[#555] text-[7px]">Code exports</div>
+                <div className="mt-[8px] text-[18px] font-semibold">180K+</div>
+              </div>
+              <div className="p-[13px] rounded-[10px] bg-white/[0.035] border border-white/[0.055]">
+                <div className="text-[#555] text-[7px]">Developers</div>
+                <div className="mt-[8px] text-[18px] font-semibold">45K+</div>
+              </div>
+              <div className="p-[13px] rounded-[10px] bg-white/[0.035] border border-white/[0.055]">
+                <div className="text-[#555] text-[7px]">Frameworks</div>
+                <div className="mt-[8px] text-[18px] font-semibold">12+</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
