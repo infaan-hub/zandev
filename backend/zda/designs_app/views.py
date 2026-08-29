@@ -7,24 +7,21 @@ from .models import Design
 
 class HealthView(APIView):
     def get(self, request):
+        result = {'status': 'ok', 'database': False, 'design_count': 0}
         try:
             from django.db import connection
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
-            db_ok = True
+            result['database'] = True
         except Exception as e:
-            db_ok = False
+            result['db_error'] = str(e)
 
         try:
-            design_count = Design.objects.count()
+            result['design_count'] = Design.objects.count()
         except Exception:
-            design_count = -1
+            pass
 
-        return Response({
-            'status': 'ok',
-            'database': db_ok,
-            'design_count': design_count,
-        })
+        return Response(result)
 
 
 class DesignListView(APIView):

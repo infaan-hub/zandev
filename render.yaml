@@ -2,50 +2,36 @@ services:
   - type: web
     name: zandev
     runtime: python
-    rootDir: backend/zda
-    buildCommand: pip install -r requirements.txt && bash build.sh
-    startCommand: gunicorn zda.wsgi:application --bind 0.0.0.0:$PORT
+    buildCommand: pip install -r requirements.txt && cd backend/zda && python manage.py migrate --noinput && python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin','admin@zandev.dev','admin123') if not User.objects.filter(username='admin').exists() else None" && python keep_alive.py && python manage.py seed_designs && python manage.py collectstatic --noinput
+    startCommand: cd backend/zda && DJANGO_SETTINGS_MODULE=zda.settings gunicorn zda.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
       - key: DJANGO_SETTINGS_MODULE
         value: zda.settings
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
         value: "False"
-      - key: DB_NAME
-        value: "neondb"
-      - key: DB_USER
-        value: "neondb_owner"
-      - key: DB_PASSWORD
-        value: "npg_pBYIbFKm7H0f"
-      - key: DB_HOST
-        value: "ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech"
-      - key: DB_PORT
-        value: "5432"
+      - key: DATABASE_URL
+        value: "postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require"
       - key: ALLOWED_HOSTS
         value: "zandev.onrender.com"
       - key: CORS_ALLOWED_ORIGINS
         value: "https://zandeveloper.vercel.app,http://localhost:5173"
-    healthCheckPath: /api/stats/
+    healthCheckPath: /api/health/
     autoDeploy: true
 
   - type: cron
     name: keep-alive-bot
     runtime: python
-    rootDir: backend/zda
-    schedule: "0 */6 * * *"
     buildCommand: pip install -r requirements.txt
-    startCommand: python keep_alive.py
+    startCommand: cd backend/zda && DJANGO_SETTINGS_MODULE=zda.settings python keep_alive.py
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
       - key: DJANGO_SETTINGS_MODULE
         value: zda.settings
-      - key: DB_NAME
-        value: "neondb"
-      - key: DB_USER
-        value: "neondb_owner"
-      - key: DB_PASSWORD
-        value: "npg_pBYIbFKm7H0f"
-      - key: DB_HOST
-        value: "ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech"
-      - key: DB_PORT
-        value: "5432"
+      - key: DATABASE_URL
+        value: "postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require"
+    schedule: "0 */6 * * *"
