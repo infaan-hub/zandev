@@ -1,4 +1,10 @@
+import { useCountUp } from '../lib/useCountUp'
+
 export default function Features() {
+  const designs = useCountUp(2400, 2200, false)
+  const exports_ = useCountUp(180, 2000, false)
+  const frameworks = useCountUp(12, 1500, false)
+
   return (
     <section className="relative" style={{ padding: '130px 0' }} id="features">
       <div className="w-full max-w-[1180px] mx-auto px-5">
@@ -27,20 +33,20 @@ export default function Features() {
             <p className="text-[#666] text-[10px] leading-[1.6] max-w-[260px] mt-[8px]">
               Explore a curated library of production-ready designs. Filter by framework, style and component type.
             </p>
-            <div className="absolute left-[22px] right-[22px] bottom-[22px] grid grid-cols-3 gap-[7px]">
+            <div ref={designs.ref} className="absolute left-[22px] right-[22px] bottom-[22px] grid grid-cols-3 gap-[7px]">
               <div className="p-[13px] rounded-[10px] bg-white/[0.035] border border-white/[0.055]">
                 <div className="text-[#555] text-[7px]">Designs</div>
-                <div className="mt-[8px] text-[18px] font-semibold">2,400+</div>
+                <div className="mt-[8px] text-[18px] font-semibold">{designs.count.toLocaleString()}+</div>
                 <div className="mt-[8px] h-[2px] rounded-full bg-gradient-to-r from-[#444] to-[#171717]" style={{ width: '70%' }} />
               </div>
               <div className="p-[13px] rounded-[10px] bg-white/[0.035] border border-white/[0.055]">
                 <div className="text-[#555] text-[7px]">Code exports</div>
-                <div className="mt-[8px] text-[18px] font-semibold">180K</div>
+                <div className="mt-[8px] text-[18px] font-semibold">{exports_.count}K</div>
                 <div className="mt-[8px] h-[2px] rounded-full bg-gradient-to-r from-[#444] to-[#171717]" style={{ width: '55%' }} />
               </div>
               <div className="p-[13px] rounded-[10px] bg-white/[0.035] border border-white/[0.055]">
                 <div className="text-[#555] text-[7px]">Frameworks</div>
-                <div className="mt-[8px] text-[18px] font-semibold">12+</div>
+                <div className="mt-[8px] text-[18px] font-semibold">{frameworks.count}+</div>
                 <div className="mt-[8px] h-[2px] rounded-full bg-gradient-to-r from-[#444] to-[#171717]" style={{ width: '80%' }} />
               </div>
             </div>

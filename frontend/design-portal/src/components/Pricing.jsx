@@ -1,8 +1,10 @@
+import { Link } from 'react-router-dom'
+
 export default function Pricing() {
   const plans = [
-    { name: 'Free', price: '$0', desc: 'For developers trying out the platform.', features: ['100+ free designs', 'Copy source code', 'Basic frameworks', 'Community access'], featured: false },
-    { name: 'Pro', price: '$19', period: '/month', desc: 'For developers shipping production UIs.', features: ['All 2,400+ designs', 'All frameworks', 'Priority export', 'Custom themes'], featured: true },
-    { name: 'Team', price: '$49', period: '/month', desc: 'For teams building together.', features: ['Everything in Pro', 'Team workspaces', 'Custom design systems', 'Priority support'], featured: false },
+    { name: 'Free', price: '$0', desc: 'For developers trying out the platform.', features: ['100+ free designs', 'Copy source code', 'Basic frameworks', 'Community access'], featured: false, slug: 'free' },
+    { name: 'Pro', price: '$19', period: '/month', desc: 'For developers shipping production UIs.', features: ['All 2,400+ designs', 'All frameworks', 'Priority export', 'Custom themes'], featured: true, slug: 'pro' },
+    { name: 'Team', price: '$49', period: '/month', desc: 'For teams building together.', features: ['Everything in Pro', 'Team workspaces', 'Custom design systems', 'Priority support'], featured: false, slug: 'team' },
   ]
 
   return (
@@ -50,15 +52,16 @@ export default function Pricing() {
                   </li>
                 ))}
               </ul>
-              <button
-                className={`mt-auto w-full h-[37px] rounded-[8px] text-[9px] font-semibold border transition-colors ${
+              <Link
+                to={`/pricing/${plan.slug}`}
+                className={`mt-auto w-full h-[37px] flex items-center justify-center rounded-[8px] text-[9px] font-semibold border transition-colors ${
                   plan.featured
                     ? 'bg-[#050505] text-white border-[#050505]'
                     : 'bg-white/[0.045] text-white border-white/[0.10] hover:bg-white/[0.08]'
                 }`}
               >
                 {plan.featured ? 'Start Free Trial' : 'Get Started'}
-              </button>
+              </Link>
             </article>
           ))}
         </div>

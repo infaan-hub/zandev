@@ -19,7 +19,7 @@ export default function Footer() {
             <Link to="/tools" className="block text-[#555] text-[9px] mb-[11px] hover:text-white transition-colors">Features</Link>
             <Link to="/analytics" className="block text-[#555] text-[9px] mb-[11px] hover:text-white transition-colors">Analytics</Link>
             <Link to="/rankings" className="block text-[#555] text-[9px] mb-[11px] hover:text-white transition-colors">Rankings</Link>
-            <Link to="/#pricing" className="block text-[#555] text-[9px] mb-[11px] hover:text-white transition-colors">Pricing</Link>
+            <Link to="/pricing-page" className="block text-[#555] text-[9px] mb-[11px] hover:text-white transition-colors">Pricing</Link>
           </div>
 
           <div>

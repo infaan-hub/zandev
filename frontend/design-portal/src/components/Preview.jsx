@@ -1,4 +1,19 @@
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { api } from '../lib/api'
+
 export default function Preview() {
+  const [designs, setDesigns] = useState([])
+
+  useEffect(() => {
+    api.getDesigns({ sort: '-score' })
+      .then((data) => setDesigns((data.results || []).slice(0, 10)))
+      .catch(() => {})
+  }, [])
+
+  const isVideo = (d) => d.file_type === 'video' || /\.(mp4|webm|ogg|mov)$/i.test(d.preview || '')
+  const isImage = (d) => d.file_type === 'image' || (d.preview && d.preview.startsWith('http') && !isVideo(d))
+
   return (
     <section className="relative overflow-hidden" style={{ padding: '100px 0 150px' }}>
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-white/[0.04] rounded-full pointer-events-none" style={{ width: '1000px', height: '1000px' }} />
@@ -13,17 +28,16 @@ export default function Preview() {
         <div
           className="rounded-[20px] overflow-hidden border border-white/[0.05]"
           style={{
-            minHeight: '650px',
             background: 'radial-gradient(circle at 70% 10%, rgba(255,255,255,0.06), transparent 30%), #060606',
           }}
         >
-          <div className="p-[50px]" style={{ minHeight: '650px' }}>
+          <div className="p-[50px]">
             <div className="flex justify-between items-center text-[#777] text-[9px]">
               <strong className="text-white">ZanDev</strong>
               <span>Designs &nbsp;&nbsp; Code &nbsp;&nbsp; AI Agent</span>
             </div>
 
-            <div className="mt-[110px] max-w-[600px]">
+            <div className="mt-[60px] max-w-[600px]">
               <div className="text-[#555] text-[8px] mb-[14px]">
                 DESIGN-TO-CODE MARKETPLACE
               </div>
@@ -35,14 +49,71 @@ export default function Preview() {
                 and paste components directly into your project.
               </p>
               <div className="flex gap-[8px] mt-[22px]">
-                <span className="inline-flex items-center justify-center min-h-[38px] px-[17px] rounded-[8px] text-[10px] font-semibold bg-white text-black border border-white/[0.1]">
+                <Link to="/tools" className="inline-flex items-center justify-center min-h-[38px] px-[17px] rounded-[8px] text-[10px] font-semibold bg-white text-black border border-white/[0.1] hover:-translate-y-[2px] transition-transform duration-200">
                   Browse designs
-                </span>
-                <span className="inline-flex items-center justify-center min-h-[38px] px-[17px] rounded-[8px] text-[10px] font-semibold bg-white/[0.035] text-[#bbb] border border-white/[0.1]">
+                </Link>
+                <Link to="/tools" className="inline-flex items-center justify-center min-h-[38px] px-[17px] rounded-[8px] text-[10px] font-semibold bg-white/[0.035] text-[#bbb] border border-white/[0.1] hover:-translate-y-[2px] transition-transform duration-200">
                   View source
-                </span>
+                </Link>
               </div>
             </div>
+
+            {/* Design Grid */}
+            {designs.length > 0 && (
+              <div className="mt-[50px] grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-[10px]">
+                {designs.map((d) => (
+                  <Link
+                    key={d.id}
+                    to="/tools"
+                    className="group relative rounded-[10px] overflow-hidden border border-white/[0.06] bg-white/[0.025] hover:border-white/[0.15] transition-all duration-200 cursor-pointer"
+                  >
+                    <div className="h-[90px] flex items-center justify-center overflow-hidden">
+                      {isVideo(d) ? (
+                        <video
+                          src={d.preview}
+                          className="w-full h-full object-cover"
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
+                          onMouseEnter={(e) => e.target.play()}
+                          onMouseLeave={(e) => { e.target.pause(); e.target.currentTime = 0 }}
+                        />
+                      ) : isImage(d) ? (
+                        <img
+                          src={d.preview}
+                          alt={d.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.style.display = 'none' }}
+                        />
+                      ) : (
+                        <div className="text-[#444] text-[8px] font-medium">{d.name}</div>
+                      )}
+                    </div>
+                    <div className="p-[8px]">
+                      <div className="text-[9px] font-semibold truncate">{d.name}</div>
+                      <div className="flex items-center gap-[4px] mt-[3px]">
+                        <span className="text-[7px] text-[#555]">{d.framework}</span>
+                        <span className={`text-[7px] font-medium ${d.price === 'Free' ? 'text-[#4ade80]' : 'text-[#fbbf24]'}`}>
+                          {d.price}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <span className="text-[8px] font-semibold bg-white/90 text-black px-[10px] py-[4px] rounded-full">View</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {designs.length > 0 && (
+              <div className="mt-[20px] text-center">
+                <Link to="/tools" className="inline-flex items-center gap-[6px] text-[10px] text-[#888] hover:text-white transition-colors font-medium">
+                  See all designs on ZanDev <span className="text-[12px]">→</span>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

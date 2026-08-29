@@ -37,7 +37,7 @@ export default function Hero() {
             to="/tools"
             className="inline-flex items-center justify-center gap-2 min-h-[38px] px-[17px] rounded-[8px] text-[10px] font-semibold border border-white/[0.1] bg-white/[0.035] text-[#bbb] hover:-translate-y-[2px] transition-transform duration-200"
           >
-            Watch Demo <span>▶</span>
+            Browse Designs <span>▶</span>
           </Link>
         </div>
 
