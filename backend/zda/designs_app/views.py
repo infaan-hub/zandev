@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models import Count, Sum
 from .models import Design
 
 
@@ -102,9 +103,8 @@ export default function {d.name.replace(' ', '').replace('-', '')}() {{
 
 class StatsView(APIView):
     def get(self, request):
-        from django.db.models import Sum
         agg = Design.objects.aggregate(
-            total_designs=models.Count('id'),
+            total_designs=Count('id'),
             total_views=Sum('views'),
             total_exports=Sum('exports'),
         )
@@ -173,6 +173,3 @@ class OriginkitDetailView(APIView):
             'categoryLabel': CATEGORY_MAP.get(match['category'], match['category']),
             'code': code,
         }, status=status.HTTP_200_OK)
-
-
-from django.db import models
