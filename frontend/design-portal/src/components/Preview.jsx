@@ -2,6 +2,24 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
 
+const OK_CATEGORY_ICONS = {
+  'interactive-elements': '✨',
+  'image-gallery': '🖼️',
+  'text': '🔤',
+  'animation': '🎬',
+  'background-animation': '🌊',
+  'button': '🔘',
+}
+
+const OK_CATEGORY_COLORS = {
+  'interactive-elements': 'from-purple-500/30 to-blue-500/30 border-purple-500/40',
+  'image-gallery': 'from-pink-500/30 to-orange-500/30 border-pink-500/40',
+  'text': 'from-cyan-500/30 to-green-500/30 border-cyan-500/40',
+  'animation': 'from-amber-500/30 to-yellow-500/30 border-amber-500/40',
+  'background-animation': 'from-blue-500/30 to-indigo-500/30 border-blue-500/40',
+  'button': 'from-red-500/30 to-pink-500/30 border-red-500/40',
+}
+
 export default function Preview() {
   const [designs, setDesigns] = useState([])
   const [originkit, setOriginkit] = useState([])
@@ -123,13 +141,16 @@ export default function Preview() {
                     <Link
                       key={d.name}
                       to="/tools"
-                      className="group relative rounded-[10px] overflow-hidden border border-white/[0.06] bg-white/[0.025] hover:border-purple-500/30 transition-all duration-200 cursor-pointer"
+                      className="group relative rounded-[10px] overflow-hidden border border-purple-500/15 bg-gradient-to-br from-[#0a0a12] to-[#0d0d15] hover:border-purple-500/35 transition-all duration-200 cursor-pointer"
                     >
-                      <div className="h-[90px] flex items-center justify-center overflow-hidden">
-                        <div className="flex flex-col items-center gap-[4px]">
-                          <div className="w-[32px] h-[32px] rounded-[8px] bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30 flex items-center justify-center">
-                            <span className="text-[14px]">🧩</span>
+                      <div className={`h-[90px] flex items-center justify-center overflow-hidden bg-gradient-to-br ${OK_CATEGORY_COLORS[d.category] || OK_CATEGORY_COLORS['interactive-elements']}`}>
+                        <div className="relative flex flex-col items-center gap-[4px]">
+                          <div className="absolute -inset-4 opacity-30">
+                            <div className="absolute top-0 left-0 w-[30px] h-[30px] rounded-full bg-purple-500/20 blur-lg" />
+                            <div className="absolute bottom-0 right-0 w-[20px] h-[20px] rounded-full bg-blue-500/20 blur-lg" />
                           </div>
+                          <span className="text-[20px] relative z-10">{OK_CATEGORY_ICONS[d.category] || '🧩'}</span>
+                          <span className="text-white/60 text-[7px] font-medium relative z-10">{d.displayName}</span>
                         </div>
                       </div>
                       <div className="p-[8px]">

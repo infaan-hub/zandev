@@ -149,59 +149,75 @@ class OriginkitListView(APIView):
     def get(self, request):
         try:
             from .originkit_service import ORIGINKIT_CATALOG, CATEGORY_MAP
-            category = request.query_params.get('category')
-            search = request.query_params.get('search')
-
-            results = list(ORIGINKIT_CATALOG)
-
-            if category:
-                results = [c for c in results if c['category'] == category]
-            if search:
-                q = search.lower()
-                results = [c for c in results if q in c['name'].lower() or q in c['displayName'].lower() or q in c['description'].lower() or any(q in t for t in c['tags'])]
-
-            categories = list({c['category'] for c in ORIGINKIT_CATALOG})
-            cat_map = {c: CATEGORY_MAP.get(c, c.replace('-', ' ').title()) for c in categories}
-
-            enriched = []
-            for c in results:
-                enriched.append({
-                    **c,
-                    'displayName': c['displayName'],
-                    'categoryLabel': cat_map.get(c['category'], c['category']),
-                    'preview': f"https://placehold.co/600x400/111111/666666?text={c['displayName'].replace(' ', '+')}",
-                })
-
-            return Response({
-                'count': len(enriched),
-                'categories': cat_map,
-                'results': enriched,
-            }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e), 'count': 0, 'categories': {}, 'results': []}, status=status.HTTP_200_OK)
+
+        category = request.query_params.get('category')
+        search = request.query_params.get('search')
+
+        results = list(ORIGINKIT_CATALOG)
+
+        if category and category != 'all':
+            results = [c for c in results if c['category'] == category]
+        if search:
+            q = search.lower()
+            results = [c for c in results if q in c['name'].lower() or q in c['displayName'].lower() or q in c['description'].lower() or any(q in t for t in c.get('tags', []))]
+
+        categories = list({c['category'] for c in ORIGINKIT_CATALOG})
+        cat_map = {c: CATEGORY_MAP.get(c, c.replace('-', ' ').title()) for c in categories}
+
+        enriched = []
+        for c in results:
+            cat_label = cat_map.get(c['category'], c['category'])
+            tags = c.get('tags', [])
+            enriched.append({
+                'name': c['name'],
+                'displayName': c['displayName'],
+                'category': c['category'],
+                'categoryLabel': cat_label,
+                'description': c.get('description', ''),
+                'tags': tags,
+                'preview': '',
+                'price': 'Free',
+                'framework': 'React',
+            })
+
+        return Response({
+            'count': len(enriched),
+            'categories': cat_map,
+            'results': enriched,
+        }, status=status.HTTP_200_OK)
 
 
 class OriginkitDetailView(APIView):
     def get(self, request, name=None):
         try:
-            from .originkit_service import ORIGINKIT_CATALOG, get_originkit_component, CATEGORY_MAP
-            match = next((c for c in ORIGINKIT_CATALOG if c['name'] == name), None)
-            if not match:
-                return Response({'error': 'component not found'}, status=status.HTTP_404_NOT_FOUND)
-
-            code_result = get_originkit_component(name)
-            code = ''
-            if 'result' in code_result:
-                content = code_result['result'].get('content', [])
-                for item in content:
-                    if item.get('type') == 'text':
-                        code = item.get('text', '')
-                        break
-
-            return Response({
-                **match,
-                'categoryLabel': CATEGORY_MAP.get(match['category'], match['category']),
-                'code': code,
-            }, status=status.HTTP_200_OK)
+            from .originkit_service import ORIGINKIT_CATALOG, CATEGORY_MAP, get_originkit_component
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_200_OK)
+
+        match = next((c for c in ORIGINKIT_CATALOG if c['name'] == name), None)
+        if not match:
+            return Response({'error': 'component not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        code = ''
+        code_result = get_originkit_component(name)
+        if code_result and 'result' in code_result:
+            content = code_result['result'].get('content', [])
+            for item in content:
+                if item.get('type') == 'text':
+                    code = item.get('text', '')
+                    break
+
+        if not code:
+            code = f"// {match['displayName']} - Originkit Component\n// Source: https://originkit.dev\n// Fetch failed - try again later"
+
+        return Response({
+            'name': match['name'],
+            'displayName': match['displayName'],
+            'category': match['category'],
+            'categoryLabel': CATEGORY_MAP.get(match['category'], match['category']),
+            'description': match.get('description', ''),
+            'tags': match.get('tags', []),
+            'code': code,
+        }, status=status.HTTP_200_OK)
