@@ -2,8 +2,9 @@ services:
   - type: web
     name: zandev
     runtime: python
-    buildCommand: pip install -r requirements.txt && bash backend/zda/build.sh
-    startCommand: cd backend/zda && gunicorn zda.wsgi:application --bind 0.0.0.0:$PORT
+    rootDir: backend/zda
+    buildCommand: pip install -r requirements.txt && bash build.sh
+    startCommand: gunicorn zda.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: zda.settings
@@ -31,9 +32,10 @@ services:
   - type: cron
     name: keep-alive-bot
     runtime: python
+    rootDir: backend/zda
     schedule: "0 */6 * * *"
     buildCommand: pip install -r requirements.txt
-    startCommand: cd backend/zda && python keep_alive.py
+    startCommand: python keep_alive.py
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: zda.settings

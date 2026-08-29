@@ -1,9 +1,7 @@
 #!/bin/bash
-# Build script for Render — runs from repo root
 set -e
 
 echo "Running migrations..."
-cd backend/zda
 python manage.py migrate --noinput
 
 echo "Creating superuser..."
