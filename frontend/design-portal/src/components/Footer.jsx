@@ -40,7 +40,7 @@ export default function Footer() {
 
         <div className="mt-[70px] pt-[20px] border-t border-white/[0.05] flex justify-between text-[#444] text-[8px]">
           <span>© 2026 ZanDev. All rights reserved.</span>
-          <span>Design-to-code, powered by AI.</span>
+          <span>Design-to-code marketplace.</span>
         </div>
       </div>
     </footer>

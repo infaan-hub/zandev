@@ -58,4 +58,10 @@ export const api = {
   adminCreateDesign: (formData) => fetchUpload('/admin-auth/designs/create/', formData),
   adminUpdateDesign: (id, formData) => fetchUpload(`/admin-auth/designs/${id}/update/`, formData),
   adminDeleteDesign: (id) => fetchJSON(`/admin-auth/designs/${id}/delete/`, { method: 'POST' }),
+
+  getOriginkit: (params = {}) => {
+    const query = new URLSearchParams(params).toString()
+    return fetchJSON(`/originkit/${query ? '?' + query : ''}`)
+  },
+  getOriginkitDetail: (name) => fetchJSON(`/originkit/${name}/`),
 }

@@ -4,10 +4,14 @@ import { api } from '../lib/api'
 
 export default function Preview() {
   const [designs, setDesigns] = useState([])
+  const [originkit, setOriginkit] = useState([])
 
   useEffect(() => {
     api.getDesigns({ sort: '-score' })
       .then((data) => setDesigns((data.results || []).slice(0, 10)))
+      .catch(() => {})
+    api.getOriginkit()
+      .then((data) => setOriginkit((data.results || []).slice(0, 10)))
       .catch(() => {})
   }, [])
 
@@ -34,7 +38,7 @@ export default function Preview() {
           <div className="p-[50px]">
             <div className="flex justify-between items-center text-[#777] text-[9px]">
               <strong className="text-white">ZanDev</strong>
-              <span>Designs &nbsp;&nbsp; Code &nbsp;&nbsp; AI Agent</span>
+              <span>Designs &nbsp;&nbsp; Code &nbsp;&nbsp; Components</span>
             </div>
 
             <div className="mt-[60px] max-w-[600px]">
@@ -60,7 +64,7 @@ export default function Preview() {
 
             {/* Design Grid */}
             {designs.length > 0 && (
-              <div className="mt-[50px] grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-[10px]">
+              <div className="mt-[50px] grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-[10px]">
                 {designs.map((d) => (
                   <Link
                     key={d.id}
@@ -107,7 +111,44 @@ export default function Preview() {
               </div>
             )}
 
-            {designs.length > 0 && (
+            {/* Originkit Animated Components */}
+            {originkit.length > 0 && (
+              <div className="mt-[30px]">
+                <div className="flex items-center gap-[8px] mb-[14px]">
+                  <span className="text-[10px] text-[#888] font-semibold">Animated Components</span>
+                  <span className="px-[6px] py-[2px] rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[7px] font-medium">Originkit</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-[10px]">
+                  {originkit.map((d) => (
+                    <Link
+                      key={d.name}
+                      to="/tools"
+                      className="group relative rounded-[10px] overflow-hidden border border-white/[0.06] bg-white/[0.025] hover:border-purple-500/30 transition-all duration-200 cursor-pointer"
+                    >
+                      <div className="h-[90px] flex items-center justify-center overflow-hidden">
+                        <div className="flex flex-col items-center gap-[4px]">
+                          <div className="w-[32px] h-[32px] rounded-[8px] bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30 flex items-center justify-center">
+                            <span className="text-[14px]">🧩</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-[8px]">
+                        <div className="text-[9px] font-semibold truncate">{d.displayName}</div>
+                        <div className="flex items-center gap-[4px] mt-[3px]">
+                          <span className="text-[7px] text-purple-400">{d.categoryLabel}</span>
+                          <span className="text-[7px] text-[#4ade80]">Free</span>
+                        </div>
+                      </div>
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-purple-500/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <span className="text-[8px] font-semibold bg-purple-500/90 text-white px-[10px] py-[4px] rounded-full">Get Code</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(designs.length > 0 || originkit.length > 0) && (
               <div className="mt-[20px] text-center">
                 <Link to="/tools" className="inline-flex items-center gap-[6px] text-[10px] text-[#888] hover:text-white transition-colors font-medium">
                   See all designs on ZanDev <span className="text-[12px]">→</span>

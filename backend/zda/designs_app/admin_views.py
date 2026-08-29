@@ -270,6 +270,7 @@ def _design_to_dict(d):
         'description': d.description,
         'preview': d.get_preview_url(),
         'file_type': d.file_type,
+        'code': d.code,
         'created_at': d.created_at.isoformat(),
     }
 
@@ -295,6 +296,7 @@ class AdminDesignCreateView(APIView):
             score=int(request.data.get('score', 0)),
             description=request.data.get('description', ''),
             preview_image=request.data.get('preview_image', ''),
+            code=request.data.get('code', ''),
         )
 
         uploaded = request.FILES.get('file')
@@ -323,6 +325,7 @@ class AdminDesignUpdateView(APIView):
         d.score = int(request.data.get('score', d.score))
         d.description = request.data.get('description', d.description)
         d.preview_image = request.data.get('preview_image', d.preview_image)
+        d.code = request.data.get('code', d.code)
 
         uploaded = request.FILES.get('file')
         if uploaded:

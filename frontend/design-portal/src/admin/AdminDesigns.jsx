@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Pencil, Trash2, X, Upload, Film, Image as ImageIcon } from 'lucide-react'
+import { Plus, Pencil, Trash2, X, Upload } from 'lucide-react'
 import { api } from '../lib/api'
 
 const frameworks = ['React', 'Next.js', 'Vue', 'Astro', 'Svelte', 'React Native']
@@ -8,7 +8,7 @@ const prices = ['Free', '$19', '$29', '$49']
 
 const emptyForm = {
   name: '', category: 'Landing', framework: 'React', price: 'Free',
-  score: 0, description: '', preview_image: '',
+  score: 0, description: '', preview_image: '', code: '',
 }
 
 function DesignModal({ design, onClose, onSave }) {
@@ -44,6 +44,7 @@ function DesignModal({ design, onClose, onSave }) {
       fd.append('score', form.score)
       fd.append('description', form.description)
       fd.append('preview_image', form.preview_image || '')
+      fd.append('code', form.code || '')
       if (file) fd.append('file', file)
 
       if (design?.id) {
@@ -103,6 +104,18 @@ function DesignModal({ design, onClose, onSave }) {
           <div>
             <label className="block text-[#888] text-[8px] font-semibold uppercase tracking-[0.1em] mb-[6px]">Description</label>
             <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} placeholder="Design description..." rows={3} className={`${inputCls} h-auto py-[8px] resize-none`} />
+          </div>
+
+          {/* Code */}
+          <div>
+            <label className="block text-[#888] text-[8px] font-semibold uppercase tracking-[0.1em] mb-[6px]">JSX Code (what users download)</label>
+            <textarea
+              value={form.code}
+              onChange={(e) => setForm({...form, code: e.target.value})}
+              placeholder="Paste your React + Tailwind component code here..."
+              rows={10}
+              className={`${inputCls} h-auto py-[8px] resize-none font-mono text-[10px] leading-[1.6]`}
+            />
           </div>
 
           {/* File Upload */}

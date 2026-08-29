@@ -19,6 +19,7 @@ class Design(models.Model):
         ('video', 'Video'),
         ('url', 'URL'),
     ], default='url')
+    code = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
