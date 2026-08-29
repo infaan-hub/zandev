@@ -2,8 +2,8 @@ services:
   - type: web
     name: zandev
     runtime: python
-    buildCommand: pip install -r requirements.txt && cd backend/zda && python manage.py migrate --noinput && python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin','admin@zandev.dev','admin123') if not User.objects.filter(username='admin').exists() else None" && python keep_alive.py && python manage.py seed_designs && python manage.py collectstatic --noinput
-    startCommand: cd backend/zda && DJANGO_SETTINGS_MODULE=zda.settings gunicorn zda.wsgi:application --bind 0.0.0.0:$PORT
+    buildCommand: export DJANGO_SETTINGS_MODULE=zda.settings && export DATABASE_URL="postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require" && pip install -r requirements.txt && cd backend/zda && python manage.py migrate --noinput && python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin','admin@zandev.dev','admin123') if not User.objects.filter(username='admin').exists() else None" && python keep_alive.py && python manage.py seed_designs && python manage.py collectstatic --noinput
+    startCommand: cd backend/zda && export DJANGO_SETTINGS_MODULE=zda.settings && gunicorn zda.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.8"
@@ -25,8 +25,8 @@ services:
   - type: cron
     name: keep-alive-bot
     runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: cd backend/zda && DJANGO_SETTINGS_MODULE=zda.settings python keep_alive.py
+    buildCommand: export DJANGO_SETTINGS_MODULE=zda.settings && export DATABASE_URL="postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require" && pip install -r requirements.txt
+    startCommand: cd backend/zda && export DJANGO_SETTINGS_MODULE=zda.settings && export DATABASE_URL="postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require" && python keep_alive.py
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.8"
