@@ -5,52 +5,78 @@ from django.db.models import Count, Sum
 from .models import Design
 
 
+class HealthView(APIView):
+    def get(self, request):
+        try:
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+            db_ok = True
+        except Exception as e:
+            db_ok = False
+
+        try:
+            design_count = Design.objects.count()
+        except Exception:
+            design_count = -1
+
+        return Response({
+            'status': 'ok',
+            'database': db_ok,
+            'design_count': design_count,
+        })
+
+
 class DesignListView(APIView):
     def get(self, request):
-        framework = request.query_params.get('framework')
-        category = request.query_params.get('category')
-        price = request.query_params.get('price')
-        search = request.query_params.get('search')
-        sort = request.query_params.get('sort', '-score')
+        try:
+            framework = request.query_params.get('framework')
+            category = request.query_params.get('category')
+            price = request.query_params.get('price')
+            search = request.query_params.get('search')
+            sort = request.query_params.get('sort', '-score')
 
-        qs = Design.objects.all()
+            qs = Design.objects.all()
 
-        if framework:
-            qs = qs.filter(framework__iexact=framework)
-        if category:
-            qs = qs.filter(category__iexact=category)
-        if price:
-            qs = qs.filter(price__iexact=price)
-        if search:
-            qs = qs.filter(name__icontains=search) | qs.filter(description__icontains=search)
+            if framework:
+                qs = qs.filter(framework__iexact=framework)
+            if category:
+                qs = qs.filter(category__iexact=category)
+            if price:
+                qs = qs.filter(price__iexact=price)
+            if search:
+                from django.db.models import Q
+                qs = qs.filter(Q(name__icontains=search) | Q(description__icontains=search))
 
-        valid_sorts = {
-            'score': 'score', '-score': '-score',
-            'views': 'views', '-views': '-views',
-            'exports': 'exports', '-exports': '-exports',
-            'name': 'name', '-name': '-name',
-            '-created_at': '-created_at', 'created_at': 'created_at',
-        }
-        order = valid_sorts.get(sort, '-score')
-        qs = qs.order_by(order)
+            valid_sorts = {
+                'score': 'score', '-score': '-score',
+                'views': 'views', '-views': '-views',
+                'exports': 'exports', '-exports': '-exports',
+                'name': 'name', '-name': '-name',
+                '-created_at': '-created_at', 'created_at': 'created_at',
+            }
+            order = valid_sorts.get(sort, '-score')
+            qs = qs.order_by(order)
 
-        results = []
-        for d in qs:
-            results.append({
-                'id': d.id,
-                'name': d.name,
-                'category': d.category,
-                'framework': d.framework,
-                'price': d.price,
-                'score': d.score,
-                'views': d.views,
-                'exports': d.exports,
-                'preview': d.get_preview_url(),
-                'file_type': d.file_type,
-                'description': d.description,
-            })
+            results = []
+            for d in qs:
+                results.append({
+                    'id': d.id,
+                    'name': d.name,
+                    'category': d.category,
+                    'framework': d.framework,
+                    'price': d.price,
+                    'score': d.score,
+                    'views': d.views,
+                    'exports': d.exports,
+                    'preview': d.get_preview_url(),
+                    'file_type': d.file_type,
+                    'description': d.description,
+                })
 
-        return Response({'count': len(results), 'results': results}, status=status.HTTP_200_OK)
+            return Response({'count': len(results), 'results': results}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e), 'results': [], 'count': 0}, status=status.HTTP_200_OK)
 
 
 class DesignDetailView(APIView):
@@ -103,73 +129,82 @@ export default function {d.name.replace(' ', '').replace('-', '')}() {{
 
 class StatsView(APIView):
     def get(self, request):
-        agg = Design.objects.aggregate(
-            total_designs=Count('id'),
-            total_views=Sum('views'),
-            total_exports=Sum('exports'),
-        )
-        frameworks = list(Design.objects.values_list('framework', flat=True).distinct())
-        categories = list(Design.objects.values_list('category', flat=True).distinct())
-        return Response({
-            'total_designs': agg['total_designs'] or 0,
-            'total_views': agg['total_views'] or 0,
-            'total_exports': agg['total_exports'] or 0,
-            'frameworks': frameworks,
-            'categories': categories,
-        })
+        try:
+            agg = Design.objects.aggregate(
+                total_designs=Count('id'),
+                total_views=Sum('views'),
+                total_exports=Sum('exports'),
+            )
+            frameworks = list(Design.objects.values_list('framework', flat=True).distinct())
+            categories = list(Design.objects.values_list('category', flat=True).distinct())
+            return Response({
+                'total_designs': agg['total_designs'] or 0,
+                'total_views': agg['total_views'] or 0,
+                'total_exports': agg['total_exports'] or 0,
+                'frameworks': frameworks,
+                'categories': categories,
+            })
+        except Exception as e:
+            return Response({'error': str(e), 'total_designs': 0, 'total_views': 0, 'total_exports': 0, 'frameworks': [], 'categories': []})
 
 
 class OriginkitListView(APIView):
     def get(self, request):
-        from .originkit_service import ORIGINKIT_CATALOG, CATEGORY_MAP
-        category = request.query_params.get('category')
-        search = request.query_params.get('search')
+        try:
+            from .originkit_service import ORIGINKIT_CATALOG, CATEGORY_MAP
+            category = request.query_params.get('category')
+            search = request.query_params.get('search')
 
-        results = list(ORIGINKIT_CATALOG)
+            results = list(ORIGINKIT_CATALOG)
 
-        if category:
-            results = [c for c in results if c['category'] == category]
-        if search:
-            q = search.lower()
-            results = [c for c in results if q in c['name'].lower() or q in c['displayName'].lower() or q in c['description'].lower() or any(q in t for t in c['tags'])]
+            if category:
+                results = [c for c in results if c['category'] == category]
+            if search:
+                q = search.lower()
+                results = [c for c in results if q in c['name'].lower() or q in c['displayName'].lower() or q in c['description'].lower() or any(q in t for t in c['tags'])]
 
-        categories = list({c['category'] for c in ORIGINKIT_CATALOG})
-        cat_map = {c: CATEGORY_MAP.get(c, c.replace('-', ' ').title()) for c in categories}
+            categories = list({c['category'] for c in ORIGINKIT_CATALOG})
+            cat_map = {c: CATEGORY_MAP.get(c, c.replace('-', ' ').title()) for c in categories}
 
-        enriched = []
-        for c in results:
-            enriched.append({
-                **c,
-                'displayName': c['displayName'],
-                'categoryLabel': cat_map.get(c['category'], c['category']),
-                'preview': f"https://placehold.co/600x400/111111/666666?text={c['displayName'].replace(' ', '+')}",
-            })
+            enriched = []
+            for c in results:
+                enriched.append({
+                    **c,
+                    'displayName': c['displayName'],
+                    'categoryLabel': cat_map.get(c['category'], c['category']),
+                    'preview': f"https://placehold.co/600x400/111111/666666?text={c['displayName'].replace(' ', '+')}",
+                })
 
-        return Response({
-            'count': len(enriched),
-            'categories': cat_map,
-            'results': enriched,
-        }, status=status.HTTP_200_OK)
+            return Response({
+                'count': len(enriched),
+                'categories': cat_map,
+                'results': enriched,
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e), 'count': 0, 'categories': {}, 'results': []}, status=status.HTTP_200_OK)
 
 
 class OriginkitDetailView(APIView):
     def get(self, request, name=None):
-        from .originkit_service import ORIGINKIT_CATALOG, get_originkit_component, CATEGORY_MAP
-        match = next((c for c in ORIGINKIT_CATALOG if c['name'] == name), None)
-        if not match:
-            return Response({'error': 'component not found'}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            from .originkit_service import ORIGINKIT_CATALOG, get_originkit_component, CATEGORY_MAP
+            match = next((c for c in ORIGINKIT_CATALOG if c['name'] == name), None)
+            if not match:
+                return Response({'error': 'component not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        code_result = get_originkit_component(name)
-        code = ''
-        if 'result' in code_result:
-            content = code_result['result'].get('content', [])
-            for item in content:
-                if item.get('type') == 'text':
-                    code = item.get('text', '')
-                    break
+            code_result = get_originkit_component(name)
+            code = ''
+            if 'result' in code_result:
+                content = code_result['result'].get('content', [])
+                for item in content:
+                    if item.get('type') == 'text':
+                        code = item.get('text', '')
+                        break
 
-        return Response({
-            **match,
-            'categoryLabel': CATEGORY_MAP.get(match['category'], match['category']),
-            'code': code,
-        }, status=status.HTTP_200_OK)
+            return Response({
+                **match,
+                'categoryLabel': CATEGORY_MAP.get(match['category'], match['category']),
+                'code': code,
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_200_OK)

@@ -4,6 +4,7 @@ from . import auth_views
 from . import admin_views
 
 urlpatterns = [
+    path('health/', views.HealthView.as_view(), name='health'),
     path('designs/', views.DesignListView.as_view(), name='design-list'),
     path('designs/<int:pk>/', views.DesignDetailView.as_view(), name='design-detail'),
     path('designs/<int:pk>/export/', views.DesignExportView.as_view(), name='design-export'),

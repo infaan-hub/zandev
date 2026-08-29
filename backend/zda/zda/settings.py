@@ -69,19 +69,39 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'zda.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'neondb'),
-        'USER': os.environ.get('DB_USER', 'neondb_owner'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'npg_pBYIbFKm7H0f'),
-        'HOST': os.environ.get('DB_HOST', 'ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
+
+if DATABASE_URL:
+    # Parse DATABASE_URL for Render/Neon
+    import urllib.parse
+    url = urllib.parse.urlparse(DATABASE_URL)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': url.path[1:],
+            'USER': url.username or '',
+            'PASSWORD': url.password or '',
+            'HOST': url.hostname or '',
+            'PORT': url.port or '5432',
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'neondb'),
+            'USER': os.environ.get('DB_USER', 'neondb_owner'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'npg_pBYIbFKm7H0f'),
+            'HOST': os.environ.get('DB_HOST', 'ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
