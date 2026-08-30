@@ -31,7 +31,4 @@ urlpatterns = [
     path('admin-auth/designs/create/', admin_views.AdminDesignCreateView.as_view(), name='admin-design-create'),
     path('admin-auth/designs/<int:pk>/update/', admin_views.AdminDesignUpdateView.as_view(), name='admin-design-update'),
     path('admin-auth/designs/<int:pk>/delete/', admin_views.AdminDesignDeleteView.as_view(), name='admin-design-delete'),
-
-    path('originkit/', views.OriginkitListView.as_view(), name='originkit-list'),
-    path('originkit/<str:name>/', views.OriginkitDetailView.as_view(), name='originkit-detail'),
 ]

@@ -3,7 +3,6 @@ set -e
 
 export DJANGO_SETTINGS_MODULE=zda.settings
 export DATABASE_URL="postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require"
-export ORIGINKIT_API_KEY="cmp_live_qNqfwhTLBNdBtMjodqiIg57aBJEHVby5"
 
 cd backend/zda
 

@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, SlidersHorizontal, X, ArrowUpDown, Grid3X3, LayoutList, Sparkles, Download, Copy, Check, ChevronDown, Zap } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Download, Copy, Check, ChevronDown, Grid3X3, Sparkles } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import { api } from '../lib/api';
 import { useFetch } from '../lib/useFetch';
@@ -20,14 +20,8 @@ const SORT_OPTIONS = [
   { value: '-views', label: 'Most Views' },
   { value: '-exports', label: 'Most Exports' },
 ];
-const SOURCES = [
-  { key: 'all', label: 'All Designs', icon: Grid3X3 },
-  { key: 'zan', label: 'ZanDev', icon: Sparkles },
-  { key: 'originkit', label: 'Originkit', icon: Zap },
-];
 
 export default function Tools() {
-  const [source, setSource] = useState('all');
   const [framework, setFramework] = useState('All');
   const [category, setCategory] = useState('All');
   const [price, setPrice] = useState('All');
@@ -63,36 +57,11 @@ export default function Tools() {
     [framework, category, price, sort, debouncedSearch]
   );
 
-  const originkitParams = useMemo(() => {
-    const p = {};
-    if (debouncedSearch) p.search = debouncedSearch;
-    return p;
-  }, [debouncedSearch]);
-
-  const { data: originkitData, loading: originkitLoading } = useFetch(
-    () => api.getOriginkit(originkitParams),
-    [debouncedSearch]
-  );
-
-  const zanDesigns = useMemo(() => (data?.results || []).map(d => ({ ...d, _source: 'zan' })), [data]);
-  const originkitDesigns = useMemo(() => (originkitData?.results || []).map(d => ({ ...d, _source: 'originkit' })), [originkitData]);
-
-  const allDesigns = useMemo(() => {
-    if (source === 'zan') return zanDesigns;
-    if (source === 'originkit') return originkitDesigns;
-    return [...zanDesigns, ...originkitDesigns];
-  }, [source, zanDesigns, originkitDesigns]);
-
-  const totalDesigns = (data?.count || 0) + (originkitData?.count || 0);
+  const designs = useMemo(() => (data?.results || []), [data]);
 
   const handleExport = useCallback(async (tool) => {
-    if (tool._source === 'originkit') {
-      const res = await api.getOriginkitDetail(tool.name);
-      setExportedCode({ code: res.code || `// ${tool.displayName || tool.name} - Originkit Component\n// Source: https://originkit.dev`, name: tool.name });
-    } else {
-      const res = await api.exportDesign(tool.id);
-      setExportedCode(res);
-    }
+    const res = await api.exportDesign(tool.id);
+    setExportedCode(res);
   }, []);
 
   const handleReset = useCallback(() => {
@@ -102,10 +71,9 @@ export default function Tools() {
     setCategory('All');
     setPrice('All');
     setSort('-score');
-    setSource('all');
   }, []);
 
-  const hasActiveFilters = framework !== 'All' || category !== 'All' || price !== 'All' || debouncedSearch || source !== 'all';
+  const hasActiveFilters = framework !== 'All' || category !== 'All' || price !== 'All' || debouncedSearch;
 
   return (
     <PageLayout title="">
@@ -118,7 +86,7 @@ export default function Tools() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-white/[0.09] rounded-full bg-white/[0.025] text-[#aaa] text-[10px] font-medium mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.6)]" />
-            {totalDesigns}+ Production-Ready Designs
+            {data?.count || 0}+ Production-Ready Designs
           </div>
         </motion.div>
         <motion.h1
@@ -185,36 +153,25 @@ export default function Tools() {
             </button>
           </div>
 
-          {/* Source tabs */}
-          <div className="flex flex-wrap gap-2 mb-3">
-            {SOURCES.map((s) => (
-              <button
-                key={s.key}
-                onClick={() => setSource(s.key)}
-                className={cn(
-                  'px-3.5 py-1.5 rounded-lg text-[10px] font-medium border transition-all flex items-center gap-1.5',
-                  source === s.key
-                    ? 'bg-white text-black border-white'
-                    : 'bg-white/[0.03] text-[#888] border-white/[0.06] hover:border-white/[0.15]'
-                )}
-              >
-                <s.icon size={11} />
-                {s.label}
-              </button>
-            ))}
-            <div className="ml-auto flex items-center gap-2">
-              <div className="relative">
-                <select
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value)}
-                  className="appearance-none h-8 px-3 pr-7 rounded-lg border border-white/[0.06] bg-white/[0.03] text-[#888] text-[10px] font-medium outline-none cursor-pointer hover:border-white/[0.15] transition-colors"
-                >
-                  {SORT_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value} className="bg-[#111] text-white">{o.label}</option>
-                  ))}
-                </select>
-                <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#555] pointer-events-none" />
+          {/* Sort row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 text-[10px] text-[#555]">
+                <Grid3X3 size={11} />
+                {designs.length} designs
               </div>
+            </div>
+            <div className="relative">
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                className="appearance-none h-8 px-3 pr-7 rounded-lg border border-white/[0.06] bg-white/[0.03] text-[#888] text-[10px] font-medium outline-none cursor-pointer hover:border-white/[0.15] transition-colors"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value} className="bg-[#111] text-white">{o.label}</option>
+                ))}
+              </select>
+              <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#555] pointer-events-none" />
             </div>
           </div>
 
@@ -228,68 +185,64 @@ export default function Tools() {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <div className="pb-4 space-y-3">
-                  {source !== 'originkit' && (
-                    <>
-                      <div>
-                        <div className="text-[9px] text-[#555] uppercase tracking-wider font-medium mb-2">Framework</div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {FRAMEWORKS.map((f) => (
-                            <button
-                              key={f}
-                              onClick={() => setFramework(f)}
-                              className={cn(
-                                'px-3 py-1 rounded-md text-[10px] font-medium border transition-all',
-                                framework === f
-                                  ? 'bg-white text-black border-white'
-                                  : 'bg-white/[0.03] text-[#888] border-white/[0.06] hover:border-white/[0.15]'
-                              )}
-                            >
-                              {f}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-[9px] text-[#555] uppercase tracking-wider font-medium mb-2">Category</div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {CATEGORIES.map((c) => (
-                            <button
-                              key={c}
-                              onClick={() => setCategory(c)}
-                              className={cn(
-                                'px-3 py-1 rounded-md text-[10px] font-medium border transition-all',
-                                category === c
-                                  ? 'bg-white text-black border-white'
-                                  : 'bg-white/[0.03] text-[#888] border-white/[0.06] hover:border-white/[0.15]'
-                              )}
-                            >
-                              {c}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-[9px] text-[#555] uppercase tracking-wider font-medium mb-2">Price</div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {PRICE_FILTERS.map((p) => (
-                            <button
-                              key={p}
-                              onClick={() => setPrice(p)}
-                              className={cn(
-                                'px-3 py-1 rounded-md text-[10px] font-medium border transition-all',
-                                price === p
-                                  ? 'bg-white text-black border-white'
-                                  : 'bg-white/[0.03] text-[#888] border-white/[0.06] hover:border-white/[0.15]'
-                              )}
-                            >
-                              {p}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
+                <div className="pb-4 pt-3 space-y-3">
+                  <div>
+                    <div className="text-[9px] text-[#555] uppercase tracking-wider font-medium mb-2">Framework</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {FRAMEWORKS.map((f) => (
+                        <button
+                          key={f}
+                          onClick={() => setFramework(f)}
+                          className={cn(
+                            'px-3 py-1 rounded-md text-[10px] font-medium border transition-all',
+                            framework === f
+                              ? 'bg-white text-black border-white'
+                              : 'bg-white/[0.03] text-[#888] border-white/[0.06] hover:border-white/[0.15]'
+                          )}
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[9px] text-[#555] uppercase tracking-wider font-medium mb-2">Category</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {CATEGORIES.map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => setCategory(c)}
+                          className={cn(
+                            'px-3 py-1 rounded-md text-[10px] font-medium border transition-all',
+                            category === c
+                              ? 'bg-white text-black border-white'
+                              : 'bg-white/[0.03] text-[#888] border-white/[0.06] hover:border-white/[0.15]'
+                          )}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[9px] text-[#555] uppercase tracking-wider font-medium mb-2">Price</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {PRICE_FILTERS.map((p) => (
+                        <button
+                          key={p}
+                          onClick={() => setPrice(p)}
+                          className={cn(
+                            'px-3 py-1 rounded-md text-[10px] font-medium border transition-all',
+                            price === p
+                              ? 'bg-white text-black border-white'
+                              : 'bg-white/[0.03] text-[#888] border-white/[0.06] hover:border-white/[0.15]'
+                          )}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   {hasActiveFilters && (
                     <button
                       onClick={handleReset}
@@ -304,33 +257,23 @@ export default function Tools() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Results count */}
-        {!loading && !error && (
-          <div className="text-[10px] text-[#555] mb-4 flex items-center gap-2">
-            <span>{allDesigns.length} designs</span>
-            {hasActiveFilters && (
-              <span className="text-[#444]">· filtered</span>
-            )}
-          </div>
-        )}
-
         {/* Content */}
-        {loading || originkitLoading ? (
+        {loading ? (
           <ToolSkeletonGrid count={12} />
         ) : error ? (
           <ToolErrorState error={error} onRetry={refetch} />
-        ) : allDesigns.length === 0 ? (
+        ) : designs.length === 0 ? (
           <ToolEmptyState search={debouncedSearch} category={category} onReset={handleReset} />
         ) : (
           <motion.div
             layout
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
           >
-            {allDesigns.map((tool, i) => {
-              const style = getStyleForTool(tool._source === 'originkit' ? tool.name : tool.id);
+            {designs.map((tool, i) => {
+              const style = getStyleForTool(tool.id);
               return (
                 <ToolCard
-                  key={tool._source === 'originkit' ? `ok-${tool.name}` : `zan-${tool.id}`}
+                  key={tool.id}
                   tool={tool}
                   style={style}
                   onExport={handleExport}
@@ -391,7 +334,7 @@ export default function Tools() {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `${exportedCode.name || 'component'}.jsx`;
+                    a.download = `component.jsx`;
                     a.click();
                     URL.revokeObjectURL(url);
                   }}

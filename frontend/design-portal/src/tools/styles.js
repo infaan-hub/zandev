@@ -1,239 +1,365 @@
 import { stableHash } from './utils';
 
-const VARIANTS = [
-  'standard', 'compact', 'horizontal', 'featured', 'terminal', 'code',
-  'metric', 'glass', 'holographic', 'perspective', 'bento', 'editorial',
-  'neon', 'floating', 'minimal', 'glitch', 'cyber', 'organic',
-  'retro', 'luxury', 'scientific', 'cosmic', 'abstract', 'overlay',
+const STYLE_COUNT = 300;
+
+const STYLE_DEFINITIONS = [
+  // 1-10: 3D Interactive
+  { id: 1, name: '3D Tilt', component: 'TiltCard', category: 'interactive', accent: '#6366f1', accentRgb: '99,102,241' },
+  { id: 2, name: 'Card Flip', component: 'FlipCard', category: 'interactive', accent: '#8b5cf6', accentRgb: '139,92,246' },
+  { id: 3, name: 'Perspective Cube', component: 'CubeCard', category: 'interactive', accent: '#a78bfa', accentRgb: '167,139,250' },
+  { id: 4, name: 'Float Physics', component: 'FloatCard', category: 'interactive', accent: '#c084fc', accentRgb: '192,132,252' },
+  { id: 5, name: 'Magnetic Snap', component: 'MagneticCard', category: 'interactive', accent: '#e879f9', accentRgb: '232,121,249' },
+  { id: 6, name: 'Hover Zoom', component: 'ZoomCard', category: 'interactive', accent: '#f472b6', accentRgb: '244,114,182' },
+  { id: 7, name: 'Expand Reveal', component: 'ExpandCard', category: 'interactive', accent: '#fb7185', accentRgb: '251,113,133' },
+  { id: 8, name: 'Glow Pulse', component: 'GlowCard', category: 'interactive', accent: '#f43f5e', accentRgb: '244,63,94' },
+  { id: 9, name: 'Ripple Touch', component: 'RippleCard', category: 'interactive', accent: '#ef4444', accentRgb: '239,68,68' },
+  { id: 10, name: 'Drag Handle', component: 'DragCard', category: 'interactive', accent: '#f97316', accentRgb: '249,115,22' },
+
+  // 11-20: Terminal & Code
+  { id: 11, name: 'Terminal', component: 'TerminalCard', category: 'terminal', accent: '#22c55e', accentRgb: '34,197,94' },
+  { id: 12, name: 'Code Editor', component: 'CodeEditorCard', category: 'terminal', accent: '#3b82f6', accentRgb: '59,130,246' },
+  { id: 13, name: 'Blueprint', component: 'BlueprintCard', category: 'terminal', accent: '#06b6d4', accentRgb: '6,182,212' },
+  { id: 14, name: 'Glitch', component: 'GlitchCard', category: 'terminal', accent: '#ec4899', accentRgb: '236,72,153' },
+  { id: 15, name: 'ASCII Art', component: 'ASCIICard', category: 'terminal', accent: '#14b8a6', accentRgb: '20,184,166' },
+  { id: 16, name: 'Debug Console', component: 'DebugCard', category: 'terminal', accent: '#f59e0b', accentRgb: '245,158,11' },
+  { id: 17, name: 'Minimap', component: 'MinimapCard', category: 'terminal', accent: '#a855f7', accentRgb: '168,85,247' },
+  { id: 18, name: 'Diff View', component: 'DiffCard', category: 'terminal', accent: '#10b981', accentRgb: '16,185,129' },
+  { id: 19, name: 'SSH Tunnel', component: 'SSHCard', category: 'terminal', accent: '#64748b', accentRgb: '100,116,139' },
+  { id: 20, name: 'Compile', component: 'CompileCard', category: 'terminal', accent: '#f43f5e', accentRgb: '244,63,94' },
+
+  // 21-35: Data & Metrics
+  { id: 21, name: 'Metric Card', component: 'MetricCard', category: 'data', accent: '#3b82f6', accentRgb: '59,130,246' },
+  { id: 22, name: 'Progress Ring', component: 'ProgressCard', category: 'data', accent: '#10b981', accentRgb: '16,185,129' },
+  { id: 23, name: 'Stat Block', component: 'StatCard', category: 'data', accent: '#8b5cf6', accentRgb: '139,92,246' },
+  { id: 24, name: 'KPI Dashboard', component: 'KPICard', category: 'data', accent: '#f59e0b', accentRgb: '245,158,11' },
+  { id: 25, name: 'Data Table', component: 'TableCard', category: 'data', accent: '#6366f1', accentRgb: '99,102,241' },
+  { id: 26, name: 'Bar Chart', component: 'BarChartCard', category: 'data', accent: '#ec4899', accentRgb: '236,72,153' },
+  { id: 27, name: 'Calendar', component: 'CalendarCard', category: 'data', accent: '#14b8a6', accentRgb: '20,184,166' },
+  { id: 28, name: 'Timeline', component: 'TimelineCard', category: 'data', accent: '#f97316', accentRgb: '249,115,22' },
+  { id: 29, name: 'Heatmap', component: 'HeatmapCard', category: 'data', accent: '#ef4444', accentRgb: '239,68,68' },
+  { id: 30, name: 'Pie Chart', component: 'PieCard', category: 'data', accent: '#a855f7', accentRgb: '168,85,247' },
+  { id: 31, name: 'Gauge Meter', component: 'GaugeCard', category: 'data', accent: '#06b6d4', accentRgb: '6,182,212' },
+  { id: 32, name: 'Sparkline', component: 'SparklineCard', category: 'data', accent: '#22c55e', accentRgb: '34,197,94' },
+  { id: 33, name: 'Radar Chart', component: 'RadarCard', category: 'data', accent: '#e879f9', accentRgb: '232,121,249' },
+  { id: 34, name: 'Stacked Bars', component: 'StackedBarCard', category: 'data', accent: '#fbbf24', accentRgb: '251,191,36' },
+  { id: 35, name: 'Funnel', component: 'FunnelCard', category: 'data', accent: '#fb7185', accentRgb: '251,113,133' },
+
+  // 36-50: Visual Effects
+  { id: 36, name: 'Matrix Rain', component: 'MatrixCard', category: 'effects', accent: '#22c55e', accentRgb: '34,197,94' },
+  { id: 37, name: 'Particle Field', component: 'ParticleCard', category: 'effects', accent: '#6366f1', accentRgb: '99,102,241' },
+  { id: 38, name: 'Waveform', component: 'WaveCard', category: 'effects', accent: '#06b6d4', accentRgb: '6,182,212' },
+  { id: 39, name: 'Scanlines', component: 'ScanlineCard', category: 'effects', accent: '#22c55e', accentRgb: '34,197,94' },
+  { id: 40, name: 'Noise Grain', component: 'NoiseCard', category: 'effects', accent: '#a1a1aa', accentRgb: '161,161,170' },
+  { id: 41, name: 'CRT Curve', component: 'CRTCard', category: 'effects', accent: '#fbbf24', accentRgb: '251,191,36' },
+  { id: 42, name: 'VHS Static', component: 'VHSCard', category: 'effects', accent: '#ef4444', accentRgb: '239,68,68' },
+  { id: 43, name: 'Pulse Ring', component: 'PulseCard', category: 'effects', accent: '#8b5cf6', accentRgb: '139,92,246' },
+  { id: 44, name: 'Shimmer', component: 'ShimmerCard', category: 'effects', accent: '#e2e8f0', accentRgb: '226,232,240' },
+  { id: 45, name: 'Lava Lamp', component: 'LavaCard', category: 'effects', accent: '#f43f5e', accentRgb: '244,63,94' },
+  { id: 46, name: 'Aurora', component: 'AuroraCard', category: 'effects', accent: '#22d3ee', accentRgb: '34,211,238' },
+  { id: 47, name: 'Starfield', component: 'StarfieldCard', category: 'effects', accent: '#f8fafc', accentRgb: '248,250,252' },
+  { id: 48, name: 'Smoke', component: 'SmokeCard', category: 'effects', accent: '#71717a', accentRgb: '113,113,122' },
+  { id: 49, name: 'Fire', component: 'FireCard', category: 'effects', accent: '#f97316', accentRgb: '249,115,22' },
+  { id: 50, name: 'Electric', component: 'ElectricCard', category: 'effects', accent: '#3b82f6', accentRgb: '59,130,246' },
+
+  // 51-65: Themed Aesthetics
+  { id: 51, name: 'Holographic', component: 'HoloCard', category: 'themed', accent: '#a78bfa', accentRgb: '167,139,250' },
+  { id: 52, name: 'Cyberpunk', component: 'CyberCard', category: 'themed', accent: '#f43f5e', accentRgb: '244,63,94' },
+  { id: 53, name: 'Organic', component: 'OrganicCard', category: 'themed', accent: '#22c55e', accentRgb: '34,197,94' },
+  { id: 54, name: 'Retro 80s', component: 'RetroCard', category: 'themed', accent: '#f472b6', accentRgb: '244,114,182' },
+  { id: 55, name: 'Luxury', component: 'LuxuryCard', category: 'themed', accent: '#d4a574', accentRgb: '212,165,116' },
+  { id: 56, name: 'Neon Noir', component: 'NeonCard', category: 'themed', accent: '#06b6d4', accentRgb: '6,182,212' },
+  { id: 57, name: 'Steampunk', component: 'SteampunkCard', category: 'themed', accent: '#b45309', accentRgb: '180,83,9' },
+  { id: 58, name: 'Vaporwave', component: 'VaporCard', category: 'themed', accent: '#c084fc', accentRgb: '192,132,252' },
+  { id: 59, name: 'Brutalist', component: 'BrutalistCard', category: 'themed', accent: '#fafafa', accentRgb: '250,250,250' },
+  { id: 60, name: 'Nordic', component: 'NordicCard', category: 'themed', accent: '#93c5fd', accentRgb: '147,197,253' },
+  { id: 61, name: 'Zen Garden', component: 'ZenCard', category: 'themed', accent: '#86efac', accentRgb: '134,239,172' },
+  { id: 62, name: 'Space', component: 'SpaceCard', category: 'themed', accent: '#818cf8', accentRgb: '129,140,248' },
+  { id: 63, name: 'Underwater', component: 'UnderwaterCard', category: 'themed', accent: '#22d3ee', accentRgb: '34,211,238' },
+  { id: 64, name: 'Desert', component: 'DesertCard', category: 'themed', accent: '#fbbf24', accentRgb: '251,191,36' },
+  { id: 65, name: 'Forest', component: 'ForestCard', category: 'themed', accent: '#15803d', accentRgb: '21,128,61' },
+
+  // 66-80: Layout & Structure
+  { id: 66, name: 'Bento Grid', component: 'BentoCard', category: 'layout', accent: '#6366f1', accentRgb: '99,102,241' },
+  { id: 67, name: 'Masonry', component: 'MasonryCard', category: 'layout', accent: '#ec4899', accentRgb: '236,72,153' },
+  { id: 68, name: 'Stacked Layers', component: 'StackedCard', category: 'layout', accent: '#8b5cf6', accentRgb: '139,92,246' },
+  { id: 69, name: 'Split View', component: 'SplitCard', category: 'layout', accent: '#14b8a6', accentRgb: '20,184,166' },
+  { id: 70, name: 'Overlap', component: 'OverlapCard', category: 'layout', accent: '#f97316', accentRgb: '249,115,22' },
+  { id: 71, name: 'Sidebar', component: 'SidebarCard', category: 'layout', accent: '#3b82f6', accentRgb: '59,130,246' },
+  { id: 72, name: 'Magazine', component: 'MagazineCard', category: 'layout', accent: '#f43f5e', accentRgb: '244,63,94' },
+  { id: 73, name: 'Poster', component: 'PosterCard', category: 'layout', accent: '#eab308', accentRgb: '234,179,8' },
+  { id: 74, name: 'Label', component: 'LabelCard', category: 'layout', accent: '#06b6d4', accentRgb: '6,182,212' },
+  { id: 75, name: 'Newspaper', component: 'NewspaperCard', category: 'layout', accent: '#a1a1aa', accentRgb: '161,161,170' },
+  { id: 76, name: 'Typewriter', component: 'TypewriterCard', category: 'layout', accent: '#d4d4d8', accentRgb: '212,212,216' },
+  { id: 77, name: 'Index Card', component: 'IndexCard', category: 'layout', accent: '#fbbf24', accentRgb: '251,191,36' },
+  { id: 78, name: 'Polaroid', component: 'PolaroidCard', category: 'layout', accent: '#fafafa', accentRgb: '250,250,250' },
+  { id: 79, name: 'Business Card', component: 'BizCard', category: 'layout', accent: '#1e293b', accentRgb: '30,41,59' },
+  { id: 80, name: 'Postcard', component: 'PostcardCard', category: 'layout', accent: '#f59e0b', accentRgb: '245,158,11' },
+
+  // 81-95: Interactive UI
+  { id: 81, name: 'Puzzle Piece', component: 'PuzzleCard', category: 'interactive_ui', accent: '#8b5cf6', accentRgb: '139,92,246' },
+  { id: 82, name: 'Circuit Board', component: 'CircuitCard', category: 'interactive_ui', accent: '#22c55e', accentRgb: '34,197,94' },
+  { id: 83, name: 'Notebook', component: 'NotebookCard', category: 'interactive_ui', accent: '#fbbf24', accentRgb: '251,191,36' },
+  { id: 84, name: 'Dashboard', component: 'DashboardCard', category: 'interactive_ui', accent: '#3b82f6', accentRgb: '59,130,246' },
+  { id: 85, name: 'Glass Panel', component: 'GlassCard', category: 'interactive_ui', accent: '#e2e8f0', accentRgb: '226,232,240' },
+  { id: 86, name: 'Card Stack', component: 'CardStackCard', category: 'interactive_ui', accent: '#f472b6', accentRgb: '244,114,182' },
+  { id: 87, name: 'Widget', component: 'WidgetCard', category: 'interactive_ui', accent: '#6366f1', accentRgb: '99,102,241' },
+  { id: 88, name: 'Notification', component: 'NotifCard', category: 'interactive_ui', accent: '#ef4444', accentRgb: '239,68,68' },
+  { id: 89, name: 'Chat Bubble', component: 'ChatCard', category: 'interactive_ui', accent: '#22c55e', accentRgb: '34,197,94' },
+  { id: 90, name: 'Recipe Card', component: 'RecipeCard', category: 'interactive_ui', accent: '#f97316', accentRgb: '249,115,22' },
+  { id: 91, name: 'Ticket', component: 'TicketCard', category: 'interactive_ui', accent: '#a855f7', accentRgb: '168,85,247' },
+  { id: 92, name: 'Badge', component: 'BadgeCard', category: 'interactive_ui', accent: '#14b8a6', accentRgb: '20,184,166' },
+  { id: 93, name: 'Accordion', component: 'AccordionCard', category: 'interactive_ui', accent: '#64748b', accentRgb: '100,116,139' },
+  { id: 94, name: 'Tab Panel', component: 'TabCard', category: 'interactive_ui', accent: '#3b82f6', accentRgb: '59,130,246' },
+  { id: 95, name: 'Tooltip', component: 'TooltipCard', category: 'interactive_ui', accent: '#1e293b', accentRgb: '30,41,59' },
+
+  // 96-110: Typography & Text
+  { id: 96, name: 'Serif Elegant', component: 'SerifCard', category: 'typography', accent: '#1e293b', accentRgb: '30,41,59' },
+  { id: 97, name: 'Mono Code', component: 'MonoCard', category: 'typography', accent: '#22c55e', accentRgb: '34,197,94' },
+  { id: 98, name: 'Display Bold', component: 'DisplayCard', category: 'typography', accent: '#f43f5e', accentRgb: '244,63,94' },
+  { id: 99, name: 'Script Flow', component: 'ScriptCard', category: 'typography', accent: '#c084fc', accentRgb: '192,132,252' },
+  { id: 100, name: 'Geometric', component: 'GeoCard', category: 'typography', accent: '#06b6d4', accentRgb: '6,182,212' },
+  { id: 101, name: 'Stencil', component: 'StencilCard', category: 'typography', accent: '#fafafa', accentRgb: '250,250,250' },
+  { id: 102, name: 'Handwritten', component: 'HandwrittenCard', category: 'typography', accent: '#fbbf24', accentRgb: '251,191,36' },
+  { id: 103, name: 'Pixel', component: 'PixelCard', category: 'typography', accent: '#22c55e', accentRgb: '34,197,94' },
+  { id: 104, name: 'Outline', component: 'OutlineCard', category: 'typography', accent: '#e2e8f0', accentRgb: '226,232,240' },
+  { id: 105, name: 'Gradient Text', component: 'GradientTextCard', category: 'typography', accent: '#8b5cf6', accentRgb: '139,92,246' },
+  { id: 106, name: 'Drop Cap', component: 'DropCapCard', category: 'typography', accent: '#f43f5e', accentRgb: '244,63,94' },
+  { id: 107, name: 'Inline Code', component: 'InlineCodeCard', category: 'typography', accent: '#ec4899', accentRgb: '236,72,153' },
+  { id: 108, name: 'Tag Cloud', component: 'TagCloudCard', category: 'typography', accent: '#6366f1', accentRgb: '99,102,241' },
+  { id: 109, name: 'Quote Block', component: 'QuoteCard', category: 'typography', accent: '#a78bfa', accentRgb: '167,139,250' },
+  { id: 110, name: 'Highlight', component: 'HighlightCard', category: 'typography', accent: '#fbbf24', accentRgb: '251,191,36' },
+
+  // 111-125: Material & Depth
+  { id: 111, name: 'Material Elevation', component: 'MaterialCard', category: 'material', accent: '#3b82f6', accentRgb: '59,130,246' },
+  { id: 112, name: 'Neumorphism', component: 'NeumorphCard', category: 'material', accent: '#e2e8f0', accentRgb: '226,232,240' },
+  { id: 113, name: 'Glassmorphism', component: 'GlassMorphCard', category: 'material', accent: '#a78bfa', accentRgb: '167,139,250' },
+  { id: 114, name: 'Claymorphism', component: 'ClayCard', category: 'material', accent: '#f472b6', accentRgb: '244,114,182' },
+  { id: 115, name: 'Floating', component: 'FloatingCard', category: 'material', accent: '#06b6d4', accentRgb: '6,182,212' },
+  { id: 116, name: 'Embossed', component: 'EmbossedCard', category: 'material', accent: '#d4d4d8', accentRgb: '212,212,216' },
+  { id: 117, name: 'Debossed', component: 'DebossedCard', category: 'material', accent: '#a1a1aa', accentRgb: '161,161,170' },
+  { id: 118, name: 'Layered', component: 'LayeredCard', category: 'material', accent: '#8b5cf6', accentRgb: '139,92,246' },
+  { id: 119, name: 'Shadow Stack', component: 'ShadowStackCard', category: 'material', accent: '#1e293b', accentRgb: '30,41,59' },
+  { id: 120, name: 'Paper', component: 'PaperCard', category: 'material', accent: '#fafafa', accentRgb: '250,250,250' },
+  { id: 121, name: 'Fabric', component: 'FabricCard', category: 'material', accent: '#78716c', accentRgb: '120,113,108' },
+  { id: 122, name: 'Metal', component: 'MetalCard', category: 'material', accent: '#94a3b8', accentRgb: '148,163,184' },
+  { id: 123, name: 'Wood', component: 'WoodCard', category: 'material', accent: '#a16207', accentRgb: '161,98,7' },
+  { id: 124, name: 'Stone', component: 'StoneCard', category: 'material', accent: '#78716c', accentRgb: '120,113,108' },
+  { id: 125, name: 'Frosted', component: 'FrostedCard', category: 'material', accent: '#e0f2fe', accentRgb: '224,242,254' },
+
+  // 126-140: Color & Gradient
+  { id: 126, name: 'Warm Sunset', component: 'GradientCard', category: 'color', accent: '#f97316', accentRgb: '249,115,22', gradient: 'linear-gradient(135deg, #f97316, #ef4444, #ec4899)' },
+  { id: 127, name: 'Cool Ocean', component: 'GradientCard', category: 'color', accent: '#06b6d4', accentRgb: '6,182,212', gradient: 'linear-gradient(135deg, #06b6d4, #3b82f6, #6366f1)' },
+  { id: 128, name: 'Forest Glow', component: 'GradientCard', category: 'color', accent: '#22c55e', accentRgb: '34,197,94', gradient: 'linear-gradient(135deg, #22c55e, #14b8a6, #06b6d4)' },
+  { id: 129, name: 'Purple Haze', component: 'GradientCard', category: 'color', accent: '#a855f7', accentRgb: '168,85,247', gradient: 'linear-gradient(135deg, #a855f7, #8b5cf6, #6366f1)' },
+  { id: 130, name: 'Neon Nights', component: 'GradientCard', category: 'color', accent: '#e879f9', accentRgb: '232,121,249', gradient: 'linear-gradient(135deg, #ec4899, #a855f7, #6366f1)' },
+  { id: 131, name: 'Golden Hour', component: 'GradientCard', category: 'color', accent: '#fbbf24', accentRgb: '251,191,36', gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24, #fcd34d)' },
+  { id: 132, name: 'Arctic Blue', component: 'GradientCard', category: 'color', accent: '#38bdf8', accentRgb: '56,189,248', gradient: 'linear-gradient(135deg, #0ea5e9, #38bdf8, #7dd3fc)' },
+  { id: 133, name: 'Crimson Tide', component: 'GradientCard', category: 'color', accent: '#dc2626', accentRgb: '220,38,38', gradient: 'linear-gradient(135deg, #991b1b, #dc2626, #ef4444)' },
+  { id: 134, name: 'Midnight', component: 'GradientCard', category: 'color', accent: '#312e81', accentRgb: '49,46,129', gradient: 'linear-gradient(135deg, #1e1b4b, #312e81, #4338ca)' },
+  { id: 135, name: 'Emerald Dream', component: 'GradientCard', category: 'color', accent: '#059669', accentRgb: '5,150,105', gradient: 'linear-gradient(135deg, #047857, #059669, #10b981)' },
+  { id: 136, name: 'Coral Reef', component: 'GradientCard', category: 'color', accent: '#fb7185', accentRgb: '251,113,133', gradient: 'linear-gradient(135deg, #f43f5e, #fb7185, #fda4af)' },
+  { id: 137, name: 'Dusk', component: 'GradientCard', category: 'color', accent: '#7c3aed', accentRgb: '124,58,237', gradient: 'linear-gradient(135deg, #581c87, #7c3aed, #a78bfa)' },
+  { id: 138, name: 'Sunrise', component: 'GradientCard', category: 'color', accent: '#f59e0b', accentRgb: '245,158,11', gradient: 'linear-gradient(135deg, #ea580c, #f59e0b, #fcd34d)' },
+  { id: 139, name: 'Steel', component: 'GradientCard', category: 'color', accent: '#64748b', accentRgb: '100,116,139', gradient: 'linear-gradient(135deg, #334155, #475569, #64748b)' },
+  { id: 140, name: 'Cherry Blossom', component: 'GradientCard', category: 'color', accent: '#f9a8d4', accentRgb: '249,168,212', gradient: 'linear-gradient(135deg, #ec4899, #f472b6, #f9a8d4)' },
+
+  // 141-160: CSS-only variations (BaseCard with distinct treatments)
+  { id: 141, name: 'Minimal White', component: 'BaseCard', category: 'css', accent: '#fafafa', accentRgb: '250,250,250', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: 'none' } },
+  { id: 142, name: 'Dark Void', component: 'BaseCard', category: 'css', accent: '#18181b', accentRgb: '24,24,27', css: { bg: '#000000', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '0', shadow: 'none' } },
+  { id: 143, name: 'Soft Radius', component: 'BaseCard', category: 'css', accent: '#a78bfa', accentRgb: '167,139,250', css: { bg: '#111113', border: '1px solid rgba(167,139,250,0.1)', borderRadius: '24px', shadow: '0 8px 32px rgba(0,0,0,0.4)' } },
+  { id: 144, name: 'Sharp Edge', component: 'BaseCard', category: 'css', accent: '#ef4444', accentRgb: '239,68,68', css: { bg: '#0a0a0a', border: '2px solid rgba(239,68,68,0.2)', borderRadius: '2px', shadow: 'none' } },
+  { id: 145, name: 'Neon Border', component: 'BaseCard', category: 'css', accent: '#22d3ee', accentRgb: '34,211,238', css: { bg: '#0a0a0a', border: '1px solid rgba(34,211,238,0.3)', borderRadius: '12px', shadow: '0 0 20px rgba(34,211,238,0.1)' } },
+  { id: 146, name: 'Inset Shadow', component: 'BaseCard', category: 'css', accent: '#71717a', accentRgb: '113,113,122', css: { bg: '#18181b', border: 'none', borderRadius: '12px', shadow: 'inset 0 2px 8px rgba(0,0,0,0.5)' } },
+  { id: 147, name: 'Double Border', component: 'BaseCard', category: 'css', accent: '#fbbf24', accentRgb: '251,191,36', css: { bg: '#0a0a0a', border: '3px double rgba(251,191,36,0.3)', borderRadius: '12px', shadow: 'none' } },
+  { id: 148, name: 'Dashed Frame', component: 'BaseCard', category: 'css', accent: '#64748b', accentRgb: '100,116,139', css: { bg: '#0a0a0a', border: '1px dashed rgba(100,116,139,0.3)', borderRadius: '8px', shadow: 'none' } },
+  { id: 149, name: 'Gradient Border', component: 'BaseCard', category: 'css', accent: '#8b5cf6', accentRgb: '139,92,246', css: { bg: '#0a0a0a', border: '1px solid transparent', borderRadius: '16px', shadow: '0 0 0 1px rgba(139,92,246,0.3)', gradientBorder: true } },
+  { id: 150, name: 'Oversized Shadow', component: 'BaseCard', category: 'css', accent: '#1e293b', accentRgb: '30,41,59', css: { bg: '#111113', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', shadow: '20px 20px 0 rgba(255,255,255,0.03)' } },
+  { id: 151, name: 'Colored Top', component: 'BaseCard', category: 'css', accent: '#f43f5e', accentRgb: '244,63,94', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: 'none', topBar: true } },
+  { id: 152, name: 'Left Accent', component: 'BaseCard', category: 'css', accent: '#22c55e', accentRgb: '34,197,94', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: 'none', leftBar: true } },
+  { id: 153, name: 'Corner Fold', component: 'BaseCard', category: 'css', accent: '#fbbf24', accentRgb: '251,191,36', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: 'none', cornerFold: true } },
+  { id: 154, name: 'Dotted Accent', component: 'BaseCard', category: 'css', accent: '#ec4899', accentRgb: '236,72,153', css: { bg: '#0a0a0a', border: '2px dotted rgba(236,72,153,0.2)', borderRadius: '12px', shadow: 'none' } },
+  { id: 155, name: 'Solid Block', component: 'BaseCard', category: 'css', accent: '#fafafa', accentRgb: '250,250,250', css: { bg: '#ffffff', border: 'none', borderRadius: '0', shadow: 'none', darkText: true } },
+  { id: 156, name: 'Tinted Glass', component: 'BaseCard', category: 'css', accent: '#a78bfa', accentRgb: '167,139,250', css: { bg: 'rgba(167,139,250,0.05)', border: '1px solid rgba(167,139,250,0.15)', borderRadius: '16px', shadow: '0 8px 32px rgba(167,139,250,0.08)' } },
+  { id: 157, name: 'Striped', component: 'BaseCard', category: 'css', accent: '#6366f1', accentRgb: '99,102,241', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: 'none', stripes: true } },
+  { id: 158, name: 'Checkered', component: 'BaseCard', category: 'css', accent: '#a1a1aa', accentRgb: '161,161,170', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: 'none', checkered: true } },
+  { id: 159, name: 'Glow Underline', component: 'BaseCard', category: 'css', accent: '#06b6d4', accentRgb: '6,182,212', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: 'none', glowUnder: true } },
+  { id: 160, name: 'Floating Shadow', component: 'BaseCard', category: 'css', accent: '#8b5cf6', accentRgb: '139,92,246', css: { bg: '#111113', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '16px', shadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)' } },
+
+  // 161-180: More CSS variations
+  { id: 161, name: 'Micro Card', component: 'BaseCard', category: 'css', accent: '#22c55e', accentRgb: '34,197,94', css: { bg: '#0a0a0a', border: '1px solid rgba(34,197,94,0.15)', borderRadius: '8px', shadow: 'none', compact: true } },
+  { id: 162, name: 'Wide Screen', component: 'BaseCard', category: 'css', accent: '#3b82f6', accentRgb: '59,130,246', css: { bg: '#0a0a0a', border: '1px solid rgba(59,130,246,0.15)', borderRadius: '12px', shadow: 'none', wide: true } },
+  { id: 163, name: 'Square Format', component: 'BaseCard', category: 'css', accent: '#f97316', accentRgb: '249,115,22', css: { bg: '#0a0a0a', border: '1px solid rgba(249,115,22,0.15)', borderRadius: '12px', shadow: 'none', square: true } },
+  { id: 164, name: 'Vertical Slice', component: 'BaseCard', category: 'css', accent: '#ec4899', accentRgb: '236,72,153', css: { bg: '#0a0a0a', border: '1px solid rgba(236,72,153,0.15)', borderRadius: '12px', shadow: 'none', tall: true } },
+  { id: 165, name: 'Minimal Line', component: 'BaseCard', category: 'css', accent: '#e2e8f0', accentRgb: '226,232,240', css: { bg: 'transparent', border: '1px solid rgba(226,232,240,0.1)', borderRadius: '0', shadow: 'none' } },
+  { id: 166, name: 'Thick Border', component: 'BaseCard', category: 'css', accent: '#f43f5e', accentRgb: '244,63,94', css: { bg: '#0a0a0a', border: '4px solid rgba(244,63,94,0.3)', borderRadius: '12px', shadow: 'none' } },
+  { id: 167, name: 'Offset Shadow', component: 'BaseCard', category: 'css', accent: '#fbbf24', accentRgb: '251,191,36', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: '8px 8px 0 rgba(251,191,36,0.2)' } },
+  { id: 168, name: 'Inner Glow', component: 'BaseCard', category: 'css', accent: '#a855f7', accentRgb: '168,85,247', css: { bg: '#0a0a0a', border: '1px solid rgba(168,85,247,0.2)', borderRadius: '16px', shadow: 'inset 0 0 30px rgba(168,85,247,0.05)' } },
+  { id: 169, name: 'Gradient Fill', component: 'BaseCard', category: 'css', accent: '#6366f1', accentRgb: '99,102,241', css: { bg: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05))', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '16px', shadow: 'none' } },
+  { id: 170, name: 'Rounded Full', component: 'BaseCard', category: 'css', accent: '#10b981', accentRgb: '16,185,129', css: { bg: '#0a0a0a', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '24px', shadow: '0 4px 20px rgba(0,0,0,0.3)' } },
+  { id: 171, name: 'Tight Spacing', component: 'BaseCard', category: 'css', accent: '#64748b', accentRgb: '100,116,139', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '4px', shadow: 'none', tight: true } },
+  { id: 172, name: 'Airy Layout', component: 'BaseCard', category: 'css', accent: '#93c5fd', accentRgb: '147,197,253', css: { bg: '#0a0a0a', border: '1px solid rgba(147,197,253,0.1)', borderRadius: '20px', shadow: 'none', airy: true } },
+  { id: 173, name: 'Subtle Grain', component: 'BaseCard', category: 'css', accent: '#a1a1aa', accentRgb: '161,161,170', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: 'none', grain: true } },
+  { id: 174, name: 'Scanline Overlay', component: 'BaseCard', category: 'css', accent: '#22c55e', accentRgb: '34,197,94', css: { bg: '#0a0a0a', border: '1px solid rgba(34,197,94,0.15)', borderRadius: '12px', shadow: 'none', scanlines: true } },
+  { id: 175, name: 'Noise Texture', component: 'BaseCard', category: 'css', accent: '#71717a', accentRgb: '113,113,122', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: 'none', noise: true } },
+  { id: 176, name: 'Diagonal Lines', component: 'BaseCard', category: 'css', accent: '#f472b6', accentRgb: '244,114,182', css: { bg: '#0a0a0a', border: '1px solid rgba(244,114,182,0.15)', borderRadius: '12px', shadow: 'none', diagonal: true } },
+  { id: 177, name: 'Dot Pattern', component: 'BaseCard', category: 'css', accent: '#6366f1', accentRgb: '99,102,241', css: { bg: '#0a0a0a', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '12px', shadow: 'none', dots: true } },
+  { id: 178, name: 'Rivet', component: 'BaseCard', category: 'css', accent: '#78716c', accentRgb: '120,113,108', css: { bg: '#18181b', border: '2px solid rgba(120,113,108,0.3)', borderRadius: '4px', shadow: 'none', rivets: true } },
+  { id: 179, name: 'Hologram', component: 'BaseCard', category: 'css', accent: '#22d3ee', accentRgb: '34,211,238', css: { bg: 'rgba(34,211,238,0.03)', border: '1px solid rgba(34,211,238,0.2)', borderRadius: '8px', shadow: '0 0 20px rgba(34,211,238,0.1)', hologram: true } },
+  { id: 180, name: 'Matte', component: 'BaseCard', category: 'css', accent: '#d4d4d8', accentRgb: '212,212,216', css: { bg: '#1c1c1f', border: 'none', borderRadius: '16px', shadow: '0 2px 12px rgba(0,0,0,0.3)' } },
+
+  // 181-200: More CSS variations
+  { id: 181, name: 'Outline Focus', component: 'BaseCard', category: 'css', accent: '#3b82f6', accentRgb: '59,130,246', css: { bg: 'transparent', border: '2px solid #3b82f6', borderRadius: '12px', shadow: 'none' } },
+  { id: 182, name: 'Tag Style', component: 'BaseCard', category: 'css', accent: '#10b981', accentRgb: '16,185,129', css: { bg: '#0a0a0a', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '6px', shadow: 'none' } },
+  { id: 183, name: 'Pill Shape', component: 'BaseCard', category: 'css', accent: '#8b5cf6', accentRgb: '139,92,246', css: { bg: '#0a0a0a', border: '1px solid rgba(139,92,246,0.2)', borderRadius: '9999px', shadow: '0 4px 16px rgba(0,0,0,0.3)' } },
+  { id: 184, name: 'Hexagonal', component: 'BaseCard', category: 'css', accent: '#f43f5e', accentRgb: '244,63,94', css: { bg: '#0a0a0a', border: '1px solid rgba(244,63,94,0.2)', borderRadius: '12px', shadow: 'none', hex: true } },
+  { id: 185, name: 'Ribbon', component: 'BaseCard', category: 'css', accent: '#ef4444', accentRgb: '239,68,68', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: 'none', ribbon: true } },
+  { id: 186, name: 'Stamp', component: 'BaseCard', category: 'css', accent: '#dc2626', accentRgb: '220,38,38', css: { bg: '#fef2f2', border: '3px solid #dc2626', borderRadius: '4px', shadow: 'none', darkText: true, stamp: true } },
+  { id: 187, name: 'Ticket Stub', component: 'BaseCard', category: 'css', accent: '#f59e0b', accentRgb: '245,158,11', css: { bg: '#0a0a0a', border: '1px dashed rgba(245,158,11,0.3)', borderRadius: '12px', shadow: 'none', ticketEdge: true } },
+  { id: 188, name: 'Washi Tape', component: 'BaseCard', category: 'css', accent: '#f9a8d4', accentRgb: '249,168,212', css: { bg: '#111113', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', shadow: '0 2px 8px rgba(0,0,0,0.3)', washi: true } },
+  { id: 189, name: 'Sticky Note', component: 'BaseCard', category: 'css', accent: '#fbbf24', accentRgb: '251,191,36', css: { bg: '#fef3c7', border: 'none', borderRadius: '2px', shadow: '2px 3px 8px rgba(0,0,0,0.2)', darkText: true, sticky: true } },
+  { id: 190, name: 'ID Badge', component: 'BaseCard', category: 'css', accent: '#3b82f6', accentRgb: '59,130,246', css: { bg: '#0f172a', border: '2px solid rgba(59,130,246,0.3)', borderRadius: '12px', shadow: 'none', badge: true } },
+  { id: 191, name: 'Plaque', component: 'BaseCard', category: 'css', accent: '#d4a574', accentRgb: '212,165,116', css: { bg: '#1a1510', border: '2px solid rgba(212,165,116,0.3)', borderRadius: '4px', shadow: 'inset 0 2px 4px rgba(0,0,0,0.3)' } },
+  { id: 192, name: 'Trophy', component: 'BaseCard', category: 'css', accent: '#fbbf24', accentRgb: '251,191,36', css: { bg: '#0a0a0a', border: '1px solid rgba(251,191,36,0.3)', borderRadius: '50% 50% 12px 12px', shadow: '0 4px 20px rgba(251,191,36,0.15)' } },
+  { id: 193, name: 'Scroll', component: 'BaseCard', category: 'css', accent: '#a16207', accentRgb: '161,98,7', css: { bg: '#1c1610', border: '1px solid rgba(161,98,7,0.3)', borderRadius: '8px', shadow: '0 4px 16px rgba(0,0,0,0.4)' } },
+  { id: 194, name: 'Capsule', component: 'BaseCard', category: 'css', accent: '#06b6d4', accentRgb: '6,182,212', css: { bg: '#0a0a0a', border: '1px solid rgba(6,182,212,0.2)', borderRadius: '9999px', shadow: '0 0 20px rgba(6,182,212,0.08)' } },
+  { id: 195, name: 'Film Strip', component: 'BaseCard', category: 'css', accent: '#a1a1aa', accentRgb: '161,161,170', css: { bg: '#0a0a0a', border: '4px solid #18181b', borderRadius: '0', shadow: 'none', filmStrip: true } },
+  { id: 196, name: 'Viewfinder', component: 'BaseCard', category: 'css', accent: '#f43f5e', accentRgb: '244,63,94', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', shadow: 'none', viewfinder: true } },
+  { id: 197, name: 'Crosshair', component: 'BaseCard', category: 'css', accent: '#ef4444', accentRgb: '239,68,68', css: { bg: '#0a0a0a', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '4px', shadow: 'none', crosshair: true } },
+  { id: 198, name: 'Zebra', component: 'BaseCard', category: 'css', accent: '#fafafa', accentRgb: '250,250,250', css: { bg: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', shadow: 'none', zebra: true } },
+  { id: 199, name: 'Halftone', component: 'BaseCard', category: 'css', accent: '#f472b6', accentRgb: '244,114,182', css: { bg: '#0a0a0a', border: '1px solid rgba(244,114,182,0.15)', borderRadius: '12px', shadow: 'none', halftone: true } },
+  { id: 200, name: 'Geode', component: 'BaseCard', category: 'css', accent: '#c084fc', accentRgb: '192,132,252', css: { bg: '#0a0a0a', border: '1px solid rgba(192,132,252,0.2)', borderRadius: '20px', shadow: 'inset 0 0 40px rgba(192,132,252,0.05), 0 0 20px rgba(192,132,252,0.08)' } },
+
+  // 201-220: More CSS variations
+  { id: 201, name: 'Brushed Metal', component: 'BaseCard', category: 'css', accent: '#94a3b8', accentRgb: '148,163,184', css: { bg: 'linear-gradient(180deg, #2a2d35, #1e2028)', border: '1px solid rgba(148,163,184,0.2)', borderRadius: '8px', shadow: '0 2px 8px rgba(0,0,0,0.3)' } },
+  { id: 202, name: 'Carbon Fiber', component: 'BaseCard', category: 'css', accent: '#52525b', accentRgb: '82,82,91', css: { bg: '#18181b', border: '1px solid rgba(82,82,91,0.3)', borderRadius: '8px', shadow: 'none', carbon: true } },
+  { id: 203, name: 'Perforated', component: 'BaseCard', category: 'css', accent: '#71717a', accentRgb: '113,113,122', css: { bg: '#18181b', border: '1px solid rgba(113,113,122,0.2)', borderRadius: '8px', shadow: 'none', perforated: true } },
+  { id: 204, name: 'Marble', component: 'BaseCard', category: 'css', accent: '#e2e8f0', accentRgb: '226,232,240', css: { bg: '#f8f8f8', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '12px', shadow: '0 4px 16px rgba(0,0,0,0.1)', darkText: true, marble: true } },
+  { id: 205, name: 'Concrete', component: 'BaseCard', category: 'css', accent: '#a1a1aa', accentRgb: '161,161,170', css: { bg: '#27272a', border: '1px solid rgba(161,161,170,0.15)', borderRadius: '4px', shadow: 'none', concrete: true } },
+  { id: 206, name: 'Leather', component: 'BaseCard', category: 'css', accent: '#92400e', accentRgb: '146,64,14', css: { bg: '#1c1610', border: '1px solid rgba(146,64,14,0.3)', borderRadius: '8px', shadow: 'inset 0 1px 3px rgba(0,0,0,0.3)' } },
+  { id: 207, name: 'Velvet', component: 'BaseCard', category: 'css', accent: '#7c3aed', accentRgb: '124,58,237', css: { bg: 'linear-gradient(135deg, #1a1025, #0f0a1a)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: '16px', shadow: 'inset 0 0 30px rgba(124,58,237,0.05)' } },
+  { id: 208, name: 'Glacier', component: 'BaseCard', category: 'css', accent: '#bae6fd', accentRgb: '186,230,253', css: { bg: 'rgba(186,230,253,0.03)', border: '1px solid rgba(186,230,253,0.15)', borderRadius: '20px', shadow: '0 0 30px rgba(186,230,253,0.05)' } },
+  { id: 209, name: 'Ember', component: 'BaseCard', category: 'css', accent: '#f97316', accentRgb: '249,115,22', css: { bg: '#0a0a0a', border: '1px solid rgba(249,115,22,0.2)', borderRadius: '8px', shadow: '0 0 30px rgba(249,115,22,0.08)' } },
+  { id: 210, name: 'Moss', component: 'BaseCard', category: 'css', accent: '#4d7c0f', accentRgb: '77,124,15', css: { bg: '#0a0f05', border: '1px solid rgba(77,124,15,0.2)', borderRadius: '12px', shadow: 'none' } },
+  { id: 211, name: 'Clay', component: 'BaseCard', category: 'css', accent: '#c2410c', accentRgb: '194,65,12', css: { bg: '#1a120c', border: '1px solid rgba(194,65,12,0.2)', borderRadius: '16px', shadow: '0 4px 12px rgba(0,0,0,0.3)' } },
+  { id: 212, name: 'Sand', component: 'BaseCard', category: 'css', accent: '#d97706', accentRgb: '217,119,6', css: { bg: '#1a1510', border: '1px solid rgba(217,119,6,0.15)', borderRadius: '12px', shadow: 'none' } },
+  { id: 213, name: 'Obsidian', component: 'BaseCard', category: 'css', accent: '#6366f1', accentRgb: '99,102,241', css: { bg: '#050508', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '4px', shadow: '0 0 20px rgba(99,102,241,0.05)' } },
+  { id: 214, name: 'Amber', component: 'BaseCard', category: 'css', accent: '#f59e0b', accentRgb: '245,158,11', css: { bg: '#1a1505', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', shadow: '0 0 20px rgba(245,158,11,0.08)' } },
+  { id: 215, name: 'Jade', component: 'BaseCard', category: 'css', accent: '#059669', accentRgb: '5,150,105', css: { bg: '#050f0a', border: '1px solid rgba(5,150,105,0.2)', borderRadius: '16px', shadow: '0 0 20px rgba(5,150,105,0.08)' } },
+  { id: 216, name: 'Ruby', component: 'BaseCard', category: 'css', accent: '#dc2626', accentRgb: '220,38,38', css: { bg: '#0f0505', border: '1px solid rgba(220,38,38,0.2)', borderRadius: '12px', shadow: '0 0 20px rgba(220,38,38,0.08)' } },
+  { id: 217, name: 'Sapphire', component: 'BaseCard', category: 'css', accent: '#2563eb', accentRgb: '37,99,235', css: { bg: '#050a14', border: '1px solid rgba(37,99,235,0.2)', borderRadius: '12px', shadow: '0 0 20px rgba(37,99,235,0.08)' } },
+  { id: 218, name: 'Topaz', component: 'BaseCard', category: 'css', accent: '#0891b2', accentRgb: '8,145,178', css: { bg: '#050f12', border: '1px solid rgba(8,145,178,0.2)', borderRadius: '12px', shadow: '0 0 20px rgba(8,145,178,0.08)' } },
+  { id: 219, name: 'Pearl', component: 'BaseCard', category: 'css', accent: '#f1f5f9', accentRgb: '241,245,249', css: { bg: 'linear-gradient(135deg, #fafafa, #f1f5f9)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '20px', shadow: '0 4px 20px rgba(0,0,0,0.08)', darkText: true } },
+  { id: 220, name: 'Onyx', component: 'BaseCard', category: 'css', accent: '#27272a', accentRgb: '39,39,42', css: { bg: '#09090b', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '8px', shadow: 'none' } },
+
+  // 221-240: More CSS variations
+  { id: 221, name: 'Prism', component: 'BaseCard', category: 'css', accent: '#e879f9', accentRgb: '232,121,249', css: { bg: '#0a0a0a', border: '1px solid rgba(232,121,249,0.2)', borderRadius: '12px', shadow: '0 0 20px rgba(232,121,249,0.08)', prism: true } },
+  { id: 222, name: 'Iridescent', component: 'BaseCard', category: 'css', accent: '#a78bfa', accentRgb: '167,139,250', css: { bg: '#0a0a0a', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '16px', shadow: 'none', iridescent: true } },
+  { id: 223, name: 'Thermal', component: 'BaseCard', category: 'css', accent: '#ef4444', accentRgb: '239,68,68', css: { bg: '#0a0a0a', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', shadow: 'none', thermal: true } },
+  { id: 224, name: 'Infrared', component: 'BaseCard', category: 'css', accent: '#dc2626', accentRgb: '220,38,38', css: { bg: '#0a0000', border: '1px solid rgba(220,38,38,0.3)', borderRadius: '8px', shadow: '0 0 20px rgba(220,38,38,0.1)' } },
+  { id: 225, name: 'Ultraviolet', component: 'BaseCard', category: 'css', accent: '#7c3aed', accentRgb: '124,58,237', css: { bg: '#0a0514', border: '1px solid rgba(124,58,237,0.25)', borderRadius: '12px', shadow: '0 0 20px rgba(124,58,237,0.1)' } },
+  { id: 226, name: 'Magnetic', component: 'BaseCard', category: 'css', accent: '#ef4444', accentRgb: '239,68,68', css: { bg: '#0a0a0a', border: '2px solid rgba(239,68,68,0.15)', borderRadius: '50%', shadow: 'none' } },
+  { id: 227, name: 'Eclipse', component: 'BaseCard', category: 'css', accent: '#fbbf24', accentRgb: '251,191,36', css: { bg: '#050508', border: 'none', borderRadius: '50%', shadow: '0 0 60px rgba(251,191,36,0.15), 0 0 0 1px rgba(255,255,255,0.05)' } },
+  { id: 228, name: 'Comet', component: 'BaseCard', category: 'css', accent: '#60a5fa', accentRgb: '96,165,250', css: { bg: '#0a0a0a', border: '1px solid rgba(96,165,250,0.15)', borderRadius: '9999px 12px 12px 9999px', shadow: '0 0 20px rgba(96,165,250,0.08)' } },
+  { id: 229, name: 'Nebula', component: 'BaseCard', category: 'css', accent: '#c084fc', accentRgb: '192,132,252', css: { bg: '#0a0514', border: '1px solid rgba(192,132,252,0.15)', borderRadius: '20px', shadow: '0 0 40px rgba(192,132,252,0.06)' } },
+  { id: 230, name: 'Quasar', component: 'BaseCard', category: 'css', accent: '#38bdf8', accentRgb: '56,189,248', css: { bg: '#050a14', border: '1px solid rgba(56,189,248,0.2)', borderRadius: '50% 12px 12px 50%', shadow: '0 0 30px rgba(56,189,248,0.1)' } },
+  { id: 231, name: 'Pulsar', component: 'BaseCard', category: 'css', accent: '#22d3ee', accentRgb: '34,211,238', css: { bg: '#050a10', border: '1px solid rgba(34,211,238,0.2)', borderRadius: '12px', shadow: '0 0 20px rgba(34,211,238,0.08)', pulsar: true } },
+  { id: 232, name: 'Supernova', component: 'BaseCard', category: 'css', accent: '#fbbf24', accentRgb: '251,191,36', css: { bg: '#0a0a0a', border: '1px solid rgba(251,191,36,0.3)', borderRadius: '12px', shadow: '0 0 40px rgba(251,191,36,0.12)' } },
+  { id: 233, name: 'Antimatter', component: 'BaseCard', category: 'css', accent: '#f43f5e', accentRgb: '244,63,94', css: { bg: '#0a0a0a', border: '1px solid rgba(244,63,94,0.2)', borderRadius: '12px', shadow: 'none', antimatter: true } },
+  { id: 234, name: 'Wormhole', component: 'BaseCard', category: 'css', accent: '#8b5cf6', accentRgb: '139,92,246', css: { bg: '#050508', border: '1px solid rgba(139,92,246,0.2)', borderRadius: '50%', shadow: 'inset 0 0 40px rgba(139,92,246,0.1)' } },
+  { id: 235, name: 'Photon', component: 'BaseCard', category: 'css', accent: '#fef08a', accentRgb: '254,240,138', css: { bg: '#0a0a0a', border: '1px solid rgba(254,240,138,0.2)', borderRadius: '12px', shadow: '0 0 20px rgba(254,240,138,0.1)' } },
+  { id: 236, name: 'Tachyon', component: 'BaseCard', category: 'css', accent: '#06b6d4', accentRgb: '6,182,212', css: { bg: '#0a0a0a', border: '1px solid rgba(6,182,212,0.2)', borderRadius: '4px', shadow: '0 0 15px rgba(6,182,212,0.08)', tachyon: true } },
+  { id: 237, name: 'Gravity', component: 'BaseCard', category: 'css', accent: '#64748b', accentRgb: '100,116,139', css: { bg: '#0a0a0a', border: '1px solid rgba(100,116,139,0.2)', borderRadius: '12px', shadow: '0 8px 40px rgba(0,0,0,0.6)' } },
+  { id: 238, name: 'Singularity', component: 'BaseCard', category: 'css', accent: '#1e293b', accentRgb: '30,41,59', css: { bg: '#000000', border: '1px solid rgba(255,255,255,0.02)', borderRadius: '50%', shadow: 'none' } },
+  { id: 239, name: 'Plasma', component: 'BaseCard', category: 'css', accent: '#e879f9', accentRgb: '232,121,249', css: { bg: '#0a0510', border: '1px solid rgba(232,121,249,0.2)', borderRadius: '16px', shadow: '0 0 30px rgba(232,121,249,0.1)' } },
+  { id: 240, name: 'Flux', component: 'BaseCard', category: 'css', accent: '#22c55e', accentRgb: '34,197,94', css: { bg: '#0a0a0a', border: '1px solid rgba(34,197,94,0.2)', borderRadius: '12px', shadow: '0 0 20px rgba(34,197,94,0.08)', flux: true } },
+
+  // 241-260: More CSS variations
+  { id: 241, name: 'Zen', component: 'BaseCard', category: 'css', accent: '#d4d4d8', accentRgb: '212,212,216', css: { bg: '#fafaf9', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '2px', shadow: 'none', darkText: true } },
+  { id: 242, name: 'Kintsugi', component: 'BaseCard', category: 'css', accent: '#fbbf24', accentRgb: '251,191,36', css: { bg: '#18181b', border: '1px solid rgba(251,191,36,0.2)', borderRadius: '12px', shadow: 'none', kintsugi: true } },
+  { id: 243, name: 'Origami', component: 'BaseCard', category: 'css', accent: '#f0abfc', accentRgb: '240,171,252', css: { bg: '#faf5ff', border: 'none', borderRadius: '0', shadow: '2px 4px 0 rgba(0,0,0,0.1)', darkText: true, origami: true } },
+  { id: 244, name: 'Shibori', component: 'BaseCard', category: 'css', accent: '#1e40af', accentRgb: '30,64,175', css: { bg: '#0f172a', border: '1px solid rgba(30,64,175,0.3)', borderRadius: '12px', shadow: 'none', shibori: true } },
+  { id: 245, name: 'Sashiko', component: 'BaseCard', category: 'css', accent: '#e2e8f0', accentRgb: '226,232,240', css: { bg: '#1e293b', border: '1px solid rgba(226,232,240,0.2)', borderRadius: '4px', shadow: 'none', sashiko: true } },
+  { id: 246, name: 'Tangram', component: 'BaseCard', category: 'css', accent: '#f97316', accentRgb: '249,115,22', css: { bg: '#0a0a0a', border: '1px solid rgba(249,115,22,0.2)', borderRadius: '12px', shadow: 'none', tangram: true } },
+  { id: 247, name: 'Mandala', component: 'BaseCard', category: 'css', accent: '#a855f7', accentRgb: '168,85,247', css: { bg: '#0a0a0a', border: '1px solid rgba(168,85,247,0.2)', borderRadius: '50%', shadow: '0 0 30px rgba(168,85,247,0.08)' } },
+  { id: 248, name: 'Celtic Knot', component: 'BaseCard', category: 'css', accent: '#22c55e', accentRgb: '34,197,94', css: { bg: '#0a0a0a', border: '2px solid rgba(34,197,94,0.2)', borderRadius: '12px', shadow: 'none', celtic: true } },
+  { id: 249, name: 'Art Deco', component: 'BaseCard', category: 'css', accent: '#fbbf24', accentRgb: '251,191,36', css: { bg: '#0a0a0a', border: '2px solid rgba(251,191,36,0.25)', borderRadius: '0', shadow: 'none', artDeco: true } },
+  { id: 250, name: 'Bauhaus', component: 'BaseCard', category: 'css', accent: '#ef4444', accentRgb: '239,68,68', css: { bg: '#fafafa', border: '3px solid #18181b', borderRadius: '0', shadow: '6px 6px 0 #18181b', darkText: true } },
+  { id: 251, name: 'Memphis', component: 'BaseCard', category: 'css', accent: '#f472b6', accentRgb: '244,114,182', css: { bg: '#fefce8', border: '2px solid #18181b', borderRadius: '24px', shadow: '4px 4px 0 #18181b', darkText: true } },
+  { id: 252, name: 'Swiss', component: 'BaseCard', category: 'css', accent: '#ef4444', accentRgb: '239,68,68', css: { bg: '#fafafa', border: 'none', borderRadius: '0', shadow: 'none', darkText: true } },
+  { id: 253, name: 'Victorian', component: 'BaseCard', category: 'css', accent: '#92400e', accentRgb: '146,64,14', css: { bg: '#1c1610', border: '2px solid rgba(146,64,14,0.3)', borderRadius: '8px', shadow: 'inset 0 0 20px rgba(0,0,0,0.3)', victorian: true } },
+  { id: 254, name: 'Edwardian', component: 'BaseCard', category: 'css', accent: '#d4a574', accentRgb: '212,165,116', css: { bg: '#faf5ef', border: '1px solid rgba(146,64,14,0.2)', borderRadius: '4px', shadow: '0 2px 8px rgba(0,0,0,0.1)', darkText: true } },
+  { id: 255, name: 'Mid-Century', component: 'BaseCard', category: 'css', accent: '#f97316', accentRgb: '249,115,22', css: { bg: '#fef3c7', border: 'none', borderRadius: '0', shadow: '4px 4px 0 rgba(249,115,22,0.3)', darkText: true } },
+  { id: 256, name: 'Art Nouveau', component: 'BaseCard', category: 'css', accent: '#059669', accentRgb: '5,150,105', css: { bg: '#0a0f0a', border: '1px solid rgba(5,150,105,0.25)', borderRadius: '20px 20px 4px 4px', shadow: 'none', artNouveau: true } },
+  { id: 257, name: 'Gothic', component: 'BaseCard', category: 'css', accent: '#6b21a8', accentRgb: '107,33,168', css: { bg: '#0a0510', border: '1px solid rgba(107,33,168,0.3)', borderRadius: '4px 4px 0 0', shadow: 'none', gothic: true } },
+  { id: 258, name: 'Baroque', component: 'BaseCard', category: 'css', accent: '#d4a574', accentRgb: '212,165,116', css: { bg: '#1a1510', border: '2px solid rgba(212,165,116,0.25)', borderRadius: '8px', shadow: 'inset 0 0 20px rgba(212,165,116,0.05)', baroque: true } },
+  { id: 259, name: 'Minimalist', component: 'BaseCard', category: 'css', accent: '#fafafa', accentRgb: '250,250,250', css: { bg: '#ffffff', border: 'none', borderRadius: '0', shadow: 'none', darkText: true } },
+  { id: 260, name: 'Maximalist', component: 'BaseCard', category: 'css', accent: '#f43f5e', accentRgb: '244,63,94', css: { bg: 'linear-gradient(135deg, #fef3c7, #fce7f3, #ede9fe, #dbeafe)', border: '3px solid #18181b', borderRadius: '16px', shadow: '6px 6px 0 #18181b', darkText: true } },
+
+  // 261-280: More CSS variations
+  { id: 261, name: 'Asymmetric', component: 'BaseCard', category: 'css', accent: '#6366f1', accentRgb: '99,102,241', css: { bg: '#0a0a0a', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '24px 4px 24px 4px', shadow: '0 4px 20px rgba(0,0,0,0.3)' } },
+  { id: 262, name: 'Stepped', component: 'BaseCard', category: 'css', accent: '#a855f7', accentRgb: '168,85,247', css: { bg: '#0a0a0a', border: '1px solid rgba(168,85,247,0.2)', borderRadius: '12px', shadow: '4px 4px 0 rgba(168,85,247,0.15), 8px 8px 0 rgba(168,85,247,0.08)' } },
+  { id: 263, name: 'Tiered', component: 'BaseCard', category: 'css', accent: '#ec4899', accentRgb: '236,72,153', css: { bg: '#0a0a0a', border: '1px solid rgba(236,72,153,0.2)', borderRadius: '12px 12px 4px 4px', shadow: '0 4px 20px rgba(0,0,0,0.3)' } },
+  { id: 264, name: 'Modular', component: 'BaseCard', category: 'css', accent: '#14b8a6', accentRgb: '20,184,166', css: { bg: '#0a0a0a', border: '1px solid rgba(20,184,166,0.2)', borderRadius: '8px', shadow: 'none', modular: true } },
+  { id: 265, name: 'Grid Locked', component: 'BaseCard', category: 'css', accent: '#3b82f6', accentRgb: '59,130,246', css: { bg: '#0a0a0a', border: '1px solid rgba(59,130,246,0.15)', borderRadius: '0', shadow: 'none', gridLocked: true } },
+  { id: 266, name: 'Fluid', component: 'BaseCard', category: 'css', accent: '#06b6d4', accentRgb: '6,182,212', css: { bg: '#0a0a0a', border: '1px solid rgba(6,182,212,0.15)', borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%', shadow: 'none' } },
+  { id: 267, name: 'Blob', component: 'BaseCard', category: 'css', accent: '#e879f9', accentRgb: '232,121,249', css: { bg: '#0a0a0a', border: '1px solid rgba(232,121,249,0.2)', borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%', shadow: 'none' } },
+  { id: 268, name: 'Wave Edge', component: 'BaseCard', category: 'css', accent: '#22d3ee', accentRgb: '34,211,238', css: { bg: '#0a0a0a', border: '1px solid rgba(34,211,238,0.15)', borderRadius: '12px', shadow: 'none', waveEdge: true } },
+  { id: 269, name: 'Zigzag', component: 'BaseCard', category: 'css', accent: '#f97316', accentRgb: '249,115,22', css: { bg: '#0a0a0a', border: '1px solid rgba(249,115,22,0.15)', borderRadius: '12px', shadow: 'none', zigzag: true } },
+  { id: 270, name: 'Sawtooth', component: 'BaseCard', category: 'css', accent: '#ef4444', accentRgb: '239,68,68', css: { bg: '#0a0a0a', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '12px', shadow: 'none', sawtooth: true } },
+  { id: 271, name: 'Pixelated', component: 'BaseCard', category: 'css', accent: '#22c55e', accentRgb: '34,197,94', css: { bg: '#0a0a0a', border: '2px solid rgba(34,197,94,0.2)', borderRadius: '0', shadow: 'none', pixelated: true } },
+  { id: 272, name: 'Low Poly', component: 'BaseCard', category: 'css', accent: '#8b5cf6', accentRgb: '139,92,246', css: { bg: '#0a0a0a', border: '1px solid rgba(139,92,246,0.15)', borderRadius: '12px', shadow: 'none', lowPoly: true } },
+  { id: 273, name: 'Wireframe', component: 'BaseCard', category: 'css', accent: '#e2e8f0', accentRgb: '226,232,240', css: { bg: 'transparent', border: '1px solid rgba(226,232,240,0.3)', borderRadius: '12px', shadow: 'none', wireframe: true } },
+  { id: 274, name: 'Isometric', component: 'BaseCard', category: 'css', accent: '#06b6d4', accentRgb: '6,182,212', css: { bg: '#0a0a0a', border: '1px solid rgba(6,182,212,0.15)', borderRadius: '12px', shadow: 'none', isometric: true } },
+  { id: 275, name: 'Parallax', component: 'BaseCard', category: 'css', accent: '#3b82f6', accentRgb: '59,130,246', css: { bg: '#0a0a0a', border: '1px solid rgba(59,130,246,0.15)', borderRadius: '12px', shadow: 'none', parallax: true } },
+  { id: 276, name: 'Depth Map', component: 'BaseCard', category: 'css', accent: '#a855f7', accentRgb: '168,85,247', css: { bg: '#0a0a0a', border: '1px solid rgba(168,85,247,0.15)', borderRadius: '12px', shadow: 'none', depthMap: true } },
+  { id: 277, name: 'Cel Shaded', component: 'BaseCard', category: 'css', accent: '#f472b6', accentRgb: '244,114,182', css: { bg: '#faf5ff', border: '3px solid #18181b', borderRadius: '12px', shadow: '3px 3px 0 #18181b', darkText: true } },
+  { id: 278, name: 'Pop Art', component: 'BaseCard', category: 'css', accent: '#f43f5e', accentRgb: '244,63,94', css: { bg: '#fefce8', border: '3px solid #18181b', borderRadius: '0', shadow: '4px 4px 0 #18181b', darkText: true } },
+  { id: 279, name: 'Watercolor', component: 'BaseCard', category: 'css', accent: '#93c5fd', accentRgb: '147,197,253', css: { bg: '#fafaf9', border: 'none', borderRadius: '20px', shadow: 'none', darkText: true, watercolor: true } },
+  { id: 280, name: 'Ink Wash', component: 'BaseCard', category: 'css', accent: '#475569', accentRgb: '71,85,105', css: { bg: '#fafaf9', border: 'none', borderRadius: '8px', shadow: 'none', darkText: true, inkWash: true } },
+
+  // 281-300: Final CSS variations
+  { id: 281, name: 'Neon Sign', component: 'BaseCard', category: 'css', accent: '#f43f5e', accentRgb: '244,63,94', css: { bg: '#0a0a0a', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '8px', shadow: '0 0 10px rgba(244,63,94,0.3), 0 0 40px rgba(244,63,94,0.1)' } },
+  { id: 282, name: 'LED Board', component: 'BaseCard', category: 'css', accent: '#22c55e', accentRgb: '34,197,94', css: { bg: '#0a0a0a', border: '1px solid rgba(34,197,94,0.2)', borderRadius: '4px', shadow: '0 0 10px rgba(34,197,94,0.2)', led: true } },
+  { id: 283, name: 'Pixel Grid', component: 'BaseCard', category: 'css', accent: '#6366f1', accentRgb: '99,102,241', css: { bg: '#0a0a0a', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '0', shadow: 'none', pixelGrid: true } },
+  { id: 284, name: 'Dot Matrix', component: 'BaseCard', category: 'css', accent: '#22c55e', accentRgb: '34,197,94', css: { bg: '#0a0a0a', border: '1px solid rgba(34,197,94,0.15)', borderRadius: '8px', shadow: 'none', dotMatrix: true } },
+  { id: 285, name: 'Segment Display', component: 'BaseCard', category: 'css', accent: '#ef4444', accentRgb: '239,68,68', css: { bg: '#0a0a0a', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '4px', shadow: 'none', segment: true } },
+  { id: 286, name: 'VFD', component: 'BaseCard', category: 'css', accent: '#06b6d4', accentRgb: '6,182,212', css: { bg: '#051520', border: '1px solid rgba(6,182,212,0.2)', borderRadius: '8px', shadow: 'none', vfd: true } },
+  { id: 287, name: 'OLED Black', component: 'BaseCard', category: 'css', accent: '#fafafa', accentRgb: '250,250,250', css: { bg: '#000000', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', shadow: 'none' } },
+  { id: 288, name: 'Paper White', component: 'BaseCard', category: 'css', accent: '#18181b', accentRgb: '24,24,27', css: { bg: '#ffffff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '12px', shadow: '0 2px 12px rgba(0,0,0,0.06)', darkText: true } },
+  { id: 289, name: 'Sepia', component: 'BaseCard', category: 'css', accent: '#92400e', accentRgb: '146,64,14', css: { bg: '#fef3c7', border: '1px solid rgba(146,64,14,0.2)', borderRadius: '4px', shadow: 'none', darkText: true, sepia: true } },
+  { id: 290, name: 'Duotone', component: 'BaseCard', category: 'css', accent: '#6366f1', accentRgb: '99,102,241', css: { bg: '#0a0a0a', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px', shadow: 'none', duotone: true } },
+  { id: 291, name: 'Tri-tone', component: 'BaseCard', category: 'css', accent: '#f43f5e', accentRgb: '244,63,94', css: { bg: '#0a0a0a', border: '1px solid rgba(244,63,94,0.15)', borderRadius: '12px', shadow: 'none', tritone: true } },
+  { id: 292, name: 'Monochrome', component: 'BaseCard', category: 'css', accent: '#a1a1aa', accentRgb: '161,161,170', css: { bg: '#18181b', border: '1px solid rgba(161,161,170,0.2)', borderRadius: '12px', shadow: 'none' } },
+  { id: 293, name: 'High Contrast', component: 'BaseCard', category: 'css', accent: '#fbbf24', accentRgb: '251,191,36', css: { bg: '#000000', border: '2px solid #fbbf24', borderRadius: '0', shadow: 'none' } },
+  { id: 294, name: 'Pastel', component: 'BaseCard', category: 'css', accent: '#c4b5fd', accentRgb: '196,181,253', css: { bg: '#faf5ff', border: '1px solid rgba(196,181,253,0.3)', borderRadius: '16px', shadow: '0 2px 8px rgba(0,0,0,0.06)', darkText: true } },
+  { id: 295, name: 'Neon Pastel', component: 'BaseCard', category: 'css', accent: '#f9a8d4', accentRgb: '249,168,212', css: { bg: '#0a0a0a', border: '1px solid rgba(249,168,212,0.25)', borderRadius: '16px', shadow: '0 0 15px rgba(249,168,212,0.1)' } },
+  { id: 296, name: 'Acid', component: 'BaseCard', category: 'css', accent: '#a3e635', accentRgb: '163,230,53', css: { bg: '#0a0a0a', border: '1px solid rgba(163,230,53,0.25)', borderRadius: '8px', shadow: '0 0 15px rgba(163,230,53,0.1)' } },
+  { id: 297, name: 'Earth Tone', component: 'BaseCard', category: 'css', accent: '#78716c', accentRgb: '120,113,108', css: { bg: '#1c1917', border: '1px solid rgba(120,113,108,0.2)', borderRadius: '12px', shadow: 'none' } },
+  { id: 298, name: 'Cool Gray', component: 'BaseCard', category: 'css', accent: '#94a3b8', accentRgb: '148,163,184', css: { bg: '#0f172a', border: '1px solid rgba(148,163,184,0.15)', borderRadius: '12px', shadow: 'none' } },
+  { id: 299, name: 'Warm Gray', component: 'BaseCard', category: 'css', accent: '#a8a29e', accentRgb: '168,162,158', css: { bg: '#1c1917', border: '1px solid rgba(168,162,158,0.15)', borderRadius: '12px', shadow: 'none' } },
+  { id: 300, name: 'Pure', component: 'BaseCard', category: 'css', accent: '#ffffff', accentRgb: '255,255,255', css: { bg: '#000000', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', shadow: 'none' } },
 ];
-
-const BG_FAMILIES = [
-  { id: 'solid', css: 'bg-[#0a0a0a]' },
-  { id: 'elevated', css: 'bg-[#111111]' },
-  { id: 'panel', css: 'bg-[#0d0d0d]' },
-  { id: 'surface', css: 'bg-[#0f0f0f]' },
-  { id: 'deep', css: 'bg-[#060606]' },
-  { id: 'charcoal', css: 'bg-[#1a1a1a]' },
-  { id: 'graphite', css: 'bg-[#141414]' },
-  { id: 'obsidian', css: 'bg-[#080808]' },
-  { id: 'slate', css: 'bg-[#181818]' },
-  { id: 'midnight', css: 'bg-[#0c0c14]' },
-  { id: 'void', css: 'bg-[#020204]' },
-  { id: 'ink', css: 'bg-[#050508]' },
-];
-
-const BORDER_FAMILIES = [
-  { id: 'subtle', css: 'border border-white/[0.06]' },
-  { id: 'medium', css: 'border border-white/[0.10]' },
-  { id: 'strong', css: 'border border-white/[0.15]' },
-  { id: 'glow', css: 'border border-white/[0.08]' },
-  { id: 'accent', css: 'border' },
-  { id: 'double', css: 'border-2 border-white/[0.08]' },
-  { id: 'dashed', css: 'border border-dashed border-white/[0.10]' },
-  { id: 'none', css: '' },
-  { id: 'gradient', css: 'border border-transparent' },
-  { id: 'thick', css: 'border-2 border-white/[0.06]' },
-];
-
-const ACCENT_PALETTES = [
-  { name: 'purple', from: '#8b5cf6', to: '#a78bfa', glow: 'rgba(139,92,246,0.3)' },
-  { name: 'blue', from: '#3b82f6', to: '#60a5fa', glow: 'rgba(59,130,246,0.3)' },
-  { name: 'cyan', from: '#06b6d4', to: '#22d3ee', glow: 'rgba(6,182,212,0.3)' },
-  { name: 'green', from: '#10b981', to: '#34d399', glow: 'rgba(16,185,129,0.3)' },
-  { name: 'yellow', from: '#f59e0b', to: '#fbbf24', glow: 'rgba(245,158,11,0.3)' },
-  { name: 'orange', from: '#f97316', to: '#fb923c', glow: 'rgba(249,115,22,0.3)' },
-  { name: 'red', from: '#ef4444', to: '#f87171', glow: 'rgba(239,68,68,0.3)' },
-  { name: 'pink', from: '#ec4899', to: '#f472b6', glow: 'rgba(236,72,153,0.3)' },
-  { name: 'rose', from: '#f43f5e', to: '#fb7185', glow: 'rgba(244,63,94,0.3)' },
-  { name: 'emerald', from: '#059669', to: '#10b981', glow: 'rgba(5,150,105,0.3)' },
-  { name: 'teal', from: '#14b8a6', to: '#2dd4bf', glow: 'rgba(20,184,166,0.3)' },
-  { name: 'indigo', from: '#6366f1', to: '#818cf8', glow: 'rgba(99,102,241,0.3)' },
-  { name: 'violet', from: '#7c3aed', to: '#a78bfa', glow: 'rgba(124,58,237,0.3)' },
-  { name: 'amber', from: '#d97706', to: '#fbbf24', glow: 'rgba(217,119,6,0.3)' },
-  { name: 'lime', from: '#84cc16', to: '#a3e635', glow: 'rgba(132,204,22,0.3)' },
-  { name: 'white', from: '#e5e5e5', to: '#ffffff', glow: 'rgba(255,255,255,0.15)' },
-  { name: 'silver', from: '#94a3b8', to: '#cbd5e1', glow: 'rgba(148,163,184,0.2)' },
-  { name: 'gold', from: '#ca8a04', to: '#facc15', glow: 'rgba(202,138,4,0.3)' },
-  { name: 'copper', from: '#c2410c', to: '#f97316', glow: 'rgba(194,65,12,0.3)' },
-  { name: 'neon-green', from: '#39ff14', to: '#00ff41', glow: 'rgba(57,255,20,0.3)' },
-  { name: 'neon-pink', from: '#ff006e', to: '#ff4da6', glow: 'rgba(255,0,110,0.3)' },
-  { name: 'neon-blue', from: '#00d4ff', to: '#0099ff', glow: 'rgba(0,212,255,0.3)' },
-  { name: 'plasma', from: '#bf5af2', to: '#da8fff', glow: 'rgba(191,90,242,0.3)' },
-  { name: 'spectrum', from: '#ff6b6b', to: '#4ecdc4', glow: 'rgba(255,107,107,0.2)' },
-];
-
-const HOVER_EFFECTS = [
-  'lift', 'glow', 'scale', 'tilt', 'border', 'shadow', 'brighten',
-  'shrink', 'rotate', 'blur-bg', 'slide', 'morph', 'pulse', 'shake',
-  'magnet', 'parallax', 'elastic', 'spring',
-];
-
-const ANIMATIONS = [
-  'none', 'fade-in', 'slide-up', 'slide-left', 'scale-in', 'blur-in',
-  'flip-in', 'rotate-in', 'bounce-in', 'elastic-in', 'stagger',
-  'draw-in', ' typewriter', 'wave', 'pulse', 'float',
-];
-
-const DECORATIONS = [
-  'none', 'dots', 'grid', 'lines', 'glow-spot', 'gradient-orb',
-  'noise', 'grain', 'scan-line', 'corner-accent', 'stripe',
-  'radial', 'conic', 'mesh', 'circuit', 'constellation',
-];
-
-const FONT_TREATMENTS = [
-  'default', 'mono', 'display', 'condensed', 'wide', 'thin',
-  'heavy', 'gradient-text', 'uppercase', 'tracking-wide',
-];
-
-const IMAGE_TREATMENTS = [
-  'cover', 'contain', 'mask-bottom', 'mask-circle', 'overlay-gradient',
-  'angled', 'blurred-bg', 'split', 'inset', 'glow-border',
-  'polaroid', 'film-strip', 'rounded-lg', 'diamond', 'hexagon',
-];
-
-function pick(arr, idx) {
-  return arr[idx % arr.length];
-}
-
-function generateStyle(index) {
-  const h = stableHash(String(index));
-  const variant = pick(VARIANTS, h % VARIANTS.length);
-  const bg = pick(BG_FAMILIES, (h >> 3) % BG_FAMILIES.length);
-  const border = pick(BORDER_FAMILIES, (h >> 6) % BORDER_FAMILIES.length);
-  const accent = pick(ACCENT_PALETTES, (h >> 9) % ACCENT_PALETTES.length);
-  const hover = pick(HOVER_EFFECTS, (h >> 12) % HOVER_EFFECTS.length);
-  const anim = pick(ANIMATIONS, (h >> 15) % ANIMATIONS.length);
-  const deco = pick(DECORATIONS, (h >> 18) % DECORATIONS.length);
-  const font = pick(FONT_TREATMENTS, (h >> 21) % FONT_TREATMENTS.length);
-  const img = pick(IMAGE_TREATMENTS, (h >> 24) % IMAGE_TREATMENTS.length);
-  const radius = [6, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32][(h >> 27) % 11];
-  const hasGradientBorder = (h >> 30) % 5 === 0;
-  const hasAnimatedBg = (h >> 31) % 7 === 0;
-  const hasGlow = (h >> 33) % 4 === 0;
-
-  const names = [
-    'Obsidian Minimal', 'Midnight Glass', 'Aurora Glass', 'Liquid Glass',
-    'Frosted Crystal', 'Black Chrome', 'Carbon Fiber', 'Graphite Studio',
-    'Dark Titanium', 'Platinum Minimal', 'Pure Monochrome', 'Soft Monochrome',
-    'Editorial Minimal', 'Swiss Grid', 'Neo Swiss', 'Bauhaus Modern',
-    'Brutalist Black', 'Soft Brutalism', 'Neo Brutalism', 'Luxury Editorial',
-    'Premium SaaS', 'Linear-inspired', 'Vercel-inspired', 'Apple-inspired',
-    'Vision Pro Glass', 'macOS Panel', 'iOS Dynamic Island', 'Material 3',
-    'Fluent Modern', 'Stripe-inspired', 'Notion-inspired', 'Raycast-inspired',
-    'Arc Browser-inspired', 'Superhuman-inspired', 'Framer-inspired', 'Webflow-inspired',
-    'Figma-inspired', 'GitHub Dark', 'GitLab Dark', 'Developer Console',
-    'Terminal Minimal', 'IDE Workspace', 'Code Editor', 'Command Palette',
-    'Documentation Portal', 'Technical Blueprint', 'Engineering Dashboard',
-    'Developer Workspace', 'Product Hunt Modern', 'Startup Landing',
-    'Neon Glass', 'Purple Glass', 'Aqua Glass', 'Emerald Glass',
-    'Rose Glass', 'Blue Frost', 'Arctic Glass', 'Ocean Glass',
-    'Sunset Glass', 'Twilight Glass', 'Aurora Borealis', 'Aurora Gradient',
-    'Northern Lights', 'Cosmic Gradient', 'Nebula Gradient', 'Solar Flare',
-    'Eclipse Glass', 'Moonlight Glass', 'Starlight Glass', 'Holographic Glass',
-    'Iridescent Glass', 'Prismatic Glass', 'Rainbow Refraction', 'Chrome Gradient',
-    'Metallic Gradient', 'Mesh Gradient', 'Animated Mesh', 'Radial Glow',
-    'Conic Glow', 'Ambient Glow', 'Soft Glow', 'Edge Glow',
-    'Neon Edge', 'Gradient Border', 'Animated Border', 'Rotating Border',
-    'Light Sweep', 'Spotlight Glass', 'Cursor Spotlight', 'Magnetic Glow',
-    'Liquid Gradient', 'Fluid Gradient', 'Morphing Gradient', 'Dreamy Gradient',
-    'Vaporwave Gradient', 'Pastel Gradient', 'Candy Gradient', 'Electric Gradient',
-    'Cyber Gradient', 'Hypercolor', '3D Tilt', '3D Perspective',
-    '3D Pop-Out', '3D Floating', '3D Depth Stack', '3D Layered',
-    '3D Hologram', '3D Holographic Foil', '3D Cube', '3D Prism',
-    '3D Sphere', '3D Orbital', '3D Card Flip', 'Horizontal Flip',
-    'Vertical Flip', 'Diagonal Flip', 'Book Fold', 'Page Turn',
-    'Card Peel', 'Iris Reveal', 'Magnetic Card', 'Magnetic Hover',
-    'Cursor Follow', 'Cursor Parallax', 'Mouse Parallax', 'Depth Parallax',
-    'Perspective Shift', 'Kinetic Card', 'Elastic Card', 'Spring Card',
-    'Physics Card', 'Floating Card', 'Levitation Card', 'Bounce Card',
-    'Elastic Grid', 'Expanding Card', 'Morphing Card', 'Shared Element',
-    'View Transition', 'Zoom Reveal', 'Scale Reveal', 'Blur Reveal',
-    'Blur-to-Sharp', 'Slide Reveal', 'Mask Reveal', 'Clip-Path Reveal',
-    'Circular Reveal', 'Diagonal Reveal', 'Radial Reveal', 'Shutter Reveal',
-    'Cyberpunk Neon', 'Cyber Grid', 'Cyber Terminal', 'Hacker Console',
-    'Matrix Rain', 'Digital Rain', 'CRT Terminal', 'Retro Terminal',
-    'DOS Terminal', 'ASCII Terminal', 'Green Phosphor', 'Amber Terminal',
-    'Blue Terminal', 'Synthwave', 'Retrowave', 'Vaporwave',
-    'Cyber Tokyo', 'Neon Tokyo', 'Cyber City', 'Digital City',
-    'Futuristic HUD', 'Sci-Fi HUD', 'Spaceship HUD', 'Mission Control',
-    'NASA Console', 'Satellite Control', 'Radar Interface', 'Sonar Interface',
-    'Tactical Interface', 'Military HUD', 'Quantum Interface', 'AI Neural Network',
-    'Neural Grid', 'Neural Glow', 'Machine Learning', 'Data Matrix',
-    'Digital Circuit', 'Circuit Board', 'CPU Architecture', 'Network Topology',
-    'Blockchain Grid', 'Crypto Terminal', 'Web3 Glass', 'DeFi Dashboard',
-    'Quantum Grid', 'Particle Field', 'Particle Network', 'Connected Nodes',
-    'Digital Orbit', 'AI Command Center', 'Liquid Morph', 'Organic Blob',
-    'Organic Shapes', 'Gooey UI', 'Fluid UI', 'Soft Clay',
-    'Claymorphism', 'Neumorphism', 'Soft Neumorphism', 'Dark Neumorphism',
-    'Retro Pixel', 'Pixel Art', '8-Bit Arcade', '16-Bit Arcade',
-    'Game UI', 'RPG Inventory', 'Trading Card', 'Collectible Card',
-    'Achievement Card', 'Quest Card', 'Arcade Neon', 'Game HUD',
-    'Cyber Game', 'Sci-Fi Game', 'Comic Book', 'Manga UI',
-    'Anime-inspired', 'Sketch UI', 'Hand Drawn', 'Paper UI',
-    'Notebook UI', 'Sticky Note', 'Newspaper', 'Magazine',
-    'Editorial Grid', 'Polaroid', 'Film Strip', 'Cinema UI',
-    'VHS Retro', 'Cassette Retro', 'Music Player', 'Vinyl Record',
-    'Spotify-inspired', 'Sound Wave', 'Equalizer', 'Audio Visualizer',
-    'Gradient Typography', 'Kinetic Typography', 'Experimental Typography', 'Art Gallery',
-    'Bento Grid', 'Asymmetric Bento', 'Masonry Grid', 'Editorial Cards',
-    'Magazine Cards', 'Portfolio Cards', 'Product Cards', 'Pricing Cards',
-    'Feature Cards', 'Service Cards', 'Integration Cards', 'API Cards',
-    'Tool Cards', 'Technology Cards', 'Framework Cards', 'Language Cards',
-    'Library Cards', 'GitHub Repository Cards', 'Documentation Cards', 'Code Snippet Cards',
-    'Terminal Command Cards', 'API Endpoint Cards', 'Database Cards', 'Server Status Cards',
-    'Monitoring Cards', 'Analytics Cards', 'KPI Cards', 'Statistic Cards',
-    'Progress Cards', 'Timeline Cards', 'Activity Cards', 'Notification Cards',
-    'Changelog Cards', 'Release Cards', 'User Profile Cards', 'Team Cards',
-    'Testimonial Cards', 'Review Cards', 'Bookmark Cards', 'Favorite Cards',
-    'Save-for-Later Cards', 'Expandable Cards', 'Swipe Cards', 'Stack Cards',
-    'Carousel Cards', 'Accordion Cards', 'Drag-and-Drop Cards', 'Sortable Cards',
-    'Infinite Canvas Cards', 'Experimental Fusion Cards',
-  ];
-
-  return {
-    id: index,
-    name: names[index % names.length],
-    variant,
-    bg,
-    border,
-    accent,
-    hover,
-    animation: anim,
-    decoration: deco,
-    fontTreatment: font,
-    imageTreatment: img,
-    radius,
-    hasGradientBorder,
-    hasAnimatedBg,
-    hasGlow,
-  };
-}
-
-const _cache = new Array(300);
-for (let i = 0; i < 300; i++) {
-  _cache[i] = generateStyle(i);
-}
-
-export const TOOL_STYLES = _cache;
 
 export function getStyleForTool(toolId) {
-  const idx = stableHash(String(toolId)) % 300;
-  return TOOL_STYLES[idx];
+  const index = stableHash(String(toolId)) % STYLE_COUNT;
+  return STYLE_DEFINITIONS[index] || STYLE_DEFINITIONS[0];
 }
 
 export function getStyleById(id) {
-  return TOOL_STYLES[id] || TOOL_STYLES[0];
+  return STYLE_DEFINITIONS.find(s => s.id === id) || STYLE_DEFINITIONS[0];
 }
 
-export const STYLE_CATEGORIES = [
-  { id: 'all', label: 'All Styles' },
-  { id: 'glass', label: 'Glass', filter: (s) => s.variant === 'glass' || s.variant === 'holographic' },
-  { id: 'minimal', label: 'Minimal', filter: (s) => s.variant === 'minimal' || s.variant === 'editorial' },
-  { id: 'neon', label: 'Neon / Cyber', filter: (s) => s.variant === 'neon' || s.variant === 'cyber' || s.variant === 'glitch' },
-  { id: '3d', label: '3D / Motion', filter: (s) => s.variant === 'perspective' || s.variant === 'floating' },
-  { id: 'dev', label: 'Developer', filter: (s) => s.variant === 'terminal' || s.variant === 'code' },
-  { id: 'creative', label: 'Creative', filter: (s) => s.variant === 'organic' || s.variant === 'abstract' || s.variant === 'retro' },
-  { id: 'premium', label: 'Premium', filter: (s) => s.variant === 'luxury' || s.variant === 'featured' },
-  { id: 'data', label: 'Data / Metrics', filter: (s) => s.variant === 'metric' || s.variant === 'scientific' },
-  { id: 'space', label: 'Cosmic / Space', filter: (s) => s.variant === 'cosmic' },
-];
+export function getAllStyles() {
+  return STYLE_DEFINITIONS;
+}
+
+export function getStylesByCategory(category) {
+  return STYLE_DEFINITIONS.filter(s => s.category === category);
+}
+
+export function getStyleCategories() {
+  const cats = new Set(STYLE_DEFINITIONS.map(s => s.category));
+  return Array.from(cats);
+}
+
+export { STYLE_COUNT };

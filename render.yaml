@@ -2,8 +2,8 @@ services:
   - type: web
     name: zandev
     runtime: python
-    buildCommand: export DJANGO_SETTINGS_MODULE=zda.settings && export DATABASE_URL="postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require" && export ORIGINKIT_API_KEY="cmp_live_qNqfwhTLBNdBtMjodqiIg57aBJEHVby5" && pip install -r requirements.txt && cd backend/zda && python manage.py migrate --noinput && python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin','admin@zandev.dev','admin123') if not User.objects.filter(username='admin').exists() else None" && python keep_alive.py && python manage.py seed_designs && python manage.py collectstatic --noinput
-    startCommand: cd backend/zda && export DJANGO_SETTINGS_MODULE=zda.settings && export DATABASE_URL="postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require" && export ORIGINKIT_API_KEY="cmp_live_qNqfwhTLBNdBtMjodqiIg57aBJEHVby5" && gunicorn zda.wsgi:application --bind 0.0.0.0:$PORT
+    buildCommand: export DJANGO_SETTINGS_MODULE=zda.settings && export DATABASE_URL="postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require" && pip install -r requirements.txt && cd backend/zda && python manage.py migrate --noinput && python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin','admin@zandev.dev','admin123') if not User.objects.filter(username='admin').exists() else None" && python keep_alive.py && python manage.py seed_designs && python manage.py collectstatic --noinput
+    startCommand: cd backend/zda && export DJANGO_SETTINGS_MODULE=zda.settings && export DATABASE_URL="postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require" && gunicorn zda.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.8"
@@ -15,8 +15,6 @@ services:
         value: "False"
       - key: DATABASE_URL
         value: "postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require"
-      - key: ORIGINKIT_API_KEY
-        value: "cmp_live_qNqfwhTLBNdBtMjodqiIg57aBJEHVby5"
       - key: ALLOWED_HOSTS
         value: "zandev.onrender.com"
       - key: CORS_ALLOWED_ORIGINS
