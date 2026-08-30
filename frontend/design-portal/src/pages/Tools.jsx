@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, SlidersHorizontal, X, Download, Copy, Check, ChevronDown, Grid3X3, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import { api } from '../lib/api';
 import { useFetch } from '../lib/useFetch';
@@ -22,6 +23,7 @@ const SORT_OPTIONS = [
 ];
 
 export default function Tools() {
+  const navigate = useNavigate();
   const [framework, setFramework] = useState('All');
   const [category, setCategory] = useState('All');
   const [price, setPrice] = useState('All');
@@ -277,6 +279,7 @@ export default function Tools() {
                   tool={tool}
                   style={style}
                   onExport={handleExport}
+                  onClick={() => navigate(`/tools/${tool.id}`)}
                   index={i}
                 />
               );

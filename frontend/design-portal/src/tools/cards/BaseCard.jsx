@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Download, Eye } from 'lucide-react';
 import { cn, formatNumber } from '../utils';
 
-function BaseCard({ tool, style, onExport, index }) {
+function BaseCard({ tool, style, onExport, onClick, index }) {
   const css = style.css || {};
   const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
   const [isHovered, setIsHovered] = useState(false);
@@ -47,8 +47,9 @@ function BaseCard({ tool, style, onExport, index }) {
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onClick={onClick}
         className={cn(
-          'relative overflow-hidden transition-shadow duration-300',
+          'relative overflow-hidden transition-shadow duration-300 cursor-pointer',
           css.compact && 'text-[10px]',
           css.wide && 'aspect-[16/7]',
           css.square && 'aspect-square',

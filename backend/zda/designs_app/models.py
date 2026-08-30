@@ -20,6 +20,9 @@ class Design(models.Model):
         ('url', 'URL'),
     ], default='url')
     code = models.TextField(blank=True, default='')
+    html_code = models.TextField(blank=True, default='')
+    css_code = models.TextField(blank=True, default='')
+    js_code = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

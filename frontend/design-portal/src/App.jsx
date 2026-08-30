@@ -6,6 +6,7 @@ import SignUp from './pages/SignUp'
 import FreeTrial from './pages/FreeTrial'
 import Demo from './pages/Demo'
 import Tools from './pages/Tools'
+import DesignDetail from './pages/DesignDetail'
 import About from './pages/About'
 import Careers from './pages/Careers'
 import Contact from './pages/Contact'
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/free-trial" element={<FreeTrial />} />
           <Route path="/demo" element={<Demo />} />
           <Route path="/tools" element={<Tools />} />
+          <Route path="/tools/:id" element={<DesignDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/contact" element={<Contact />} />

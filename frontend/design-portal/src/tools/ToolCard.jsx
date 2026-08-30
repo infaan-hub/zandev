@@ -15,6 +15,7 @@ import HoloCard from './cards/HoloCard';
 import GlassCard from './cards/GlassCard';
 import GradientCard from './cards/GradientCard';
 import BaseCard from './cards/BaseCard';
+import LiveCodeCard from './cards/LiveCodeCard';
 
 const CARD_MAP = {
   TiltCard,
@@ -146,9 +147,13 @@ const CARD_MAP = {
   FrostedCard: GlassCard,
 };
 
-function ToolCard({ tool, style, onExport, index }) {
+function ToolCard({ tool, style, onExport, onClick, index }) {
+  const hasCode = tool.has_code || tool.html_code || tool.css_code || tool.js_code;
+  if (hasCode) {
+    return <LiveCodeCard tool={tool} style={style} onExport={onExport} onClick={onClick} index={index} />;
+  }
   const Component = CARD_MAP[style.component] || BaseCard;
-  return <Component tool={tool} style={style} onExport={onExport} index={index} />;
+  return <Component tool={tool} style={style} onExport={onExport} onClick={onClick} index={index} />;
 }
 
 export default memo(ToolCard);

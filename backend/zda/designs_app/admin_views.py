@@ -271,6 +271,9 @@ def _design_to_dict(d):
         'preview': d.get_preview_url(),
         'file_type': d.file_type,
         'code': d.code,
+        'html_code': d.html_code,
+        'css_code': d.css_code,
+        'js_code': d.js_code,
         'created_at': d.created_at.isoformat(),
     }
 
@@ -297,6 +300,9 @@ class AdminDesignCreateView(APIView):
             description=request.data.get('description', ''),
             preview_image=request.data.get('preview_image', ''),
             code=request.data.get('code', ''),
+            html_code=request.data.get('html_code', ''),
+            css_code=request.data.get('css_code', ''),
+            js_code=request.data.get('js_code', ''),
         )
 
         uploaded = request.FILES.get('file')
@@ -326,6 +332,9 @@ class AdminDesignUpdateView(APIView):
         d.description = request.data.get('description', d.description)
         d.preview_image = request.data.get('preview_image', d.preview_image)
         d.code = request.data.get('code', d.code)
+        d.html_code = request.data.get('html_code', d.html_code)
+        d.css_code = request.data.get('css_code', d.css_code)
+        d.js_code = request.data.get('js_code', d.js_code)
 
         uploaded = request.FILES.get('file')
         if uploaded:

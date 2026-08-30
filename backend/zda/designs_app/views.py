@@ -69,6 +69,10 @@ class DesignListView(APIView):
                     'preview': d.get_preview_url(),
                     'file_type': d.file_type,
                     'description': d.description,
+                    'html_code': d.html_code,
+                    'css_code': d.css_code,
+                    'js_code': d.js_code,
+                    'has_code': bool(d.html_code or d.css_code or d.js_code or d.code),
                 })
 
             return Response({'count': len(results), 'results': results}, status=status.HTTP_200_OK)
@@ -94,6 +98,11 @@ class DesignDetailView(APIView):
             'preview': d.get_preview_url(),
             'file_type': d.file_type,
             'description': d.description,
+            'html_code': d.html_code,
+            'css_code': d.css_code,
+            'js_code': d.js_code,
+            'code': d.code,
+            'has_code': bool(d.html_code or d.css_code or d.js_code or d.code),
         }, status=status.HTTP_200_OK)
 
 
@@ -105,7 +114,11 @@ class DesignExportView(APIView):
             return Response({'error': 'design not found'}, status=status.HTTP_404_NOT_FOUND)
 
         code = d.code
-        if not code:
+        html = d.html_code
+        css = d.css_code
+        js = d.js_code
+
+        if not code and not html and not css and not js:
             code = f"""// {d.name} - {d.framework} Component
 
 import React from 'react';
@@ -121,7 +134,13 @@ export default function {d.name.replace(' ', '').replace('-', '')}() {{
 
         d.exports += 1
         d.save(update_fields=['exports'])
-        return Response({'code': code.strip(), 'design_id': d.id}, status=status.HTTP_200_OK)
+        return Response({
+            'code': code.strip() if code else '',
+            'html': html,
+            'css': css,
+            'js': js,
+            'design_id': d.id,
+        }, status=status.HTTP_200_OK)
 
 
 class StatsView(APIView):
