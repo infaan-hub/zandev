@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
+import LivePreview from '../tools/LivePreview'
 
 export default function Preview() {
   const [designs, setDesigns] = useState([])
@@ -64,11 +65,19 @@ export default function Preview() {
                 {designs.map((d) => (
                   <Link
                     key={d.id}
-                    to="/tools"
+                    to={`/tools/${d.id}`}
                     className="group relative rounded-[10px] overflow-hidden border border-white/[0.06] bg-white/[0.025] hover:border-white/[0.15] transition-all duration-200 cursor-pointer"
                   >
                     <div className="h-[90px] flex items-center justify-center overflow-hidden">
-                      {isVideo(d) ? (
+                      {d.has_code ? (
+                        <LivePreview
+                          html={d.html_code}
+                          css={d.css_code}
+                          js={d.js_code}
+                          className="w-full h-full"
+                          title={d.name}
+                        />
+                      ) : isVideo(d) ? (
                         <video
                           src={d.preview}
                           className="w-full h-full object-cover"
@@ -93,6 +102,9 @@ export default function Preview() {
                     <div className="p-[8px]">
                       <div className="text-[9px] font-semibold truncate">{d.name}</div>
                       <div className="flex items-center gap-[4px] mt-[3px]">
+                        {d.has_code && (
+                          <span className="text-[7px] font-semibold px-1.5 py-0.5 rounded bg-green-500/15 text-green-400">Live</span>
+                        )}
                         <span className="text-[7px] text-[#555]">{d.framework}</span>
                         <span className={`text-[7px] font-medium ${d.price === 'Free' ? 'text-[#4ade80]' : 'text-[#fbbf24]'}`}>
                           {d.price}

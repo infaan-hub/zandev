@@ -84,26 +84,37 @@ function TextInput({ label, value, onChange, placeholder }) {
 }
 
 function extractTextPlaceholders(html) {
-  const placeholders = [];
-  const regex = /data-zan-text="([^"]+)"/g;
+  const texts = [];
+  const seen = new Set();
+  const regex = /<(?:h[1-6]|p|span|a|button|label|li|td|th|div)[^>]*>([^<]+)</gi;
   let match;
   while ((match = regex.exec(html)) !== null) {
-    if (!placeholders.includes(match[1])) placeholders.push(match[1]);
+    const text = match[1].trim();
+    if (text && !seen.has(text) && text.length > 1 && text.length < 60) {
+      seen.add(text);
+      texts.push(text);
+    }
   }
-  return placeholders;
+  return texts;
 }
 
 function extractColorPlaceholders(html, css) {
   const colors = [];
-  const regex = /data-zan-color="([^"]+)"/g;
+  const seen = new Set();
+  const hexRegex = /#(?:[0-9a-fA-F]{3}){1,2}\b/g;
   let match;
-  while ((match = regex.exec(html)) !== null) {
-    if (!colors.includes(match[1])) colors.push(match[1]);
+  while ((match = hexRegex.exec(css)) !== null) {
+    const c = match[0].toLowerCase();
+    if (!seen.has(c)) { seen.add(c); colors.push(c); }
   }
-  const cssRegex = /var\(--zan-([^)]+)\)/g;
-  while ((match = cssRegex.exec(css)) !== null) {
-    const name = match[1];
-    if (!colors.includes(name)) colors.push(name);
+  const attrRegex = /data-[a-z-]+="(#[0-9a-fA-F]{3,8})"/gi;
+  while ((match = attrRegex.exec(html)) !== null) {
+    const c = match[1].toLowerCase();
+    if (!seen.has(c)) { seen.add(c); colors.push(c); }
+  }
+  const rgbRegex = /rgba?\([^)]+\)/gi;
+  while ((match = rgbRegex.exec(html)) !== null) {
+    if (!seen.has(match[0])) { seen.add(match[0]); colors.push(match[0]); }
   }
   return colors;
 }
@@ -114,39 +125,34 @@ function applyCustomizations(html, css, js, customizations) {
   let j = js;
 
   if (customizations.texts) {
-    Object.entries(customizations.texts).forEach(([key, val]) => {
-      if (val !== undefined && val !== '') {
-        h = h.replace(new RegExp(`data-zan-text="${key}"[^>]*>([^<]*)<`, 'g'),
-          `data-zan-text="${key}">${val}<`);
-        h = h.replace(new RegExp(`>${key}<`, 'g'), `>${val}<`);
+    Object.entries(customizations.texts).forEach(([orig, val]) => {
+      if (val && val !== orig) {
+        h = h.split(orig).join(val);
       }
     });
   }
 
   if (customizations.colors) {
-    Object.entries(customizations.colors).forEach(([key, val]) => {
-      if (val !== undefined && val !== '') {
-        const cssVarRegex = new RegExp(`--zan-${key}:\\s*[^;]+;`, 'g');
-        c = c.replace(cssVarRegex, `--zan-${key}: ${val};`);
-        h = h.replace(new RegExp(`data-zan-color="${key}"[^>]*style="[^"]*--zan-${key}:[^"]*"`, 'g'),
-          (m) => m.replace(new RegExp(`--zan-${key}:[^"]*`), `--zan-${key}:${val}`));
-        const hexRegex = new RegExp(`(data-zan-color="${key}"[^>]*style="[^"]*?)#[0-9a-fA-F]{3,8}([^"]*")`, 'g');
-        h = h.replace(hexRegex, `$1${val}$2`);
+    Object.entries(customizations.colors).forEach(([orig, val]) => {
+      if (val && val !== orig) {
+        const lc = orig.toLowerCase();
+        const vc = val.toLowerCase();
+        h = h.split(lc).join(vc);
+        h = h.split(orig).join(val);
+        c = c.split(lc).join(vc);
+        c = c.split(orig).join(val);
       }
     });
   }
 
   if (customizations.speed !== undefined && customizations.speed !== 1) {
-    const speedVal = customizations.speed;
-    c = c.replace(/animation-duration:\s*([\d.]+)s/g, (m, dur) => {
-      return `animation-duration: ${(parseFloat(dur) / speedVal).toFixed(2)}s`;
-    });
-    c = c.replace(/transition-duration:\s*([\d.]+)s/g, (m, dur) => {
-      return `transition-duration: ${(parseFloat(dur) / speedVal).toFixed(2)}s`;
-    });
-    j = j.replace(/speed\s*[*=]\s*([\d.]+)/g, (m, val) => {
-      return m.replace(val, (parseFloat(val) * speedVal).toFixed(2));
-    });
+    const mult = customizations.speed;
+    if (/animation-duration/i.test(c)) {
+      c = c.replace(/animation-duration:\s*([\d.]+)s/g, (_, dur) =>
+        `animation-duration: ${(parseFloat(dur) / mult).toFixed(2)}s`);
+    }
+    h = h.replace(/data-speed="([\d.]+)"/g, (_, val) =>
+      `data-speed="${(parseFloat(val) * mult).toFixed(1)}"`);
   }
 
   if (customizations.design) {
@@ -155,14 +161,6 @@ function applyCustomizations(html, css, js, customizations) {
         const varRegex = new RegExp(`--zan-${key}:\\s*[^;]+;`, 'g');
         if (varRegex.test(c)) {
           c = c.replace(varRegex, `--zan-${key}: ${val};`);
-        } else {
-          const selectorRegex = /(\.[a-zA-Z][\w-]*)\s*\{/g;
-          let lastSelector = '';
-          let m;
-          while ((m = selectorRegex.exec(c)) !== null) lastSelector = m[1];
-          if (lastSelector) {
-            c = c.replace(/(\.[a-zA-Z][\w-]*\s*\{[^}]*)\}/, `$1  --zan-${key}: ${val};\n}`);
-          }
         }
       }
     });
@@ -286,7 +284,7 @@ export default function DesignDetail() {
     if (version === 'original') {
       code = tab === 'html' ? origHtml : tab === 'css' ? origCss : origJs;
     } else {
-      code = tab === 'html' ? curHtml : tab === 'css' ? curCss : curJs;
+      code = tab === 'html' ? renderHtml : tab === 'css' ? renderCss : renderJs;
     }
     navigator.clipboard.writeText(code);
     setCopied(true);
@@ -295,9 +293,9 @@ export default function DesignDetail() {
 
   const handleCopyAll = (version) => {
     const parts = [];
-    const h = version === 'original' ? origHtml : curHtml;
-    const c = version === 'original' ? origCss : curCss;
-    const j = version === 'original' ? origJs : curJs;
+    const h = version === 'original' ? origHtml : renderHtml;
+    const c = version === 'original' ? origCss : renderCss;
+    const j = version === 'original' ? origJs : renderJs;
     if (h) parts.push(`<!-- HTML -->\n${h}`);
     if (c) parts.push(`/* CSS */\n${c}`);
     if (j) parts.push(`// JavaScript\n${j}`);
@@ -317,9 +315,16 @@ export default function DesignDetail() {
   };
 
   const handleDownload = (version) => {
-    const h = version === 'original' ? origHtml : curHtml;
-    const c = version === 'original' ? origCss : curCss;
-    const j = version === 'original' ? origJs : curJs;
+    let h, c, j;
+    if (version === 'original') {
+      h = origHtml;
+      c = origCss;
+      j = origJs;
+    } else {
+      h = renderHtml;
+      c = renderCss;
+      j = renderJs;
+    }
     const suffix = version === 'original' ? '' : '-edited';
     if (h) downloadFile(`index${suffix}.html`, h);
     if (c) downloadFile(`style${suffix}.css`, c);
@@ -337,9 +342,9 @@ export default function DesignDetail() {
       fd.append('price', design.price || 'Free');
       fd.append('score', design.score || 0);
       fd.append('description', `Remix of ${design.name}`);
-      fd.append('html_code', curHtml);
-      fd.append('css_code', curCss);
-      fd.append('js_code', curJs);
+      fd.append('html_code', renderHtml);
+      fd.append('css_code', renderCss);
+      fd.append('js_code', renderJs);
       await api.adminCreateDesign(fd);
       setShowRemixModal(false);
       setIsDirty(false);
