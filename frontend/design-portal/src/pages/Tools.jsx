@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import PageLayout from '../components/PageLayout'
 import { api } from '../lib/api'
 import { useFetch } from '../lib/useFetch'
@@ -7,22 +7,176 @@ import { Download, Copy, Check, ExternalLink } from 'lucide-react'
 const frameworks = ['All', 'React', 'Next.js', 'Vue', 'Astro', 'Svelte', 'React Native']
 const categories = ['All', 'Landing', 'Dashboard', 'E-Commerce', 'Portfolio', 'Blog', 'Admin', 'Mobile', 'Auth', 'Form']
 
-const OK_CATEGORY_ICONS = {
-  'interactive-elements': '✨',
-  'image-gallery': '🖼️',
-  'text': '🔤',
-  'animation': '🎬',
-  'background-animation': '🌊',
-  'button': '🔘',
+const OK_CATEGORY_COLORS = {
+  'interactive-elements': { from: '#8b5cf6', to: '#3b82f6' },
+  'image-gallery': { from: '#ec4899', to: '#f97316' },
+  'text': { from: '#06b6d4', to: '#22c55e' },
+  'animation': { from: '#f59e0b', to: '#eab308' },
+  'background-animation': { from: '#3b82f6', to: '#6366f1' },
+  'button': { from: '#ef4444', to: '#ec4899' },
 }
 
-const OK_CATEGORY_COLORS = {
+const OK_CATEGORY_GRADIENTS = {
   'interactive-elements': 'from-purple-500/30 to-blue-500/30 border-purple-500/40',
   'image-gallery': 'from-pink-500/30 to-orange-500/30 border-pink-500/40',
   'text': 'from-cyan-500/30 to-green-500/30 border-cyan-500/40',
   'animation': 'from-amber-500/30 to-yellow-500/30 border-amber-500/40',
   'background-animation': 'from-blue-500/30 to-indigo-500/30 border-blue-500/40',
   'button': 'from-red-500/30 to-pink-500/30 border-red-500/40',
+}
+
+function useAnimatedValue(speed = 0.02) {
+  const [t, setT] = useState(0)
+  const ref = useRef()
+  useEffect(() => {
+    let f = 0
+    const animate = () => { f += speed; setT(f); ref.current = requestAnimationFrame(animate) }
+    ref.current = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(ref.current)
+  }, [speed])
+  return t
+}
+
+function ParticleSVG({ colors }) {
+  const t = useAnimatedValue(0.02)
+  const particles = Array.from({ length: 20 }, (_, i) => {
+    const angle = (i / 20) * Math.PI * 2 + t
+    const r = 25 + Math.sin(t * 2 + i) * 15
+    const x = 50 + Math.cos(angle) * r
+    const y = 50 + Math.sin(angle) * r
+    const op = 0.3 + Math.sin(t * 3 + i) * 0.3
+    return <circle key={i} cx={x} cy={y} r={1.5 + Math.sin(t + i) * 0.8} fill={i % 2 === 0 ? colors.from : colors.to} opacity={op} />
+  })
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full">
+      <defs>
+        <radialGradient id={`pg-${colors.from.replace('#','')}`}><stop offset="0%" stopColor={colors.from} stopOpacity="0.15" /><stop offset="100%" stopColor={colors.to} stopOpacity="0" /></radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r="40" fill={`url(#pg-${colors.from.replace('#','')})`} />
+      {particles}
+    </svg>
+  )
+}
+
+function GallerySVG({ colors }) {
+  const t = useAnimatedValue(0.015)
+  const imgs = Array.from({ length: 6 }, (_, i) => {
+    const angle = (i / 6) * Math.PI * 2 + t * 0.5
+    const x = 50 + Math.cos(angle) * 28
+    const y = 50 + Math.sin(angle) * 20
+    const scale = 0.7 + Math.sin(t + i) * 0.15
+    const opacity = 0.5 + Math.sin(t * 2 + i) * 0.3
+    return <rect key={i} x={x - 6} y={y - 4} width={12} height={8} rx={1.5} fill={i % 2 === 0 ? colors.from : colors.to} opacity={opacity} transform={`scale(${scale})`} />
+  })
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full">
+      <defs>
+        <radialGradient id={`gg-${colors.from.replace('#','')}`}><stop offset="0%" stopColor={colors.from} stopOpacity="0.1" /><stop offset="100%" stopColor={colors.to} stopOpacity="0" /></radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r="40" fill={`url(#gg-${colors.from.replace('#','')})`} />
+      {imgs}
+    </svg>
+  )
+}
+
+function TextSVG({ colors }) {
+  const t = useAnimatedValue(0.03)
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full">
+      <defs>
+        <linearGradient id={`tg-${colors.from.replace('#','')}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor={colors.from} /><stop offset="100%" stopColor={colors.to} /></linearGradient>
+      </defs>
+      {'ABCD'.split('').map((l, i) => (
+        <text key={i} x={25 + Math.sin(t * 2 + i) * 8} y={30 + i * 15} fontSize="14" fontWeight="bold" fill={`url(#tg-${colors.from.replace('#','')})`} opacity={0.4 + Math.sin(t * 3 + i) * 0.4}>{l}</text>
+      ))}
+    </svg>
+  )
+}
+
+function AnimationSVG({ colors }) {
+  const t = useAnimatedValue(0.025)
+  const lines = Array.from({ length: 8 }, (_, i) => {
+    const progress = ((t * 0.5 + i * 0.3) % 1.2)
+    const w = progress * 60
+    const op = progress < 1 ? 0.6 : 0.6 * (1.2 - progress)
+    return <rect key={i} x={20} y={20 + i * 8} width={w} height={3} rx={1.5} fill={i % 2 === 0 ? colors.from : colors.to} opacity={op} />
+  })
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full">
+      <defs>
+        <radialGradient id={`ag-${colors.from.replace('#','')}`}><stop offset="0%" stopColor={colors.from} stopOpacity="0.08" /><stop offset="100%" stopColor={colors.to} stopOpacity="0" /></radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r="40" fill={`url(#ag-${colors.from.replace('#','')})`} />
+      {lines}
+    </svg>
+  )
+}
+
+function WaveSVG({ colors }) {
+  const t = useAnimatedValue(0.02)
+  const paths = Array.from({ length: 3 }, (_, i) => {
+    const y = 40 + i * 10
+    let d = `M 0 ${y}`
+    for (let x = 0; x <= 100; x += 2) {
+      d += ` L ${x} ${y + Math.sin((x * 0.05) + t + i) * 6}`
+    }
+    return <path key={i} d={d} fill="none" stroke={i === 0 ? colors.from : colors.to} strokeWidth={1.5} opacity={0.15 + i * 0.1} />
+  })
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full">
+      <defs>
+        <linearGradient id={`wg-${colors.from.replace('#','')}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor={colors.from} stopOpacity="0.06" /><stop offset="100%" stopColor={colors.to} stopOpacity="0.02" /></linearGradient>
+      </defs>
+      <rect x="0" y="0" width="100" height="100" fill={`url(#wg-${colors.from.replace('#','')})`} />
+      {paths}
+    </svg>
+  )
+}
+
+function ButtonSVG({ colors }) {
+  const t = useAnimatedValue(0.03)
+  const [hover, setHover] = useState(false)
+  const glow = hover ? 0.4 + Math.sin(t * 3) * 0.2 : 0.15
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full"
+      onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+      <defs>
+        <linearGradient id={`bg-${colors.from.replace('#','')}`} x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor={colors.from} /><stop offset="100%" stopColor={colors.to} /></linearGradient>
+        <filter id={`glow-${colors.from.replace('#','')}`}><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+      </defs>
+      <g transform={`translate(50,50) scale(${hover ? 1.05 : 1}) translate(-50,-50)`}>
+        <rect x="20" y="38" width="60" height="24" rx="8" fill={`url(#bg-${colors.from.replace('#','')})`} opacity={0.8 + glow * 0.5} filter={hover ? `url(#glow-${colors.from.replace('#','')})` : undefined} />
+        <text x="50" y="54" textAnchor="middle" fontSize="8" fontWeight="bold" fill="white" opacity="0.9">Click</text>
+      </g>
+    </svg>
+  )
+}
+
+const PREVIEW_MAP = {
+  'interactive-elements': ParticleSVG,
+  'image-gallery': GallerySVG,
+  'text': TextSVG,
+  'animation': AnimationSVG,
+  'background-animation': WaveSVG,
+  'button': ButtonSVG,
+}
+
+function OriginkitPreview({ category, colors }) {
+  const Comp = PREVIEW_MAP[category] || ParticleSVG
+  return (
+    <div className="w-full h-full relative overflow-hidden">
+      <Comp colors={colors} />
+    </div>
+  )
+}
+
+function OriginkitCard({ d }) {
+  const colors = OK_CATEGORY_COLORS[d.category] || OK_CATEGORY_COLORS['interactive-elements']
+  return (
+    <div className={`h-full rounded-[10px] overflow-hidden bg-gradient-to-br ${OK_CATEGORY_GRADIENTS[d.category] || OK_CATEGORY_GRADIENTS['interactive-elements']}`}>
+      <OriginkitPreview category={d.category} colors={colors} />
+    </div>
+  )
 }
 
 export default function Tools() {
@@ -59,7 +213,7 @@ export default function Tools() {
     try {
       if (isOriginkit) {
         const res = await api.getOriginkitDetail(id)
-        setExportedCode({ code: res.code || `// ${id} - Originkit Component\n// Source: https://originkit.dev`, design_id: name })
+        setExportedCode({ code: res.code || `// ${id} - Originkit Component\n// Source: https://originkit.dev`, design_id: id })
       } else {
         const res = await api.exportDesign(id)
         setExportedCode(res)
@@ -207,15 +361,7 @@ export default function Tools() {
                 {/* Card Preview */}
                 <div className="h-[200px] flex items-center justify-center overflow-hidden relative">
                   {isOK ? (
-                    <div className={`w-full h-full bg-gradient-to-br ${OK_CATEGORY_COLORS[d.category] || OK_CATEGORY_COLORS['interactive-elements']} border-b flex flex-col items-center justify-center gap-[10px] relative`}>
-                      <div className="absolute inset-0 opacity-20">
-                        <div className="absolute top-[15%] left-[15%] w-[60px] h-[60px] rounded-full bg-purple-500/20 blur-xl" />
-                        <div className="absolute bottom-[20%] right-[20%] w-[40px] h-[40px] rounded-full bg-blue-500/20 blur-xl" />
-                        <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[80px] h-[80px] rounded-full bg-cyan-500/10 blur-2xl" />
-                      </div>
-                      <span className="text-[36px] relative z-10">{OK_CATEGORY_ICONS[d.category] || '🧩'}</span>
-                      <span className="text-white/70 text-[11px] font-semibold relative z-10 tracking-wide">{d.displayName}</span>
-                    </div>
+                    <OriginkitCard d={d} />
                   ) : isVideo(d) ? (
                     <video
                       src={d.preview}
