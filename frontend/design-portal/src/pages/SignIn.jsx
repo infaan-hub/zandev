@@ -27,15 +27,36 @@ export default function SignIn() {
     setError('')
     setLoading(true)
     try {
-      const res = await login(username, password)
-      if (res.user.is_staff || res.user.is_superuser) {
+      // Try regular user login first
+      try {
+        const res = await login(username, password)
+        if (res.user.is_staff || res.user.is_superuser) {
+          localStorage.setItem('admin_auth', 'true')
+          navigate('/admin-dashboard')
+        } else {
+          navigate('/dashboard')
+        }
+        return
+      } catch (userErr) {
+        // Regular login failed, try admin login
+      }
+
+      // Try admin API login
+      const adminRes = await fetch('/api/admin-auth/login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      })
+      const adminData = await adminRes.json()
+
+      if (adminRes.ok && adminData.success) {
         localStorage.setItem('admin_auth', 'true')
-        navigate('/admin-dashboard')
+        navigate('/admin-dashboard', { replace: true })
       } else {
-        navigate('/dashboard')
+        setError('Invalid credentials')
       }
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Cannot reach server')
     } finally {
       setLoading(false)
     }

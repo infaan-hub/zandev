@@ -24,13 +24,13 @@ export default function AdminLayout() {
     const adminAuth = localStorage.getItem('admin_auth') === 'true'
     const isStaff = user && (user.is_staff || user.is_superuser)
     if (!adminAuth && !isStaff) {
-      navigate('/admin-login')
+      navigate('/signin')
     }
   }, [navigate, loading, user])
 
   const handleLogout = () => {
     localStorage.removeItem('admin_auth')
-    navigate('/admin-login')
+    navigate('/signin')
   }
 
   return (

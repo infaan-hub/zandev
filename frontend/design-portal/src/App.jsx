@@ -28,7 +28,6 @@ import DashboardDownloads from './dashboard/DashboardDownloads'
 import DashboardProjects from './dashboard/DashboardProjects'
 import DashboardAnalytics from './dashboard/DashboardAnalytics'
 import DashboardSettings from './dashboard/DashboardSettings'
-import AdminLogin from './admin/AdminLogin'
 import AdminLayout from './admin/AdminLayout'
 import AdminDashboard from './admin/AdminDashboard'
 import AdminLogs from './admin/AdminLogs'
@@ -81,7 +80,6 @@ export default function App() {
             <Route path="settings" element={<DashboardSettings />} />
           </Route>
 
-          <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin-dashboard" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="designs" element={<AdminDesigns />} />
