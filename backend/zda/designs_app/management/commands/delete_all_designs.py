@@ -27,11 +27,6 @@ class Command(BaseCommand):
                     os.remove(d.uploaded_file.path)
                 except OSError:
                     pass
-            if d.preview_image:
-                try:
-                    os.remove(d.preview_image.path)
-                except OSError:
-                    pass
 
         Design.objects.all().delete()
         self.stdout.write(self.style.SUCCESS(f'Successfully deleted {count} design(s).'))

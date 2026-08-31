@@ -40,7 +40,7 @@ export default function SignUp() {
               Create your <span className="text-[#858585]">account</span>
             </h1>
             <p className="text-[#666] text-[12px] leading-[1.7] mt-[14px] max-w-[300px] mx-auto">
-              Start browsing 2,400+ production-ready designs today.
+              Start browsing 2,400+ design components with full source code today.
             </p>
           </div>
 

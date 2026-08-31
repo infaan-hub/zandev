@@ -20,8 +20,7 @@ export default function Careers() {
           <span className="text-[#858585]">building the future.</span>
         </h1>
         <p className="text-[#747474] text-[13px] leading-[1.7] mt-[20px] max-w-[480px] mx-auto">
-          We&apos;re a small, focused team working on tools that
-          help developers ship faster. Remote-first, async-friendly.
+          We&apos;re a small, focused team building design-to-code tools for developers. Remote-first, async-friendly.
         </p>
       </div>
 
@@ -49,9 +48,9 @@ export default function Careers() {
                 <div className="text-[13px] font-semibold">{o.title}</div>
                 <div className="text-[#555] text-[10px] mt-[4px]">{o.team} · {o.location} · {o.type}</div>
               </div>
-              <div className="px-[16px] py-[8px] rounded-[8px] border border-white/[0.10] bg-white/[0.035] text-[10px] font-semibold text-white hover:bg-white/[0.08] transition-colors cursor-pointer whitespace-nowrap">
+              <a href={`mailto:careers@zandeveloper.vercel.app?subject=Application: ${o.title}`} className="px-[16px] py-[8px] rounded-[8px] border border-white/[0.10] bg-white/[0.035] text-[10px] font-semibold text-white hover:bg-white/[0.08] transition-colors cursor-pointer whitespace-nowrap inline-block">
                 Apply
-              </div>
+              </a>
             </div>
           ))}
         </div>

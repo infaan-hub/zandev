@@ -10,15 +10,15 @@ export default function Results() {
     <section className="relative" style={{ padding: '130px 0' }} id="results">
       <div className="w-full max-w-[1180px] mx-auto px-5">
         <div className="text-[#707070] text-[9px] font-semibold uppercase tracking-[0.15em] mb-[16px]">
-          Traction
+          Impact
         </div>
         <h2 className="text-[clamp(35px,5vw,64px)] leading-[0.98] tracking-[-0.06em] max-w-[700px]">
-          Trusted by developers<br />
-          <span className="text-[#626262]">worldwide.</span>
+          Developers ship faster<br />
+          <span className="text-[#626262]">with design-to-code.</span>
         </h2>
         <p className="mt-[20px] max-w-[470px] text-[#747474] text-[12px] leading-[1.7]">
           From solo founders to enterprise teams, developers use ZanDev
-          to ship production-ready UIs faster.
+          to convert designs into code faster and reduce frontend implementation time.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-[12px] mt-[50px]">

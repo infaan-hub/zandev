@@ -195,6 +195,7 @@ export default function DesignDetail() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [showRemixModal, setShowRemixModal] = useState(false);
   const [remixName, setRemixName] = useState('');
+  const [remixError, setRemixError] = useState('');
   const [previewError, setPreviewError] = useState(null);
   const leaveRef = useRef(false);
 
@@ -350,7 +351,7 @@ export default function DesignDetail() {
       setIsDirty(false);
       navigate('/tools');
     } catch (err) {
-      alert('Failed to save remix: ' + err.message);
+      setRemixError(err.message || 'Failed to save remix');
     }
   };
 
@@ -389,7 +390,7 @@ export default function DesignDetail() {
       <div className="max-w-[1600px] mx-auto">
         {/* Top Bar */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-4">
-          <button onClick={() => { if (isDirty && !confirm('Unsaved changes. Leave anyway?')) return; navigate('/tools'); }}
+          <button onClick={() => { if (isDirty && !window.confirm('Unsaved changes. Leave anyway?')) return; navigate('/tools'); }}
             className="flex items-center gap-2 text-[#666] hover:text-white text-[12px] transition-colors">
             <ArrowLeft size={14} /> Back to Tools
           </button>
@@ -407,7 +408,7 @@ export default function DesignDetail() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-medium bg-white text-black hover:-translate-y-0.5 transition-transform">
               <Download size={11} /> Download
             </button>
-            <button onClick={() => setShowRemixModal(true)}
+            <button onClick={() => { setRemixError(''); setShowRemixModal(true); }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-medium border border-white/[0.10] text-[#aaa] hover:bg-white/[0.05] transition-colors">
               <Save size={11} /> Save Remix
             </button>
@@ -700,6 +701,7 @@ export default function DesignDetail() {
                 <button onClick={() => setShowRemixModal(false)} className="text-[#666] hover:text-white"><X size={16} /></button>
               </div>
               <p className="text-[11px] text-[#666] mb-4">The original design remains unchanged. Your remix will be saved as a new design.</p>
+              {remixError && <p className="text-[11px] text-red-400 mb-4">{remixError}</p>}
               <input type="text" value={remixName} onChange={e => setRemixName(e.target.value)}
                 placeholder={`${design.name} — My Remix`}
                 className="w-full h-[40px] px-[14px] rounded-[8px] border border-white/[0.10] bg-white/[0.035] text-white text-[12px] placeholder-[#555] outline-none focus:border-white/[0.25] transition-colors mb-4" />

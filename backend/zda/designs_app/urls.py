@@ -19,6 +19,7 @@ urlpatterns = [
     path('webhooks/', views.WebhookListView.as_view(), name='webhook-list'),
     path('webhooks/<int:pk>/', views.WebhookDeleteView.as_view(), name='webhook-delete'),
     path('analytics/dashboard/', views.AnalyticsDashboardView.as_view(), name='analytics-dashboard'),
+    path('user-downloads/', views.UserDownloadsView.as_view(), name='user-downloads'),
 
     path('auth/register/', auth_views.RegisterView.as_view(), name='register'),
     path('auth/login/', auth_views.LoginView.as_view(), name='login'),

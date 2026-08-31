@@ -14,8 +14,7 @@ export default function Results() {
           <span className="text-[#858585]">real numbers.</span>
         </h1>
         <p className="text-[#747474] text-[13px] leading-[1.7] mt-[20px] max-w-[480px] mx-auto">
-          See how ZanDev helps developers and teams
-          ship faster and build better products.
+          See how ZanDev helps developers convert designs to code faster and reduce implementation time.
         </p>
       </div>
 

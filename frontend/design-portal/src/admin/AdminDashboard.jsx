@@ -48,7 +48,7 @@ export default function AdminDashboard() {
         </div>
         <div className="flex gap-[8px]">
           <a
-            href="http://localhost:8000/admin/"
+            href="/admin/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-[6px] px-[14px] py-[8px] rounded-[8px] border border-white/[0.10] bg-white/[0.035] text-[10px] font-semibold text-[#aaa] hover:bg-white/[0.08] transition-colors"

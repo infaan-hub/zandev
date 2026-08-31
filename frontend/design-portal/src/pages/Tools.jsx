@@ -1,6 +1,6 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, SlidersHorizontal, X, Download, Copy, Check, ChevronDown, Grid3X3, Sparkles } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Download, Copy, Check, ChevronDown, Grid3X3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import { api } from '../lib/api';
@@ -33,7 +33,7 @@ export default function Tools() {
   const [showFilters, setShowFilters] = useState(false);
   const [exportedCode, setExportedCode] = useState(null);
   const [copied, setCopied] = useState(false);
-  const searchRef = useRef(null);
+
 
   const debouncedSetSearch = useMemo(
     () => debounce((val) => setDebouncedSearch(val), 300),
@@ -88,7 +88,7 @@ export default function Tools() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-white/[0.09] rounded-full bg-white/[0.025] text-[#aaa] text-[10px] font-medium mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.6)]" />
-            {data?.count || 0}+ Production-Ready Designs
+            {data?.count || 0}+ Design Components
           </div>
         </motion.div>
         <motion.h1
@@ -97,8 +97,8 @@ export default function Tools() {
           transition={{ duration: 0.6, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="text-[clamp(32px,5vw,60px)] leading-[0.95] tracking-[-0.06em] font-bold mb-4"
         >
-          Browse. Copy.
-          <span className="text-[#555]"> Ship.</span>
+          Browse. Inspect.
+          <span className="text-[#555]"> Export.</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -106,7 +106,7 @@ export default function Tools() {
           transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="text-[#747474] text-[13px] leading-[1.7] max-w-[480px] mx-auto"
         >
-          Production-ready designs, inspect the source code, and paste components directly into your project.
+          Browse component designs, inspect source code, and export clean implementations. Filter by framework, category, and sort by score.
         </motion.p>
       </div>
 
@@ -122,7 +122,6 @@ export default function Tools() {
             <div className="relative flex-1">
               <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#555]" />
               <input
-                ref={searchRef}
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -131,7 +130,7 @@ export default function Tools() {
               />
               {search && (
                 <button
-                  onClick={() => { setSearch(''); searchRef.current?.focus(); }}
+                  onClick={() => setSearch('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555] hover:text-white transition-colors"
                 >
                   <X size={14} />

@@ -9,7 +9,7 @@ export default function Preview() {
   useEffect(() => {
     api.getDesigns({ sort: '-score' })
       .then((data) => setDesigns((data.results || []).slice(0, 10)))
-      .catch(() => {})
+      .catch(e => console.error('Failed to load designs:', e))
   }, [])
 
   const isVideo = (d) => d.file_type === 'video' || /\.(mp4|webm|ogg|mov)$/i.test(d.preview || '')
@@ -40,14 +40,14 @@ export default function Preview() {
 
             <div className="mt-[60px] max-w-[600px]">
               <div className="text-[#555] text-[8px] mb-[14px]">
-                DESIGN-TO-CODE MARKETPLACE
+                DESIGN-TO-CODE TOOL
               </div>
               <div className="text-[48px] leading-[0.95] tracking-[-0.06em] font-bold">
-                Browse. Copy.<span className="text-[#555]"> Ship.</span>
+                Browse. Inspect.<span className="text-[#555]"> Export.</span>
               </div>
               <p className="text-[#666] text-[10px] leading-[1.6] max-w-[370px] mt-[18px]">
-                Browse production-ready designs, inspect the source code,
-                and paste components directly into your project.
+                Every design comes with full source code. Browse the component,
+                inspect the implementation, and export clean code for your framework.
               </p>
               <div className="flex gap-[8px] mt-[22px]">
                 <Link to="/tools" className="inline-flex items-center justify-center min-h-[38px] px-[17px] rounded-[8px] text-[10px] font-semibold bg-white text-black border border-white/[0.1] hover:-translate-y-[2px] transition-transform duration-200">

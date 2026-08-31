@@ -12,18 +12,18 @@ export default function Hero() {
       <div className="relative z-[2] w-full max-w-[700px] mx-auto px-5 text-center">
         <div className="inline-flex items-center gap-[7px] px-[10px] py-[6px] border border-white/[0.09] rounded-full bg-white/[0.025] text-[#aaa] text-[9px] font-medium mb-[22px]">
           <span className="w-[5px] h-[5px] rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.7)]" />
-          Design-to-Code Marketplace
+          Design-to-Code Tool
         </div>
 
         <h1 className="text-[clamp(48px,7vw,88px)] leading-[0.92] tracking-[-0.075em] font-bold max-w-[780px] mx-auto">
-          Ship designs as<br />
-          <span className="text-[#858585]">production code.</span>
+          Turn designs into<br />
+          <span className="text-[#858585]">working code.</span>
         </h1>
 
         <p className="max-w-[480px] mx-auto mt-[25px] text-[#858585] text-[13px] leading-[1.7]">
-          Browse pixel-perfect designs, view the source code,
-          and paste production-ready components directly into
-          your project. Free and premium templates.
+          Browse component designs, inspect the source code,
+          and copy clean implementations into your project.
+          Supports React, Vue, Svelte, Astro, and more.
         </p>
 
         <div className="flex justify-center gap-[10px] mt-[28px]">

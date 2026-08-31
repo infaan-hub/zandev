@@ -4,13 +4,13 @@ export default function Footer() {
   return (
     <footer className="border-t border-white/[0.06] pt-[70px] pb-[30px]">
       <div className="w-full max-w-[1180px] mx-auto px-5">
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-[50px]">
+        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr] gap-[50px]">
           <div>
             <div className="text-[20px] font-bold tracking-[-0.05em]">ZanDev</div>
             <p className="max-w-[280px] mt-[12px] text-[#5d5d5d] text-[9px] leading-[1.7]">
-              The design-to-code marketplace for developers.
-              Browse production-ready designs, view source code,
-              and ship components instantly.
+              The design-to-code tool for developers.
+              Browse component designs, inspect source code,
+              and export clean implementations to any framework.
             </p>
           </div>
 
@@ -40,7 +40,7 @@ export default function Footer() {
 
         <div className="mt-[70px] pt-[20px] border-t border-white/[0.05] flex justify-between text-[#444] text-[8px]">
           <span>© 2026 ZanDev. All rights reserved.</span>
-          <span>Design-to-code marketplace.</span>
+          <span>          Design-to-code tool.</span>
         </div>
       </div>
     </footer>

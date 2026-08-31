@@ -21,7 +21,7 @@ export default function Blog() {
           Latest <span className="text-[#858585]">insights.</span>
         </h1>
         <p className="text-[#747474] text-[13px] leading-[1.7] mt-[20px] max-w-[400px] mx-auto">
-          News, tutorials, and updates from the ZanDev team.
+          Tutorials, release notes, and deep dives on design-to-code workflows from the ZanDev team.
         </p>
       </div>
 
@@ -31,7 +31,7 @@ export default function Blog() {
             <div className="text-[#555] text-[8px] mb-[12px]">{p.category} · {p.date}</div>
             <h3 className="text-[16px] tracking-[-0.03em] font-semibold leading-tight mb-[10px]">{p.title}</h3>
             <p className="text-[#666] text-[10px] leading-[1.7]">{p.excerpt}</p>
-            <div className="mt-[16px] text-[9px] text-[#888] font-medium">Read more →</div>
+            <div role="button" tabIndex={0} className="mt-[16px] text-[9px] text-[#888] font-medium cursor-pointer hover:text-white transition-colors">Read more →</div>
           </article>
         ))}
       </div>

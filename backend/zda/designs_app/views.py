@@ -8,7 +8,7 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import (Design, ActivityLog, Category, ContactMessage, Collection,
     CollectionDesign, DesignVersion, Review, DesignRemix, Webhook, WebhookDelivery,
-    AnalyticsEvent, AdminAuditLog)
+    AnalyticsEvent, AdminAuditLog, UserDownload)
 
 
 class StandardPagination(PageNumberPagination):
@@ -74,6 +74,8 @@ class DesignListView(APIView):
             order = valid_sorts.get(sort, '-score')
             qs = qs.order_by(order)
 
+            qs = qs.annotate(review_count=Count('reviews'), avg_rating=Avg('reviews__rating'))
+
             paginator = StandardPagination()
             page = paginator.paginate_queryset(qs, request)
 
@@ -95,13 +97,13 @@ class DesignListView(APIView):
                     'css_code': d.css_code,
                     'js_code': d.js_code,
                     'has_code': bool(d.html_code or d.css_code or d.js_code or d.code),
-                    'review_count': d.reviews.count(),
-                    'avg_rating': d.reviews.aggregate(avg=Avg('rating'))['avg'],
+                    'review_count': d.review_count,
+                    'avg_rating': d.avg_rating,
                 })
 
             return paginator.get_paginated_response(results)
         except Exception as e:
-            return Response({'error': str(e), 'results': [], 'count': 0}, status=status.HTTP_200_OK)
+            return Response({'error': str(e), 'results': [], 'count': 0}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class DesignDetailView(APIView):
@@ -221,7 +223,7 @@ class StatsView(APIView):
                 'categories': categories,
             })
         except Exception as e:
-            return Response({'error': str(e), 'total_designs': 0, 'total_views': 0, 'total_exports': 0})
+            return Response({'error': str(e), 'total_designs': 0, 'total_views': 0, 'total_exports': 0}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CategoryListView(APIView):
@@ -409,3 +411,21 @@ class AnalyticsDashboardView(APIView):
             'total_signups_30d': total_signups,
             'total_searches_30d': total_searches,
         })
+
+
+class UserDownloadsView(APIView):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+        downloads = UserDownload.objects.filter(user=request.user).select_related('design').order_by('-downloaded_at')
+        results = []
+        for d in downloads:
+            results.append({
+                'id': d.id,
+                'design_id': d.design.id if d.design else None,
+                'design_name': d.design.name if d.design else 'Unknown',
+                'framework': d.design.framework if d.design else '',
+                'downloaded_at': d.downloaded_at.isoformat(),
+                'download_type': d.download_type,
+            })
+        return Response({'results': results, 'count': len(results)})

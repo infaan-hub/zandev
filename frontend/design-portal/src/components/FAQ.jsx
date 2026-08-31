@@ -18,8 +18,8 @@ export default function FAQ() {
             FAQ
           </div>
           <h2 className="text-[clamp(35px,5vw,64px)] leading-[0.98] tracking-[-0.06em] max-w-[700px] mx-auto">
-            Your questions<br />
-            <span className="text-[#626262]">answered.</span>
+            Frequently asked<br />
+            <span className="text-[#626262]">questions.</span>
           </h2>
         </div>
 

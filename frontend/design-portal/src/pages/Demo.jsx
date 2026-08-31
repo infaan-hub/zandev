@@ -1,7 +1,20 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PageLayout from '../components/PageLayout'
+import LivePreview from '../tools/LivePreview'
+import { api } from '../lib/api'
 
 export default function Demo() {
+  const [designs, setDesigns] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.getDesigns({ sort: '-score', page_size: 6 })
+      .then(data => setDesigns((data.results || []).slice(0, 6)))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <PageLayout title="">
       <div className="text-center mb-[60px]">
@@ -14,12 +27,11 @@ export default function Demo() {
           <span className="text-[#858585]">in action.</span>
         </h1>
         <p className="text-[#747474] text-[13px] leading-[1.7] mt-[20px] max-w-[480px] mx-auto">
-          Browse designs, inspect source code, and copy components
-          directly into your project.
+          Browse live component designs, inspect the source code, and copy clean implementations.
+          Every preview runs real HTML, CSS, and JavaScript.
         </p>
       </div>
 
-      {/* Browser mockup */}
       <div className="w-full max-w-[920px] mx-auto bg-[#050505] border border-white/[0.10] rounded-[28px] p-[13px] shadow-[0_40px_100px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.04)]">
         <div className="h-[31px] flex items-center gap-[5px] px-[10px]">
           <span className="w-[5px] h-[5px] rounded-full bg-[#373737]" />
@@ -32,13 +44,37 @@ export default function Demo() {
               <strong className="text-white">ZanDev</strong>
               <span>Designs &nbsp;&nbsp; Code &nbsp;&nbsp; Export</span>
             </div>
-            <div className="grid grid-cols-3 gap-[10px]">
-              {[1,2,3,4,5,6].map((i) => (
-                <div key={i} className="h-[120px] rounded-[12px] bg-white/[0.035] border border-white/[0.06] flex items-center justify-center">
-                  <div className="text-[#555] text-[10px]">Design {i}</div>
-                </div>
-              ))}
-            </div>
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[10px]">
+                {[1,2,3,4,5,6].map(i => (
+                  <div key={i} className="h-[180px] rounded-[12px] bg-white/[0.035] border border-white/[0.06] animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[10px]">
+                {designs.map(d => (
+                  <Link key={d.id} to={`/tools/${d.id}`} className="group rounded-[12px] bg-white/[0.035] border border-white/[0.06] overflow-hidden hover:border-white/[0.15] transition-colors">
+                    <div className="h-[130px] overflow-hidden">
+                      {d.has_code ? (
+                        <LivePreview html={d.html_code} css={d.css_code} js={d.js_code} className="w-full h-full" title={d.name} />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[#444] text-[10px]">{d.name}</div>
+                      )}
+                    </div>
+                    <div className="p-[10px]">
+                      <div className="text-[10px] font-semibold truncate">{d.name}</div>
+                      <div className="flex items-center gap-[6px] mt-[4px]">
+                        <span className="text-[8px] text-[#555]">{d.framework}</span>
+                        <span className="text-[8px] text-[#555]">Score: {d.score}</span>
+                      </div>
+                      <div className="mt-[6px] text-[8px] text-[#888] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                        View Full Design →
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

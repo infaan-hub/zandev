@@ -67,7 +67,7 @@ export default function AdminLayout() {
 
         <div className="p-[12px] border-t border-white/[0.06] flex flex-col gap-[6px]">
           <a
-            href="http://localhost:8000/admin/"
+            href="/admin/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-[10px] px-[12px] py-[10px] rounded-[8px] text-[11px] font-medium text-[#666] hover:text-[#aaa] hover:bg-white/[0.03] transition-colors"

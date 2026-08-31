@@ -13,7 +13,7 @@ export default function Testimonials() {
         </div>
         <h2 className="text-[clamp(35px,5vw,64px)] leading-[0.98] tracking-[-0.06em] max-w-[700px]">
           What developers<br />
-          <span className="text-[#626262]">say about us.</span>
+          <span className="text-[#626262]">say about the tool.</span>
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[12px] mt-[50px]">

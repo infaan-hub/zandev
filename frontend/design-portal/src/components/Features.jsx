@@ -9,15 +9,15 @@ export default function Features() {
     <section className="relative" style={{ padding: '130px 0' }} id="features">
       <div className="w-full max-w-[1180px] mx-auto px-5">
         <div className="text-[#707070] text-[9px] font-semibold uppercase tracking-[0.15em] mb-[16px]">
-          Platform Features
+          Design-to-Code Features
         </div>
         <h2 className="text-[clamp(35px,5vw,64px)] leading-[0.98] tracking-[-0.06em] max-w-[700px]">
-          Design-to-code tools<br />
-          <span className="text-[#626262]">that deliver real results.</span>
+          Built for developers<br />
+          <span className="text-[#626262]">who think in components.</span>
         </h2>
         <p className="mt-[20px] max-w-[470px] text-[#747474] text-[12px] leading-[1.7]">
-          Browse designs, inspect production-ready source code,
-          and copy components directly into your project.
+          Every design component includes full source code.
+          Browse, inspect, and export clean implementations for your framework.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[12px] mt-[50px]">
@@ -28,10 +28,10 @@ export default function Features() {
               <span>↗</span>
             </div>
             <h3 className="mt-[30px] text-[25px] tracking-[-0.04em] leading-tight">
-              Browse pixel-perfect<br />designs.
+              Browse component designs.
             </h3>
             <p className="text-[#666] text-[10px] leading-[1.6] max-w-[260px] mt-[8px]">
-              Explore a curated library of production-ready designs. Filter by framework, style and component type.
+              Explore a curated library of UI components. Filter by framework, category, and popularity.
             </p>
             <div ref={designs.ref} className="absolute left-[22px] right-[22px] bottom-[22px] grid grid-cols-3 gap-[7px]">
               <div className="p-[13px] rounded-[10px] bg-white/[0.035] border border-white/[0.055]">
@@ -59,10 +59,10 @@ export default function Features() {
               <span>↗</span>
             </div>
             <h3 className="mt-[30px] text-[25px] tracking-[-0.04em] leading-tight">
-              See the source<br />code.
+              Inspect the source<br />code.
             </h3>
             <p className="text-[#666] text-[10px] leading-[1.6] max-w-[260px] mt-[8px]">
-              Inspect clean, production-ready code before you copy. Built with best practices and modern patterns.
+              Every design includes full HTML, CSS, and JavaScript. Inspect the implementation before you copy.
             </p>
             <div className="mt-[18px] rounded-[12px] bg-[#0a0a0a] border border-white/[0.05] p-[14px] font-mono text-[8px] leading-[1.6]">
               <div><span className="text-[#c678dd]">export</span> <span className="text-[#c678dd]">default</span> <span className="text-[#61afef]">function</span> <span className="text-[#e5c07b]">Card</span>() {'{'}</div>
@@ -78,10 +78,10 @@ export default function Features() {
               <span>↗</span>
             </div>
             <h3 className="mt-[30px] text-[25px] tracking-[-0.04em] leading-tight">
-              Paste into your<br />project.
+              Copy to your<br />project.
             </h3>
             <p className="text-[#666] text-[10px] leading-[1.6] max-w-[260px] mt-[8px]">
-              One click to copy. Drop components directly into your codebase. No vendor lock-in.
+              Copy any component's source code and paste it into your codebase. Framework-specific, no build step required.
             </p>
             <div className="absolute bottom-[25px] left-[25px] right-[25px] flex gap-[10px]">
               <div className="flex-1 h-[100px] rounded-[12px] bg-[#0a0a0a] border border-white/[0.05] flex items-center justify-center">
@@ -100,10 +100,10 @@ export default function Features() {
               <span>↗</span>
             </div>
             <h3 className="mt-[30px] text-[25px] tracking-[-0.04em] leading-tight">
-              Export ready<br />components.
+              Export clean<br />code.
             </h3>
             <p className="text-[#666] text-[10px] leading-[1.6] max-w-[260px] mt-[8px]">
-              Generate production-ready components optimized for your framework and coding style.
+              Download complete component source code with all assets. Clean, production-quality implementations.
             </p>
             <div className="absolute bottom-[28px] left-[25px] right-[25px] flex gap-[7px]">
               <span className="px-[10px] py-[6px] rounded-full border border-white/[0.09] bg-white/[0.025] text-[#aaa] text-[9px] font-medium">React</span>

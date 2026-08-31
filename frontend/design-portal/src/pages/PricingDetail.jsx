@@ -59,7 +59,7 @@ export default function PricingDetail() {
       </div>
 
       <div className="text-center mt-[30px]">
-        <Link to="/" className="text-[10px] text-[#555] hover:text-white transition-colors">← Back to pricing</Link>
+        <Link to="/pricing-page" className="text-[10px] text-[#555] hover:text-white transition-colors">← Back to pricing</Link>
       </div>
     </PageLayout>
   )

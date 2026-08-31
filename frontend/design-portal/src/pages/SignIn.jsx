@@ -75,7 +75,7 @@ export default function SignIn() {
               Sign in to <span className="text-[#858585]">ZanDev</span>
             </h1>
             <p className="text-[#666] text-[12px] leading-[1.7] mt-[14px] max-w-[300px] mx-auto">
-              Access your saved designs, code exports, and projects.
+              Access your saved designs, code exports, and collections.
             </p>
           </div>
 

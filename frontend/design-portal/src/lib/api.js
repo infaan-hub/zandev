@@ -34,6 +34,11 @@ export const api = {
   requestPasswordReset: (data) => fetchJSON('/auth/password-reset/', { method: 'POST', body: JSON.stringify(data) }),
   confirmPasswordReset: (data) => fetchJSON('/auth/password-reset/confirm/', { method: 'POST', body: JSON.stringify(data) }),
 
+  getUserDownloads: () => fetchJSON('/user-downloads/'),
+  addUserDownload: (designId) => fetchJSON('/user-downloads/', { method: 'POST', body: JSON.stringify({ design_id: designId }) }),
+  deleteUserDownload: (id) => fetchJSON(`/user-downloads/${id}/`, { method: 'DELETE' }),
+  toggleUserDownloadFavorite: (id) => fetchJSON(`/user-downloads/${id}/favorite/`, { method: 'PATCH' }),
+
   getDesigns: (params = {}) => {
     const query = new URLSearchParams(params).toString()
     return fetchJSON(`/designs/${query ? '?' + query : ''}`)
@@ -55,6 +60,7 @@ export const api = {
   createReview: (designId, data) => fetchJSON(`/designs/${designId}/reviews/`, { method: 'POST', body: JSON.stringify(data) }),
 
   getRemixes: () => fetchJSON('/remixes/'),
+  getUserDownloads: () => fetchJSON('/user-downloads/'),
 
   getWebhooks: () => fetchJSON('/webhooks/'),
   createWebhook: (data) => fetchJSON('/webhooks/', { method: 'POST', body: JSON.stringify(data) }),

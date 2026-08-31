@@ -24,12 +24,12 @@ export default function About() {
         </div>
         <h1 className="text-[clamp(36px,5vw,64px)] leading-[0.95] tracking-[-0.07em] font-bold max-w-[700px] mx-auto">
           We help developers<br />
-          <span className="text-[#858585]">ship UIs faster.</span>
+          <span className="text-[#858585]">go from design to code faster.</span>
         </h1>
         <p className="text-[#747474] text-[13px] leading-[1.7] mt-[20px] max-w-[480px] mx-auto">
-          ZanDev was founded to bridge the gap between design and code.
-          We build tools that let developers browse, inspect, and copy
-          production-ready components.
+          ZanDev bridges the gap between design and implementation.
+          We build tools that let developers browse component designs,
+          inspect source code, and copy clean, framework-specific implementations.
         </p>
       </div>
 

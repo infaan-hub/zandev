@@ -14,12 +14,12 @@ export default function Pricing() {
           Pricing
         </div>
         <h2 className="text-[clamp(35px,5vw,64px)] leading-[0.98] tracking-[-0.06em] max-w-[700px]">
-          Flexible pricing<br />
-          <span className="text-[#626262]">for every business.</span>
+          Plans for every<br />
+          <span className="text-[#626262]">workflow.</span>
         </h2>
         <p className="mt-[20px] max-w-[470px] text-[#747474] text-[12px] leading-[1.7]">
-          Start for free and upgrade when you need more
-          powerful features and capabilities.
+          Start free. Upgrade when you need more exports,
+          collections, and team features.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[12px] mt-[50px]">

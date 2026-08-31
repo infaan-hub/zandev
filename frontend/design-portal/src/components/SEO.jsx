@@ -2,13 +2,13 @@ import { useEffect } from 'react'
 
 export default function SEO({ title, description, url }) {
   useEffect(() => {
-    document.title = title ? `${title} | ZanDev` : 'ZanDev — Design-to-Code Marketplace'
+    document.title = title ? `${title} | ZanDev` : 'ZanDev — Design-to-Code Tool'
     const meta = document.querySelector('meta[name="description"]')
-    if (meta) meta.setAttribute('content', description || 'Browse production-ready designs, inspect source code, and export production-ready code.')
+    if (meta) meta.setAttribute('content', description || 'Transform UI designs into clean, copyable code. Browse components, inspect source, and export to any framework.')
     else {
       const m = document.createElement('meta')
       m.name = 'description'
-      m.content = description || 'Browse production-ready designs, inspect source code, and export production-ready code.'
+      m.content = description || 'Transform UI designs into clean, copyable code. Browse components, inspect source, and export to any framework.'
       document.head.appendChild(m)
     }
     const og = document.querySelector('meta[property="og:title"]') || document.createElement('meta')
@@ -17,7 +17,7 @@ export default function SEO({ title, description, url }) {
     if (!og.parentElement) document.head.appendChild(og)
     const ogDesc = document.querySelector('meta[property="og:description"]') || document.createElement('meta')
     ogDesc.setAttribute('property', 'og:description')
-    ogDesc.setAttribute('content', description || 'Design-to-Code Marketplace')
+    ogDesc.setAttribute('content', description || 'Design-to-Code Tool')
     if (!ogDesc.parentElement) document.head.appendChild(ogDesc)
     if (url) {
       const ogUrl = document.querySelector('meta[property="og:url"]') || document.createElement('meta')
