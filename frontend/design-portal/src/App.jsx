@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './lib/AuthContext'
+import { ThemeProvider } from './lib/ThemeContext'
+import ErrorBoundary from './components/ErrorBoundary'
 import Home from './pages/Home'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -7,6 +9,7 @@ import FreeTrial from './pages/FreeTrial'
 import Demo from './pages/Demo'
 import Tools from './pages/Tools'
 import DesignDetail from './pages/DesignDetail'
+import DesignCompare from './pages/DesignCompare'
 import About from './pages/About'
 import Careers from './pages/Careers'
 import Contact from './pages/Contact'
@@ -46,51 +49,56 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/free-trial" element={<FreeTrial />} />
-          <Route path="/demo" element={<Demo />} />
-          <Route path="/tools" element={<Tools />} />
-          <Route path="/tools/:id" element={<DesignDetail />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/careers" element={<Careers />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/security" element={<Security />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/rankings" element={<Rankings />} />
-          <Route path="/pricing/:plan" element={<PricingDetail />} />
-          <Route path="/results" element={<Results />} />
-          <Route path="/features" element={<FeaturesPage />} />
-          <Route path="/results-stats" element={<ResultsPage />} />
-          <Route path="/pricing-page" element={<PricingPage />} />
-          <Route path="/faq" element={<FaqPage />} />
+    <ThemeProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/free-trial" element={<FreeTrial />} />
+              <Route path="/demo" element={<Demo />} />
+              <Route path="/tools" element={<Tools />} />
+              <Route path="/tools/:id" element={<DesignDetail />} />
+              <Route path="/compare" element={<DesignCompare />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/security" element={<Security />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/rankings" element={<Rankings />} />
+              <Route path="/pricing/:plan" element={<PricingDetail />} />
+              <Route path="/results" element={<Results />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/results-stats" element={<ResultsPage />} />
+              <Route path="/pricing-page" element={<PricingPage />} />
+              <Route path="/faq" element={<FaqPage />} />
 
-          <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-            <Route index element={<DashboardOverview />} />
-            <Route path="downloads" element={<DashboardDownloads />} />
-            <Route path="projects" element={<DashboardProjects />} />
-            <Route path="analytics" element={<DashboardAnalytics />} />
-            <Route path="settings" element={<DashboardSettings />} />
-          </Route>
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                <Route index element={<DashboardOverview />} />
+                <Route path="downloads" element={<DashboardDownloads />} />
+                <Route path="projects" element={<DashboardProjects />} />
+                <Route path="analytics" element={<DashboardAnalytics />} />
+                <Route path="settings" element={<DashboardSettings />} />
+              </Route>
 
-          <Route path="/admin-dashboard" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="designs" element={<AdminDesigns />} />
-            <Route path="logs" element={<AdminLogs />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="security" element={<AdminSecurity />} />
-            <Route path="threats" element={<AdminThreats />} />
-            <Route path="blocked-ips" element={<AdminBlockedIPs />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+              <Route path="/admin-dashboard" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="designs" element={<AdminDesigns />} />
+                <Route path="logs" element={<AdminLogs />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="security" element={<AdminSecurity />} />
+                <Route path="threats" element={<AdminThreats />} />
+                <Route path="blocked-ips" element={<AdminBlockedIPs />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </ErrorBoundary>
+    </ThemeProvider>
   )
 }

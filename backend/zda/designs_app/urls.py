@@ -1,4 +1,4 @@
-from django.urls import path
+﻿from django.urls import path
 from . import views
 from . import auth_views
 from . import admin_views
@@ -6,17 +6,33 @@ from . import admin_views
 urlpatterns = [
     path('health/', views.HealthView.as_view(), name='health'),
     path('designs/', views.DesignListView.as_view(), name='design-list'),
+    path('designs/compare/', views.CompareDesignsView.as_view(), name='design-compare'),
     path('designs/<int:pk>/', views.DesignDetailView.as_view(), name='design-detail'),
     path('designs/<int:pk>/export/', views.DesignExportView.as_view(), name='design-export'),
     path('stats/', views.StatsView.as_view(), name='stats'),
+    path('categories/', views.CategoryListView.as_view(), name='category-list'),
+    path('contact/', views.ContactMessageView.as_view(), name='contact'),
+    path('collections/', views.CollectionListView.as_view(), name='collection-list'),
+    path('collections/<int:pk>/', views.CollectionDetailView.as_view(), name='collection-detail'),
+    path('designs/<int:design_id>/reviews/', views.ReviewListView.as_view(), name='review-list'),
+    path('remixes/', views.RemixListView.as_view(), name='remix-list'),
+    path('webhooks/', views.WebhookListView.as_view(), name='webhook-list'),
+    path('webhooks/<int:pk>/', views.WebhookDeleteView.as_view(), name='webhook-delete'),
+    path('analytics/dashboard/', views.AnalyticsDashboardView.as_view(), name='analytics-dashboard'),
+
     path('auth/register/', auth_views.RegisterView.as_view(), name='register'),
     path('auth/login/', auth_views.LoginView.as_view(), name='login'),
     path('auth/user/', auth_views.UserView.as_view(), name='user'),
+    path('auth/user/update/', auth_views.UserUpdateView.as_view(), name='user-update'),
+    path('auth/password-reset/', auth_views.PasswordResetRequestView.as_view(), name='password-reset'),
+    path('auth/password-reset/confirm/', auth_views.PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
 
     path('admin-auth/login/', admin_views.AdminLoginView.as_view(), name='admin-login'),
     path('admin-auth/stats/', admin_views.AdminStatsView.as_view(), name='admin-stats'),
     path('admin-auth/logs/', admin_views.AdminLogsView.as_view(), name='admin-logs'),
+    path('admin-auth/audit-logs/', admin_views.AdminAuditLogsView.as_view(), name='admin-audit-logs'),
     path('admin-auth/users/', admin_views.AdminUsersView.as_view(), name='admin-users'),
+    path('admin-auth/users/<int:user_id>/update/', admin_views.AdminUserUpdateView.as_view(), name='admin-user-update'),
     path('admin-auth/users/<int:user_id>/block/', admin_views.AdminUserBlockView.as_view(), name='admin-user-block'),
     path('admin-auth/users/<int:user_id>/unblock/', admin_views.AdminUserUnblockView.as_view(), name='admin-user-unblock'),
     path('admin-auth/users/<int:user_id>/delete/', admin_views.AdminUserDeleteView.as_view(), name='admin-user-delete'),
@@ -26,9 +42,11 @@ urlpatterns = [
     path('admin-auth/threats/resolve/', admin_views.AdminThreatsResolveView.as_view(), name='admin-threats-resolve'),
     path('admin-auth/blocked-ips/', admin_views.AdminBlockedIPsView.as_view(), name='admin-blocked-ips'),
     path('admin-auth/blocked-ips/<int:ip_id>/', admin_views.AdminBlockedIPDeleteView.as_view(), name='admin-blocked-ip-delete'),
-
     path('admin-auth/designs/', admin_views.AdminDesignListView.as_view(), name='admin-design-list'),
     path('admin-auth/designs/create/', admin_views.AdminDesignCreateView.as_view(), name='admin-design-create'),
+    path('admin-auth/designs/bulk/', admin_views.AdminBulkDesignsView.as_view(), name='admin-designs-bulk'),
     path('admin-auth/designs/<int:pk>/update/', admin_views.AdminDesignUpdateView.as_view(), name='admin-design-update'),
     path('admin-auth/designs/<int:pk>/delete/', admin_views.AdminDesignDeleteView.as_view(), name='admin-design-delete'),
+    path('admin-auth/designs/<int:pk>/versions/', admin_views.AdminDesignVersionsView.as_view(), name='admin-design-versions'),
+    path('admin-auth/contact-messages/', admin_views.AdminContactMessagesView.as_view(), name='admin-contact-messages'),
 ]

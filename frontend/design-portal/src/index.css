@@ -121,3 +121,9 @@ button {
 @media (max-width: 600px) {
   .star { opacity: 0.35; }
 }
+
+html.light body { background: #f5f5f5; color: #111; }
+html.light .bg-\[\#080808\] { background: #fff; }
+html.light .bg-\[\#0a0a0a\] { background: #fafafa; }
+html.light .text-white { color: #111; }
+html.light .border-white\/\[0\.06\] { border-color: rgba(0,0,0,0.1); }
