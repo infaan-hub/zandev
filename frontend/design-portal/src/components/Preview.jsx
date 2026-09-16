@@ -9,7 +9,9 @@ function DesignCard({ design }) {
   const isVideo = d.file_type === 'video' || /\.(mp4|webm|ogg|mov)$/i.test(d.preview || '')
   const isImage = d.file_type === 'image' || (d.preview && d.preview.startsWith('http') && !isVideo)
 
-  const galleryImages = [d.preview_image, d.gallery_image_1, d.gallery_image_2, d.gallery_image_3, d.gallery_image_4, d.gallery_image_5].filter(Boolean)
+  const galleryImages = (d.gallery_images && d.gallery_images.length > 0)
+    ? d.gallery_images
+    : [d.preview_image, d.gallery_image_1, d.gallery_image_2, d.gallery_image_3, d.gallery_image_4, d.gallery_image_5].filter(Boolean)
 
   return (
     <Link to={`/tools/${d.id}`}

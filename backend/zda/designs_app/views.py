@@ -91,6 +91,12 @@ class DesignListView(APIView):
 
             results = []
             for d in page:
+                gallery = [_abs_url(img) for img in (d.gallery_images or []) if img]
+                if not gallery:
+                    gallery = [_abs_url(d.gallery_image_1), _abs_url(d.gallery_image_2),
+                               _abs_url(d.gallery_image_3), _abs_url(d.gallery_image_4),
+                               _abs_url(d.gallery_image_5)]
+                    gallery = [img for img in gallery if img]
                 results.append({
                     'id': d.id,
                     'name': d.name,
@@ -102,6 +108,12 @@ class DesignListView(APIView):
                     'exports': d.exports,
                     'preview': _abs_url(d.get_preview_url()),
                     'preview_image': _abs_url(d.preview_image) or _abs_url(d.get_preview_url()),
+                    'gallery_images': gallery,
+                    'gallery_image_1': _abs_url(d.gallery_image_1),
+                    'gallery_image_2': _abs_url(d.gallery_image_2),
+                    'gallery_image_3': _abs_url(d.gallery_image_3),
+                    'gallery_image_4': _abs_url(d.gallery_image_4),
+                    'gallery_image_5': _abs_url(d.gallery_image_5),
                     'file_type': d.file_type,
                     'description': d.description,
                     'html_code': d.html_code,
@@ -127,6 +139,12 @@ class DesignDetailView(APIView):
             return Response({'error': 'design not found'}, status=status.HTTP_404_NOT_FOUND)
 
         reviews = d.reviews.select_related('user').all()[:10]
+        gallery = [_abs_url(img) for img in (d.gallery_images or []) if img]
+        if not gallery:
+            gallery = [_abs_url(d.gallery_image_1), _abs_url(d.gallery_image_2),
+                       _abs_url(d.gallery_image_3), _abs_url(d.gallery_image_4),
+                       _abs_url(d.gallery_image_5)]
+            gallery = [img for img in gallery if img]
         return Response({
             'id': d.id,
             'name': d.name,
@@ -138,14 +156,15 @@ class DesignDetailView(APIView):
             'exports': d.exports,
             'preview': _abs_url(d.get_preview_url()),
             'preview_image': _abs_url(d.preview_image) or _abs_url(d.get_preview_url()),
-            'file_type': d.file_type,
-            'description': d.description,
-            'prompt': d.prompt,
+            'gallery_images': gallery,
             'gallery_image_1': _abs_url(d.gallery_image_1),
             'gallery_image_2': _abs_url(d.gallery_image_2),
             'gallery_image_3': _abs_url(d.gallery_image_3),
             'gallery_image_4': _abs_url(d.gallery_image_4),
             'gallery_image_5': _abs_url(d.gallery_image_5),
+            'file_type': d.file_type,
+            'description': d.description,
+            'prompt': d.prompt,
             'html_code': d.html_code,
             'css_code': d.css_code,
             'js_code': d.js_code,
@@ -158,6 +177,20 @@ class DesignDetailView(APIView):
             'has_code': bool(d.html_code or d.css_code or d.js_code or d.react_code or d.vue_code or d.svelte_code or d.astro_code or d.next_code or d.code),
             'version': d.version,
             'published': d.published,
+            'style': d.style,
+            'industry': d.industry,
+            'tags': d.tags,
+            'colors': d.colors,
+            'typography': d.typography,
+            'animations': d.animations,
+            'layout_type': d.layout_type,
+            'responsive': d.responsive,
+            'accessibility': d.accessibility,
+            'browser_support': d.browser_support,
+            'license': d.license,
+            'difficulty': d.difficulty,
+            'creator': d.creator,
+            'pricing': d.pricing,
             'review_count': d.reviews.count(),
             'avg_rating': d.reviews.aggregate(avg=Avg('rating'))['avg'],
             'reviews': [{

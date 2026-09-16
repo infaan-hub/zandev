@@ -358,12 +358,19 @@ def _abs_url(path):
 
 
 def _design_to_dict(d):
+    gallery = [_abs_url(img) for img in (d.gallery_images or []) if img]
+    if not gallery:
+        gallery = [_abs_url(d.gallery_image_1), _abs_url(d.gallery_image_2),
+                   _abs_url(d.gallery_image_3), _abs_url(d.gallery_image_4),
+                   _abs_url(d.gallery_image_5)]
+        gallery = [img for img in gallery if img]
     return {
         'id': d.id, 'name': d.name, 'category': d.category,
         'framework': d.framework, 'price': d.price, 'score': d.score,
         'views': d.views, 'exports': d.exports,
         'description': d.description, 'prompt': d.prompt,
         'preview_image': _abs_url(d.preview_image) or _abs_url(d.get_preview_url()), 'preview': _abs_url(d.get_preview_url()),
+        'gallery_images': gallery,
         'gallery_image_1': _abs_url(d.gallery_image_1), 'gallery_image_2': _abs_url(d.gallery_image_2),
         'gallery_image_3': _abs_url(d.gallery_image_3), 'gallery_image_4': _abs_url(d.gallery_image_4),
         'gallery_image_5': _abs_url(d.gallery_image_5),
@@ -373,6 +380,12 @@ def _design_to_dict(d):
         'svelte_code': d.svelte_code, 'astro_code': d.astro_code,
         'next_code': d.next_code,
         'version': d.version, 'published': d.published,
+        'style': d.style, 'industry': d.industry, 'tags': d.tags,
+        'colors': d.colors, 'typography': d.typography,
+        'animations': d.animations, 'layout_type': d.layout_type,
+        'responsive': d.responsive, 'accessibility': d.accessibility,
+        'browser_support': d.browser_support, 'license': d.license,
+        'difficulty': d.difficulty, 'creator': d.creator, 'pricing': d.pricing,
         'created_at': d.created_at.isoformat(), 'updated_at': d.updated_at.isoformat(),
     }
 

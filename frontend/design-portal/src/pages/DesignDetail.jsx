@@ -86,14 +86,16 @@ function DesignDetail() {
   const codeFields = getCodeFields();
   const hasCode = codeFields.length > 0;
 
-  const galleryImages = [
-    design?.preview_image,
-    design?.gallery_image_1,
-    design?.gallery_image_2,
-    design?.gallery_image_3,
-    design?.gallery_image_4,
-    design?.gallery_image_5,
-  ].filter(Boolean);
+  const galleryImages = (design?.gallery_images && design.gallery_images.length > 0)
+    ? design.gallery_images
+    : [
+        design?.preview_image,
+        design?.gallery_image_1,
+        design?.gallery_image_2,
+        design?.gallery_image_3,
+        design?.gallery_image_4,
+        design?.gallery_image_5,
+      ].filter(Boolean);
 
   const handleCopy = useCallback((field) => {
     if (!user) { setShowLoginModal(true); return; }
