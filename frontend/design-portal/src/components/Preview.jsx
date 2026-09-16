@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, memo } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
-import LivePreview from '../tools/LivePreview'
 import { useDesignWebSocket } from '../hooks/useDesignWebSocket'
 
 function DesignCard({ design }) {
@@ -9,7 +8,6 @@ function DesignCard({ design }) {
   const d = design
   const isVideo = d.file_type === 'video' || /\.(mp4|webm|ogg|mov)$/i.test(d.preview || '')
   const isImage = d.file_type === 'image' || (d.preview && d.preview.startsWith('http') && !isVideo)
-  const hasCode = d.has_code
 
   const galleryImages = [d.preview_image, d.gallery_image_1, d.gallery_image_2, d.gallery_image_3, d.gallery_image_4, d.gallery_image_5].filter(Boolean)
 
@@ -18,15 +16,8 @@ function DesignCard({ design }) {
       className="group relative rounded-2xl overflow-hidden border border-white/[0.08] bg-[#080808] hover:border-white/[0.15] hover:shadow-[0_8px_40px_rgba(0,0,0,0.5)] transition-all duration-300">
       {/* Preview Area */}
       <div className="h-[220px] flex items-center justify-center overflow-hidden bg-[#050505] relative">
-        {hasCode ? (
-          <LivePreview
-            html={d.html_code}
-            css={d.css_code}
-            js={d.js_code}
-            reactCode={d.react_code}
-            className="w-full h-full"
-            title={`card-${d.id}`}
-          />
+        {d.preview_image ? (
+          <img src={d.preview_image} alt={d.name} className="w-full h-full object-cover" onError={e => e.target.style.display='none'} />
         ) : isVideo ? (
           <video src={d.preview} className="w-full h-full object-cover" muted loop playsInline preload="metadata"
             onMouseEnter={e => e.target.play()} onMouseLeave={e => { e.target.pause(); e.target.currentTime = 0 }} />
@@ -48,9 +39,6 @@ function DesignCard({ design }) {
           <div className="text-[10px] text-[#666] truncate mb-2">{d.description}</div>
         )}
         <div className="flex items-center gap-2 flex-wrap">
-          {hasCode && (
-            <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded bg-green-500/15 text-green-400">LIVE</span>
-          )}
           <span className="text-[9px] text-[#888]">{d.framework}</span>
           <span className="text-[9px] text-[#555]">|</span>
           <span className="text-[9px] text-[#666]">{d.category}</span>

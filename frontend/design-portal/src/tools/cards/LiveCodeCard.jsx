@@ -2,23 +2,12 @@ import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Download, Eye, Copy, Check } from 'lucide-react';
 import { cn, formatNumber } from '../utils';
-import LivePreview from '../LivePreview';
 
 function LiveCodeCard({ tool, style, onExport, onClick, index }) {
   const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
   const [isHovered, setIsHovered] = useState(false);
   const [copied, setCopied] = useState(false);
   const cardRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-    if (cardRef.current) observer.observe(cardRef.current);
-    return () => observer.disconnect();
-  }, []);
 
   const handleMouseMove = useCallback((e) => {
     if (!cardRef.current) return;
@@ -61,23 +50,9 @@ function LiveCodeCard({ tool, style, onExport, onClick, index }) {
         className="relative overflow-hidden rounded-[18px] border border-white/[0.06] bg-[#080808] transition-all duration-300 hover:border-white/[0.12] cursor-pointer"
         style={{ aspectRatio: '4/3' }}
       >
-        {/* Live Preview Area */}
+        {/* Preview Area */}
         <div className="absolute inset-0 z-[2] overflow-hidden">
-          {hasLiveCode ? (
-            isVisible ? (
-              <LivePreview
-                html={tool.html_code}
-                css={tool.css_code}
-                js={tool.js_code}
-                className="w-full h-full"
-                title={tool.name}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-[#0a0a0a]">
-                <div className="w-8 h-8 rounded-full border-2 border-white/10 border-t-white/40 animate-spin" />
-              </div>
-            )
-          ) : tool.preview ? (
+          {tool.preview ? (
             <img
               src={tool.preview}
               alt={tool.name}
@@ -98,16 +73,6 @@ function LiveCodeCard({ tool, style, onExport, onClick, index }) {
 
         {/* Top badges */}
         <div className="absolute top-3 left-3 z-[5] flex items-center gap-1.5">
-          {hasLiveCode && (
-            <span className="px-2 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider"
-              style={{
-                backgroundColor: `rgba(${accentRgb}, 0.2)`,
-                color: accent,
-                backdropFilter: 'blur(8px)',
-              }}>
-              Live
-            </span>
-          )}
           <span className="px-2 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider"
             style={{
               backgroundColor: `rgba(${accentRgb}, 0.15)`,

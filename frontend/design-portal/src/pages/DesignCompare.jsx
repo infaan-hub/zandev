@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Plus, X } from 'lucide-react'
 import PageLayout from '../components/PageLayout'
 import SEO from '../components/SEO'
-import LivePreview from '../tools/LivePreview'
 import { api } from '../lib/api'
 
 export default function DesignCompare() {
@@ -93,8 +92,8 @@ export default function DesignCompare() {
                     <X size={12} />
                   </button>
                   <div className="h-[200px] overflow-hidden">
-                    {d.has_code ? (
-                      <LivePreview html={d.html_code} css={d.css_code} js={d.js_code} className="w-full h-full" title={d.name} />
+                    {d.preview_image ? (
+                      <img src={d.preview_image} alt={d.name} className="w-full h-full object-cover" onError={e => e.target.style.display='none'} />
                     ) : (
                       <div className="w-full h-full bg-[#0a0a0a] flex items-center justify-center text-[#444] text-[10px]">{d.name}</div>
                     )}

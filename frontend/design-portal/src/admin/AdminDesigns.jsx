@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Plus, Trash2, X, Upload, RotateCcw, Code, Eye, Copy, Check } from 'lucide-react'
 import { api } from '../lib/api'
-import LivePreview from '../tools/LivePreview'
 
 const FRAMEWORKS = ['HTML', 'React', 'Vue', 'Svelte', 'Next.js', 'Astro']
 const CATEGORIES = ['Landing', 'Hero', 'Navigation', 'Cards', 'Dashboard', 'Forms', 'Buttons', 'Animation', 'UI Component', 'Portfolio', 'E-commerce', 'Travel', 'SaaS', 'Blog', 'Auth', 'Other']
@@ -83,7 +82,6 @@ function DesignModal({ design, onClose, onSave }) {
   const [previews, setPreviews] = useState({})
   const [saving, setSaving] = useState(false)
   const [activeField, setActiveField] = useState('html_code')
-  const [showPreview, setShowPreview] = useState(true)
   const [copied, setCopied] = useState(false)
 
   const fields = FRAMEWORK_FIELDS[form.framework] || ['html_code', 'css_code', 'js_code']
@@ -137,8 +135,6 @@ function DesignModal({ design, onClose, onSave }) {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
-
-  const hasLiveCode = fields.some(f => form[f])
 
   const inputCls = "w-full h-[40px] px-3 rounded-lg border border-white/[0.15] bg-white/[0.05] text-white text-[12px] placeholder-[#555] outline-none focus:border-[#4ade80] focus:ring-1 focus:ring-[#4ade80]/30 transition-all"
   const selectCls = "w-full h-[40px] px-3 pr-8 rounded-lg border border-white/[0.15] bg-[#1a1a1a] text-white text-[12px] outline-none focus:border-[#4ade80] focus:ring-1 focus:ring-[#4ade80]/30 transition-all cursor-pointer appearance-none"
@@ -287,18 +283,12 @@ function DesignModal({ design, onClose, onSave }) {
                 <button onClick={handleCopyCode} className="px-3 py-1.5 rounded-md text-[11px] text-[#888] hover:text-white border border-white/[0.10] hover:border-white/[0.20] transition-colors flex items-center gap-1">
                   {copied ? <Check size={11} className="text-[#4ade80]" /> : <Copy size={11} />} {copied ? 'Copied' : 'Copy'}
                 </button>
-                <button onClick={() => setShowPreview(!showPreview)}
-                  className={`px-3 py-1.5 rounded-md text-[11px] font-medium border transition-all flex items-center gap-1 ${
-                    showPreview ? 'bg-[#4ade80] text-black border-[#4ade80]' : 'text-[#888] border-white/[0.10] hover:border-white/[0.20]'
-                  }`}>
-                  <Eye size={11} /> Preview
-                </button>
               </div>
             </div>
 
-            {/* Editor + Preview */}
+            {/* Editor */}
             <div className="flex-1 flex min-h-0 overflow-hidden">
-              <div className={`flex flex-col min-h-0 ${showPreview ? 'w-1/2 border-r border-white/[0.06]' : 'flex-1'}`}>
+              <div className="flex flex-col min-h-0 flex-1">
                 <CodeEditor
                   value={form[activeField]}
                   onChange={val => setForm(prev => ({ ...prev, [activeField]: val }))}
@@ -306,30 +296,6 @@ function DesignModal({ design, onClose, onSave }) {
                   label={labels[activeField] || activeField}
                 />
               </div>
-              {showPreview && (
-                <div className="w-1/2 flex flex-col min-h-0 bg-[#0a0a0a]">
-                  <div className="px-3 py-2 border-b border-white/[0.04] flex items-center gap-1.5 shrink-0">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-pulse" />
-                    <span className="text-[9px] text-[#888] uppercase tracking-wider font-medium">Live Preview</span>
-                  </div>
-                  <div className="flex-1 p-3 min-h-0">
-                    {hasLiveCode ? (
-                      <LivePreview
-                        html={form.html_code}
-                        css={form.css_code}
-                        js={form.js_code}
-                        className="w-full h-full rounded-lg overflow-hidden border border-white/[0.08]"
-                        title="admin-preview"
-                      />
-                    ) : (
-                      <div className="w-full h-full rounded-lg border-2 border-dashed border-white/[0.10] flex flex-col items-center justify-center text-[#555] gap-2">
-                        <Code size={28} />
-                        <span className="text-[12px]">Enter code to see a live preview</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>

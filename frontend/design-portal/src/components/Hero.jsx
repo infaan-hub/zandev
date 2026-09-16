@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 export default function Hero() {
   return (
-    <section className="relative flex justify-center items-start overflow-hidden pt-24 pb-8">
+    <section className="relative flex justify-center items-center overflow-hidden min-h-screen pt-[72px]">
       <div className="relative z-[2] w-full max-w-[700px] mx-auto px-5 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-white/[0.09] rounded-full bg-white/[0.025] text-[#aaa] text-[9px] font-medium mb-5">
           <span className="w-[5px] h-[5px] rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.7)]" />

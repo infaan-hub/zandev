@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Copy, Check, Download, Eye, Terminal, ChevronDown, ChevronUp, X } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
-import LivePreview from '../tools/LivePreview';
 import { api } from '../lib/api';
 import MCPDownloadModal from '../components/MCPDownloadModal';
 
@@ -193,20 +192,9 @@ function DesignDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
           {/* Left: Preview + Gallery + Code */}
           <div className="space-y-4">
-            {/* Live Preview */}
+            {/* Preview */}
             <div className="rounded-2xl border border-white/[0.08] bg-[#0a0a0a] overflow-hidden">
-              {hasCode ? (
-                <div className="h-[500px]">
-                  <LivePreview
-                    html={design.html_code}
-                    css={design.css_code}
-                    js={design.js_code}
-                    reactCode={design.react_code}
-                    className="w-full h-full"
-                    title={design.name}
-                  />
-                </div>
-              ) : galleryImages.length > 0 ? (
+              {galleryImages.length > 0 ? (
                 <div className="relative">
                   <img src={galleryImages[selectedImage]} alt={design.name} className="w-full h-[500px] object-cover" />
                 </div>

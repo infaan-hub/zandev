@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PageLayout from '../components/PageLayout'
-import LivePreview from '../tools/LivePreview'
 import { api } from '../lib/api'
 
 export default function Demo() {
@@ -55,8 +54,8 @@ export default function Demo() {
                 {designs.map(d => (
                   <Link key={d.id} to={`/tools/${d.id}`} className="group rounded-[12px] bg-white/[0.035] border border-white/[0.06] overflow-hidden hover:border-white/[0.15] transition-colors">
                     <div className="h-[130px] overflow-hidden">
-                      {d.has_code ? (
-                        <LivePreview html={d.html_code} css={d.css_code} js={d.js_code} className="w-full h-full" title={d.name} />
+                      {d.preview_image ? (
+                        <img src={d.preview_image} alt={d.name} className="w-full h-full object-cover" onError={e => e.target.style.display='none'} />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-[#444] text-[10px]">{d.name}</div>
                       )}
