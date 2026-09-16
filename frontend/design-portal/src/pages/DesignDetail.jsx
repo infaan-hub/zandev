@@ -3,11 +3,82 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Copy, Check, Download, Eye, Code, Monitor, Tablet, Smartphone,
-  RotateCcw, Paintbrush, Palette, Type, Zap, ChevronDown, X, Save, AlertTriangle
+  RotateCcw, Paintbrush, Palette, Type, Zap, ChevronDown, X, Save, AlertTriangle, Terminal
 } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
-import LivePreview from '../tools/LivePreview';
+import LivePreview, { LIBRARY_CDNS } from '../tools/LivePreview';
 import { api } from '../lib/api';
+import MCPDownloadModal from '../components/MCPDownloadModal';
+
+const LIBRARY_GROUPS = [
+  { label: 'Frameworks', libs: [
+    { key: 'react', name: 'React 18' },
+    { key: 'vue', name: 'Vue 3' },
+    { key: 'alpine', name: 'Alpine.js' },
+  ]},
+  { label: 'CSS', libs: [
+    { key: 'tailwind', name: 'Tailwind CSS' },
+    { key: 'font-awesome', name: 'Font Awesome' },
+  ]},
+  { label: 'Fonts', libs: [
+    { key: 'google-fonts-inter', name: 'Inter' },
+    { key: 'google-fonts-mono', name: 'JetBrains Mono' },
+    { key: 'google-fonts-space', name: 'Space Grotesk' },
+    { key: 'google-fonts-poppins', name: 'Poppins' },
+    { key: 'google-fonts-raleway', name: 'Raleway' },
+    { key: 'google-fonts-oswald', name: 'Oswald' },
+    { key: 'google-fonts-playfair', name: 'Playfair Display' },
+    { key: 'google-fonts-lato', name: 'Lato' },
+    { key: 'google-fonts-montserrat', name: 'Montserrat' },
+    { key: 'google-fonts-roboto', name: 'Roboto' },
+  ]},
+  { label: 'Animation', libs: [
+    { key: 'gsap', name: 'GSAP' },
+  ]},
+  { label: 'Charts & Viz', libs: [
+    { key: 'chart', name: 'Chart.js' },
+    { key: 'three', name: 'Three.js' },
+  ]},
+  { label: 'Utilities', libs: [
+    { key: 'lodash', name: 'Lodash' },
+    { key: 'axios', name: 'Axios' },
+    { key: 'marked', name: 'Marked (MD)' },
+    { key: 'dompurify', name: 'DOMPurify' },
+    { key: 'highlight.js', name: 'Highlight.js' },
+  ]},
+];
+
+function highlightCode(code, lang) {
+  if (!code) return '';
+  let escaped = code
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  if (lang === 'html') {
+    escaped = escaped
+      .replace(/(&lt;\/?)([\w-]+)/g, '$1<span style="color:#f472b6">$2</span>')
+      .replace(/([\w-]+)(=)/g, '<span style="color:#a78bfa">$1</span>$2')
+      .replace(/(".*?")/g, '<span style="color:#86efac">$1</span>')
+      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span style="color:#555">$1</span>');
+  } else if (lang === 'css') {
+    escaped = escaped
+      .replace(/(\/\*[\s\S]*?\*\/)/g, '<span style="color:#555">$1</span>')
+      .replace(/([\w.-]+)\s*\{/g, '<span style="color:#a78bfa">$1</span> {')
+      .replace(/([\w-]+)\s*:/g, '<span style="color:#86efac">$1</span>:')
+      .replace(/:\s*([^;{}]+)/g, ': <span style="color:#fde68a">$1</span>')
+      .replace(/!important/g, '<span style="color:#f472b6">!important</span>');
+  } else if (lang === 'js') {
+    escaped = escaped
+      .replace(/(\/\/.*$)/gm, '<span style="color:#555">$1</span>')
+      .replace(/(\/\*[\s\S]*?\*\/)/g, '<span style="color:#555">$1</span>')
+      .replace(/\b(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|new|this|class|extends|import|export|from|default|async|await|try|catch|finally|throw|typeof|instanceof|in|of|yield|void|delete|null|undefined|true|false)\b/g, '<span style="color:#c084fc">$1</span>')
+      .replace(/(".*?"|'.*?'|`.*?`)/g, '<span style="color:#86efac">$1</span>')
+      .replace(/\b(\d+\.?\d*)\b/g, '<span style="color:#fde68a">$1</span>')
+      .replace(/\.([\w]+)\(/g, '.<span style="color:#a78bfa">$1</span>(');
+  }
+  return escaped;
+}
 
 const CODE_TABS = [
   { key: 'html', label: 'HTML' },
@@ -193,10 +264,13 @@ export default function DesignDetail() {
   const [showCustomizer, setShowCustomizer] = useState(true);
   const [previewKey, setPreviewKey] = useState(0);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [showMCPModal, setShowMCPModal] = useState(false);
   const [showRemixModal, setShowRemixModal] = useState(false);
   const [remixName, setRemixName] = useState('');
   const [remixError, setRemixError] = useState('');
   const [previewError, setPreviewError] = useState(null);
+  const [libraries, setLibraries] = useState([]);
+  const [showLibraryPicker, setShowLibraryPicker] = useState(false);
   const leaveRef = useRef(false);
 
   useEffect(() => {
@@ -408,6 +482,10 @@ export default function DesignDetail() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-medium bg-white text-black hover:-translate-y-0.5 transition-transform">
               <Download size={11} /> Download
             </button>
+            <button onClick={() => setShowMCPModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-medium bg-gradient-to-r from-violet-500/20 to-blue-500/20 border border-violet-500/20 text-violet-300 hover:-translate-y-0.5 transition-transform">
+              <Terminal size={11} /> MCP
+            </button>
             <button onClick={() => { setRemixError(''); setShowRemixModal(true); }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-medium border border-white/[0.10] text-[#aaa] hover:bg-white/[0.05] transition-colors">
               <Save size={11} /> Save Remix
@@ -518,6 +596,43 @@ export default function DesignDetail() {
                             onChange={(v) => handleDesignChange('opacity', v)} min={10} max={100} unit="%" />
                         </div>
                       </div>
+
+                      {/* Libraries */}
+                      <div>
+                        <button onClick={() => setShowLibraryPicker(!showLibraryPicker)}
+                          className="flex items-center justify-between w-full text-[9px] text-[#555] uppercase tracking-wider font-medium mb-2 hover:text-[#888] transition-colors">
+                          <span>Libraries ({libraries.length})</span>
+                          <ChevronDown size={10} className={`transition-transform ${showLibraryPicker ? 'rotate-180' : ''}`} />
+                        </button>
+                        {showLibraryPicker && (
+                          <div className="space-y-3">
+                            {LIBRARY_GROUPS.map(group => (
+                              <div key={group.label}>
+                                <div className="text-[8px] text-[#444] mb-1">{group.label}</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {group.libs.map(lib => {
+                                    const active = libraries.includes(lib.key);
+                                    return (
+                                      <button key={lib.key}
+                                        onClick={() => {
+                                          setLibraries(prev => active ? prev.filter(k => k !== lib.key) : [...prev, lib.key]);
+                                          markDirty();
+                                        }}
+                                        className={`px-2 py-0.5 rounded-[4px] text-[9px] border transition-all ${
+                                          active
+                                            ? 'bg-white/[0.10] border-white/[0.20] text-white'
+                                            : 'bg-white/[0.02] border-white/[0.06] text-[#555] hover:text-[#888]'
+                                        }`}>
+                                        {lib.name}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </>
                   ) : (
                     /* Code Editor Tab */
@@ -532,13 +647,22 @@ export default function DesignDetail() {
                           </button>
                         ))}
                       </div>
-                      <textarea
-                        value={activeCodeTab === 'html' ? curHtml : activeCodeTab === 'css' ? curCss : curJs}
-                        onChange={(e) => handleCodeEdit(activeCodeTab, e.target.value)}
-                        spellCheck={false}
-                        className="w-full h-[400px] p-[10px] bg-[#050505] text-[#e0e0e0] font-mono text-[10px] leading-[1.7] resize-none outline-none border border-white/[0.05] rounded-[8px] placeholder-[#333]"
-                        placeholder={`Edit ${activeCodeTab.toUpperCase()} here...`}
-                      />
+                      <div className="relative">
+                        <div className="flex items-center justify-between px-3 py-1.5 bg-[#080808] border border-white/[0.05] border-b-0 rounded-t-[8px]">
+                          <span className="text-[9px] text-[#555] font-mono uppercase">{activeCodeTab}</span>
+                          <span className="text-[9px] text-[#333] font-mono">
+                            {(activeCodeTab === 'html' ? curHtml : activeCodeTab === 'css' ? curCss : curJs || '').split('\n').length} lines
+                          </span>
+                        </div>
+                        <textarea
+                          value={activeCodeTab === 'html' ? curHtml : activeCodeTab === 'css' ? curCss : curJs}
+                          onChange={(e) => handleCodeEdit(activeCodeTab, e.target.value)}
+                          spellCheck={false}
+                          className="w-full h-[400px] p-[10px] bg-[#050505] text-[#e0e0e0] font-mono text-[10px] leading-[1.7] resize-none outline-none border border-white/[0.05] rounded-b-[8px] placeholder-[#333] tab-size-2"
+                          placeholder={`Edit ${activeCodeTab.toUpperCase()} here...`}
+                          style={{ tabSize: 2 }}
+                        />
+                      </div>
                       <div className="flex gap-2">
                         <button onClick={() => handleCopy(activeCodeTab, 'edited')}
                           className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[10px] font-medium border border-white/[0.06] text-[#666] hover:text-white hover:border-white/[0.15] transition-all">
@@ -595,6 +719,7 @@ export default function DesignDetail() {
                       html={renderHtml}
                       css={renderCss}
                       js={renderJs}
+                      libraries={libraries}
                       className="w-full h-full rounded-[8px] overflow-hidden border border-white/[0.05]"
                       title={design.name}
                     />
@@ -616,6 +741,18 @@ export default function DesignDetail() {
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
+                    {libraries.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        {libraries.slice(0, 3).map(lib => (
+                          <span key={lib} className="px-1.5 py-0.5 rounded-[3px] bg-white/[0.05] text-[8px] text-[#666] font-mono">
+                            {lib.split('-').pop()}
+                          </span>
+                        ))}
+                        {libraries.length > 3 && (
+                          <span className="text-[8px] text-[#444]">+{libraries.length - 3}</span>
+                        )}
+                      </div>
+                    )}
                     <div className="relative group">
                       <button className="flex items-center gap-1 px-2.5 py-1 rounded-[4px] text-[9px] text-[#666] hover:text-white border border-white/[0.06] hover:border-white/[0.15] transition-colors">
                         <Copy size={10} /> Copy
@@ -636,9 +773,12 @@ export default function DesignDetail() {
                   </div>
                 </div>
                 <div className="max-h-[200px] overflow-auto p-3">
-                  <pre className="text-[10px] leading-[1.7] text-[#aaa] font-mono whitespace-pre-wrap break-words">
-                    {activeCodeTab === 'html' ? curHtml : activeCodeTab === 'css' ? curCss : curJs || `/* No ${activeCodeTab.toUpperCase()} */`}
-                  </pre>
+                  <pre className="text-[10px] leading-[1.7] font-mono whitespace-pre-wrap break-words" dangerouslySetInnerHTML={{
+                    __html: highlightCode(
+                      activeCodeTab === 'html' ? curHtml : activeCodeTab === 'css' ? curCss : curJs || `/* No ${activeCodeTab.toUpperCase()} */`,
+                      activeCodeTab
+                    )
+                  }} />
                 </div>
               </div>
             </div>
@@ -681,11 +821,26 @@ export default function DesignDetail() {
                   </div>
                   <div className="text-[9px] text-[#666] mt-0.5">Download your current customizations</div>
                 </button>
+                <button onClick={() => { setShowDownloadModal(false); setShowMCPModal(true); }}
+                  className="w-full p-3 rounded-xl border border-violet-500/20 bg-gradient-to-r from-violet-500/5 to-blue-500/5 text-left hover:from-violet-500/10 hover:to-blue-500/10 transition-colors group">
+                  <div className="flex items-center gap-2">
+                    <Terminal size={14} className="text-violet-400" />
+                    <div className="text-[11px] font-semibold text-violet-300 group-hover:text-violet-200">Get via MCP</div>
+                  </div>
+                  <div className="text-[9px] text-[#666] mt-1">Retrieve code using Model Context Protocol</div>
+                </button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* MCP Download Modal */}
+      <MCPDownloadModal
+        isOpen={showMCPModal}
+        onClose={() => setShowMCPModal(false)}
+        design={design}
+      />
 
       {/* Remix Modal */}
       <AnimatePresence>

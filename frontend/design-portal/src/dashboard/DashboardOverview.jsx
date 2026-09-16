@@ -1,12 +1,31 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useDashboard } from './DashboardContext'
-import { Download, FolderOpen, Code2, TrendingUp, ArrowUpRight, Zap, ExternalLink, Heart } from 'lucide-react'
+import { api } from '../lib/api'
+import { Download, FolderOpen, Code2, TrendingUp, ArrowUpRight, Zap, ExternalLink, Heart, Eye, Star } from 'lucide-react'
 
 export default function DashboardOverview() {
   const { downloads, projects, exportDownload, toggleFavorite, isLight } = useDashboard()
+  const [designs, setDesigns] = useState([])
+  const [loadingDesigns, setLoadingDesigns] = useState(true)
+
+  useEffect(() => {
+    const fetchDesigns = async () => {
+      try {
+        setLoadingDesigns(true)
+        const data = await api.getDesigns({ limit: 8, sort: '-score' })
+        setDesigns(data?.results || [])
+      } catch (err) {
+        console.error('Failed to fetch designs:', err)
+      } finally {
+        setLoadingDesigns(false)
+      }
+    }
+    fetchDesigns()
+  }, [])
 
   const totalDownloads = downloads.length
-  const totalExports = downloads.reduce((a, d) => a + d.exports, 0)
+  const totalExports = downloads.reduce((a, d) => a + (d.exports || 0), 0)
   const activeProjects = projects.filter(p => p.status === 'active').length
   const recentDownloads = downloads.slice(0, 5)
 
@@ -25,39 +44,104 @@ export default function DashboardOverview() {
     tooltip: isLight ? 'bg-white border-black/[0.1] text-[#1a1a1a]' : 'bg-[#1a1a1a] border-white/[0.1] text-white',
     quickCard: isLight ? 'bg-white border-black/[0.06] hover:bg-black/[0.02]' : 'bg-[#080808] border-white/[0.10] hover:bg-white/[0.035]',
     quickIcon: isLight ? 'bg-black/[0.04] border-black/[0.06]' : 'bg-white/[0.05] border-white/[0.08]',
+    designCard: isLight ? 'bg-white border-black/[0.06] hover:border-black/[0.12]' : 'bg-[#080808] border-white/[0.08] hover:border-white/[0.15]',
+    preview: isLight ? 'bg-[#f5f5f5]' : 'bg-[#0a0a0a]',
   }
 
   const monthlyUsage = [120, 180, 145, 210, 195, 240, 220, 280, 260, 310, 290, downloads.length * 28]
   const maxUsage = Math.max(...monthlyUsage)
 
   const frameworks = [
-    { name: 'React', count: downloads.filter(d => d.framework === 'React').length, color: '#61dafb' },
-    { name: 'Next.js', count: downloads.filter(d => d.framework === 'Next.js').length, color: isLight ? '#111' : '#fff' },
-    { name: 'Vue', count: downloads.filter(d => d.framework === 'Vue').length, color: '#42b883' },
-    { name: 'Svelte', count: downloads.filter(d => d.framework === 'Svelte').length, color: '#ff3e00' },
-    { name: 'Astro', count: downloads.filter(d => d.framework === 'Astro').length, color: '#ff5d01' },
+    { name: 'React', count: downloads.filter(d => d.framework === 'React').length || designs.filter(d => d.framework === 'React').length, color: '#61dafb' },
+    { name: 'Next.js', count: downloads.filter(d => d.framework === 'Next.js').length || designs.filter(d => d.framework === 'Next.js').length, color: isLight ? '#111' : '#fff' },
+    { name: 'Vue', count: downloads.filter(d => d.framework === 'Vue').length || designs.filter(d => d.framework === 'Vue').length, color: '#42b883' },
+    { name: 'Svelte', count: downloads.filter(d => d.framework === 'Svelte').length || designs.filter(d => d.framework === 'Svelte').length, color: '#ff3e00' },
+    { name: 'Astro', count: downloads.filter(d => d.framework === 'Astro').length || designs.filter(d => d.framework === 'Astro').length, color: '#ff5d01' },
   ]
   const maxFramework = Math.max(...frameworks.map(f => f.count), 1)
 
   return (
     <div>
-      <Link to="/tools" className={`block mb-[32px] p-[28px] rounded-[18px] border transition-all group cursor-pointer ${isLight ? 'border-black/[0.06] bg-gradient-to-br from-black/[0.02] to-transparent hover:from-black/[0.04]' : 'border-white/[0.10] bg-gradient-to-br from-white/[0.045] to-white/[0.012] hover:from-white/[0.06] hover:to-white/[0.02]'}`}>
-        <div className={`${c.muted} text-[9px] font-semibold uppercase tracking-[0.15em] mb-[12px]`}>
-          Design-to-Code Marketplace
+      {/* Designs Grid - Top Section */}
+      <div className="mb-[32px]">
+        <div className="flex items-center justify-between mb-[16px]">
+          <div>
+            <h2 className={`${c.text} text-[18px] font-bold tracking-[-0.03em]`}>Browse Designs</h2>
+            <p className={`${c.body} text-[11px] mt-[4px]`}>Explore production-ready components</p>
+          </div>
+          <Link to="/tools" className={`${c.body} text-[10px] hover:${c.text} transition-colors flex items-center gap-1`}>
+            View all <ExternalLink size={10} />
+          </Link>
         </div>
-        <h1 className={`${c.text} text-[clamp(28px,4vw,48px)] leading-[0.95] tracking-[-0.06em] font-bold mb-[12px]`}>
-          Browse. Copy. Ship.
-        </h1>
-        <p className={`${c.body} text-[12px] leading-[1.7] max-w-[480px] mb-[16px]`}>
-          Access 2,400+ production-ready designs. Select any design to view source code and export directly to your project.
-        </p>
-        <div className="inline-flex items-center gap-[8px] px-[16px] py-[10px] rounded-[10px] bg-white text-black text-[11px] font-semibold group-hover:-translate-y-[2px] transition-transform duration-200 shadow-sm">
-          <Zap size={14} />
-          Browse Designs
-          <ExternalLink size={12} />
-        </div>
-      </Link>
+        
+        {loadingDesigns ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[12px]">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className={`rounded-[14px] border ${c.border} overflow-hidden animate-pulse`}>
+                <div className={`h-[140px] ${c.preview}`} />
+                <div className="p-[14px]">
+                  <div className={`h-[14px] w-[60%] rounded ${c.bar} mb-[8px]`} />
+                  <div className={`h-[10px] w-[40%] rounded ${c.bar}`} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[12px]">
+            {designs.map((design) => (
+              <Link
+                key={design.id}
+                to={`/tools/${design.id}`}
+                className={`group rounded-[14px] border overflow-hidden transition-all hover:-translate-y-1 ${c.designCard}`}
+              >
+                {/* Preview */}
+                <div className={`h-[140px] ${c.preview} relative overflow-hidden`}>
+                  {design.preview ? (
+                    <img 
+                      src={design.preview} 
+                      alt={design.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none'
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-[32px] opacity-20">🎨</div>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute bottom-2 left-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="px-2 py-1 rounded text-[8px] font-medium bg-white/20 text-white backdrop-blur-sm">{design.framework}</span>
+                    <span className="px-2 py-1 rounded text-[8px] font-medium bg-white/20 text-white backdrop-blur-sm">{design.category}</span>
+                  </div>
+                </div>
+                
+                {/* Info */}
+                <div className="p-[14px]">
+                  <h3 className={`${c.text} text-[12px] font-semibold mb-[4px] truncate`}>{design.name}</h3>
+                  <div className="flex items-center gap-[12px] text-[9px] ${c.body}`}>
+                    <span className="flex items-center gap-[4px]">
+                      <Eye size={10} />
+                      {design.views || 0}
+                    </span>
+                    <span className="flex items-center gap-[4px]">
+                      <Download size={10} />
+                      {design.exports || 0}
+                    </span>
+                    <span className="flex items-center gap-[4px]">
+                      <Star size={10} />
+                      {design.score || 0}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[12px] mb-[32px]">
         {[
           { label: 'Total Downloads', value: totalDownloads, sub: `${downloads.filter(d => d.favorited).length} favorited`, href: '/dashboard/downloads', icon: Download },
@@ -80,6 +164,7 @@ export default function DashboardOverview() {
         })}
       </div>
 
+      {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.4fr] gap-[12px] mb-[32px]">
         <div className={`p-[24px] rounded-[18px] border ${c.card}`}>
           <div className={`${c.muted} text-[9px] mb-[20px]`}>MONTHLY DOWNLOADS</div>
@@ -123,55 +208,64 @@ export default function DashboardOverview() {
               </div>
               <div className="flex justify-between text-[10px]">
                 <span className={c.body}>Categories</span>
-                <span className={`font-medium ${c.text}`}>{[...new Set(downloads.map(d => d.category))].length}</span>
+                <span className={`font-medium ${c.text}`}>{[...new Set([...downloads.map(d => d.category), ...designs.map(d => d.category)])].length}</span>
               </div>
               <div className="flex justify-between text-[10px]">
-                <span className={c.body}>Total size</span>
-                <span className={`font-medium ${c.text}`}>{downloads.reduce((a, d) => a + parseInt(d.size), 0)} KB</span>
+                <span className={c.body}>Total designs</span>
+                <span className={`font-medium ${c.text}`}>{designs.length}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Recent Downloads + Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-[0.6fr_0.4fr] gap-[12px] mb-[32px]">
         <div className={`p-[24px] rounded-[18px] border ${c.card}`}>
           <div className="flex items-center justify-between mb-[20px]">
             <div className={`${c.muted} text-[9px]`}>RECENT DOWNLOADS</div>
             <Link to="/dashboard/downloads" className={`${c.body} text-[9px] hover:${c.text} transition-colors`}>View all →</Link>
           </div>
-          <div className="flex flex-col gap-[6px]">
-            {recentDownloads.map((d) => (
-              <div key={d.id} className={`flex items-center justify-between p-[12px] rounded-[10px] border transition-colors ${c.row}`}>
-                <div className="flex items-center gap-[12px]">
-                  <div className={`w-[32px] h-[32px] rounded-[8px] border grid place-items-center ${c.quickIcon}`}>
-                    <Download size={12} className={c.body} />
-                  </div>
-                  <div>
-                    <div className={`text-[11px] font-medium ${c.text}`}>{d.name}</div>
-                    <div className={`flex items-center gap-[6px] text-[9px] mt-[2px] ${c.body}`}>
-                      <span>{d.framework}</span>
-                      <span>·</span>
-                      <span>{d.category}</span>
+          {recentDownloads.length === 0 ? (
+            <div className="text-center py-[40px]">
+              <Download size={24} className={`${c.subtle} mx-auto mb-[12px]`} />
+              <p className={`${c.body} text-[11px]`}>No downloads yet</p>
+              <p className={`${c.subtle} text-[9px] mt-[4px]`}>Browse designs to get started</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-[6px]">
+              {recentDownloads.map((d) => (
+                <div key={d.id} className={`flex items-center justify-between p-[12px] rounded-[10px] border transition-colors ${c.row}`}>
+                  <div className="flex items-center gap-[12px]">
+                    <div className={`w-[32px] h-[32px] rounded-[8px] border grid place-items-center ${c.quickIcon}`}>
+                      <Download size={12} className={c.body} />
+                    </div>
+                    <div>
+                      <div className={`text-[11px] font-medium ${c.text}`}>{d.name}</div>
+                      <div className={`flex items-center gap-[6px] text-[9px] mt-[2px] ${c.body}`}>
+                        <span>{d.framework}</span>
+                        <span>·</span>
+                        <span>{d.category}</span>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-[8px]">
+                    <button onClick={(e) => { e.preventDefault(); toggleFavorite(d.id) }} className={`${c.subtle} hover:text-[#f472b6] transition-colors`}>
+                      <Heart size={13} fill={d.favorited ? '#f472b6' : 'none'} className={d.favorited ? 'text-[#f472b6]' : ''} />
+                    </button>
+                    <button onClick={(e) => { e.preventDefault(); exportDownload(d) }} className={`${c.subtle} hover:${c.text} transition-colors`}>
+                      <ExternalLink size={13} />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-[8px]">
-                  <button onClick={(e) => { e.preventDefault(); toggleFavorite(d.id) }} className={`${c.subtle} hover:text-[#f472b6] transition-colors`}>
-                    <Heart size={13} fill={d.favorited ? '#f472b6' : 'none'} className={d.favorited ? 'text-[#f472b6]' : ''} />
-                  </button>
-                  <button onClick={(e) => { e.preventDefault(); exportDownload(d) }} className={`${c.subtle} hover:${c.text} transition-colors`}>
-                    <ExternalLink size={13} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-[12px]">
           {[
-            { label: 'Browse Designs', desc: 'Explore 2,400+ production-ready designs', href: '/tools', icon: Zap },
+            { label: 'Browse Designs', desc: 'Explore production-ready designs', href: '/tools', icon: Zap },
             { label: 'View Analytics', desc: 'Track your downloads and usage trends', href: '/dashboard/analytics', icon: TrendingUp },
             { label: 'Manage Projects', desc: 'Organize your exported components', href: '/dashboard/projects', icon: FolderOpen },
           ].map((a) => {

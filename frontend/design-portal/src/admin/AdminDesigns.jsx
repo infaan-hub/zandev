@@ -44,7 +44,7 @@ function CodeEditor({ value, onChange, language, placeholder }) {
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         spellCheck={false}
-        className="w-full h-full p-[12px] bg-[#050505] text-[#e0e0e0] font-mono text-[11px] leading-[1.7] resize-none outline-none border border-white/[0.05] rounded-[8px] placeholder-[#333]"
+        className="w-full h-full p-[14px] bg-[#080808] text-[#e0e0e0] font-mono text-[12px] leading-[1.7] resize-none outline-none border border-white/[0.08] rounded-[8px] placeholder-[#444] focus:border-[#4ade80]/50 transition-colors"
       />
     </div>
   )
@@ -127,87 +127,103 @@ function DesignModal({ design, onClose, onSave }) {
     setForm(prev => ({ ...prev, html_code: '', css_code: '', js_code: '' }))
   }
 
-  const inputCls = "w-full h-[36px] px-[12px] rounded-[8px] border border-white/[0.10] bg-white/[0.035] text-white text-[11px] placeholder-[#555] outline-none focus:border-white/[0.25] transition-colors"
-  const selectCls = "w-full h-[36px] px-[12px] rounded-[8px] border border-white/[0.10] bg-white/[0.035] text-white text-[11px] outline-none focus:border-white/[0.25] transition-colors appearance-none"
+  const inputCls = "w-full h-[40px] px-[12px] rounded-[8px] border border-white/[0.15] bg-white/[0.05] text-white text-[12px] placeholder-[#555] outline-none focus:border-[#4ade80] focus:ring-1 focus:ring-[#4ade80]/30 transition-all"
+  const selectCls = "w-full h-[40px] px-[12px] pr-[32px] rounded-[8px] border border-white/[0.15] bg-white/[0.05] text-white text-[12px] outline-none focus:border-[#4ade80] focus:ring-1 focus:ring-[#4ade80]/30 transition-all cursor-pointer"
+  const labelCls = "block text-[#aaa] text-[10px] font-semibold uppercase tracking-[0.05em] mb-[6px]"
 
   return (
     <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={onClose}>
       <div className="w-full max-w-[1200px] h-[90vh] flex flex-col rounded-[18px] border border-white/[0.10] bg-[#0a0a0a] overflow-hidden" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between px-[24px] py-[16px] border-b border-white/[0.06] shrink-0">
-          <h3 className="text-[14px] font-semibold">{design?.id ? 'Edit Design' : 'New Design'}</h3>
-          <button onClick={onClose} className="text-[#666] hover:text-white"><X size={18} /></button>
+          <h3 className="text-[16px] font-semibold">{design?.id ? 'Edit Design' : 'New Design'}</h3>
+          <button onClick={onClose} className="p-[6px] rounded-[6px] text-[#666] hover:text-white hover:bg-white/[0.05] transition-colors"><X size={18} /></button>
         </div>
 
         <div className="flex flex-1 min-h-0 overflow-hidden">
           {/* Left: Form */}
-          <div className="w-[340px] shrink-0 border-r border-white/[0.06] overflow-y-auto p-[20px] space-y-[14px]">
+          <div className="w-[340px] shrink-0 border-r border-white/[0.06] overflow-y-auto p-[20px] space-y-[16px]">
             <div>
-              <label className="block text-[#888] text-[8px] font-semibold uppercase tracking-[0.1em] mb-[6px]">Name *</label>
+              <label className={labelCls}>Name *</label>
               <input type="text" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} placeholder="Design name" className={inputCls} />
             </div>
-            <div className="grid grid-cols-2 gap-[10px]">
+            <div className="grid grid-cols-2 gap-[12px]">
               <div>
-                <label className="block text-[#888] text-[8px] font-semibold uppercase tracking-[0.1em] mb-[6px]">Framework</label>
-                <select value={form.framework} onChange={(e) => setForm({...form, framework: e.target.value})} className={selectCls}>
-                  {frameworks.map(f => <option key={f} value={f}>{f}</option>)}
-                </select>
+                <label className={labelCls}>Framework</label>
+                <div className="relative">
+                  <select value={form.framework} onChange={(e) => setForm({...form, framework: e.target.value})} className={selectCls}>
+                    {frameworks.map(f => <option key={f} value={f}>{f}</option>)}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                </div>
               </div>
               <div>
-                <label className="block text-[#888] text-[8px] font-semibold uppercase tracking-[0.1em] mb-[6px]">Category</label>
-                <select value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} className={selectCls}>
-                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <label className={labelCls}>Category</label>
+                <div className="relative">
+                  <select value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} className={selectCls}>
+                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-[10px]">
+            <div className="grid grid-cols-2 gap-[12px]">
               <div>
-                <label className="block text-[#888] text-[8px] font-semibold uppercase tracking-[0.1em] mb-[6px]">Price</label>
-                <select value={form.price} onChange={(e) => setForm({...form, price: e.target.value})} className={selectCls}>
-                  {prices.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
+                <label className={labelCls}>Price</label>
+                <div className="relative">
+                  <select value={form.price} onChange={(e) => setForm({...form, price: e.target.value})} className={selectCls}>
+                    {prices.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                </div>
               </div>
               <div>
-                <label className="block text-[#888] text-[8px] font-semibold uppercase tracking-[0.1em] mb-[6px]">Score</label>
+                <label className={labelCls}>Score</label>
                 <input type="number" min="0" max="100" value={form.score} onChange={(e) => setForm({...form, score: parseInt(e.target.value) || 0})} className={inputCls} />
               </div>
             </div>
             <div>
-              <label className="block text-[#888] text-[8px] font-semibold uppercase tracking-[0.1em] mb-[6px]">Description</label>
-              <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} placeholder="Design description..." rows={3} className={`${inputCls} h-auto py-[8px] resize-none`} />
+              <label className={labelCls}>Description</label>
+              <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} placeholder="Design description..." rows={3} className={`${inputCls} h-auto py-[10px] resize-none`} />
             </div>
 
             {/* JSX Code (download) */}
             <div>
-              <label className="block text-[#888] text-[8px] font-semibold uppercase tracking-[0.1em] mb-[6px]">JSX Code (downloadable)</label>
+              <label className={labelCls}>JSX Code (downloadable)</label>
               <textarea
                 value={form.code}
                 onChange={(e) => setForm({...form, code: e.target.value})}
                 placeholder="React component code for download..."
                 rows={4}
-                className={`${inputCls} h-auto py-[8px] resize-none font-mono text-[10px] leading-[1.6]`}
+                className={`${inputCls} h-auto py-[10px] resize-none font-mono text-[11px] leading-[1.6]`}
               />
             </div>
 
             {/* File Upload */}
             <div>
-              <label className="block text-[#888] text-[8px] font-semibold uppercase tracking-[0.1em] mb-[6px]">Fallback Preview Media</label>
+              <label className={labelCls}>Preview Media</label>
               <div className="flex gap-[8px]">
                 <input ref={fileRef} type="file" accept="image/*,video/*" onChange={handleFile} className="hidden" id="design-file" />
-                <label htmlFor="design-file" className="flex-1 flex items-center justify-center gap-[6px] h-[60px] rounded-[10px] border border-dashed border-white/[0.12] bg-white/[0.02] text-[#666] text-[10px] cursor-pointer hover:border-white/[0.25] hover:bg-white/[0.04] transition-colors">
+                <label htmlFor="design-file" className="flex-1 flex items-center justify-center gap-[6px] h-[70px] rounded-[8px] border-2 border-dashed border-white/[0.15] bg-white/[0.03] text-[#888] text-[11px] cursor-pointer hover:border-[#4ade80] hover:bg-white/[0.05] transition-all">
                   {preview ? (
                     <div className="relative w-full h-full">
-                      <img src={preview} className="w-full h-full object-cover rounded-[8px]" alt="Preview" />
+                      <img src={preview} className="w-full h-full object-cover rounded-[6px]" alt="Preview" />
                     </div>
                   ) : (
                     <>
-                      <Upload size={14} />
-                      <span>Upload image</span>
+                      <Upload size={16} />
+                      <span>Upload image or video</span>
                     </>
                   )}
                 </label>
                 {preview && (
-                  <button type="button" onClick={handleRemoveFile} className="self-start mt-[4px] text-[#666] hover:text-red-400">
+                  <button type="button" onClick={handleRemoveFile} className="self-start mt-[4px] p-[4px] rounded-[4px] text-[#666] hover:text-red-400 hover:bg-red-400/10 transition-colors">
                     <X size={14} />
                   </button>
                 )}
@@ -215,9 +231,9 @@ function DesignModal({ design, onClose, onSave }) {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-[8px] pt-[4px]">
-              <button type="button" onClick={onClose} className="flex-1 h-[36px] rounded-[8px] border border-white/[0.10] text-[10px] font-semibold text-[#aaa] hover:bg-white/[0.05] transition-colors">Cancel</button>
-              <button type="button" onClick={handleSubmit} disabled={saving || !form.name} className="flex-1 h-[36px] rounded-[8px] bg-white text-black text-[10px] font-semibold hover:-translate-y-[1px] transition-transform disabled:opacity-50">
+            <div className="flex gap-[10px] pt-[8px]">
+              <button type="button" onClick={onClose} className="flex-1 h-[40px] rounded-[8px] border border-white/[0.15] text-[11px] font-semibold text-[#aaa] hover:bg-white/[0.05] transition-colors">Cancel</button>
+              <button type="button" onClick={handleSubmit} disabled={saving || !form.name} className="flex-1 h-[40px] rounded-[8px] bg-[#4ade80] text-black text-[11px] font-semibold hover:-translate-y-[1px] transition-transform disabled:opacity-50 disabled:bg-[#333] disabled:text-[#666]">
                 {saving ? 'Saving...' : design?.id ? 'Update' : 'Publish'}
               </button>
             </div>
@@ -226,16 +242,16 @@ function DesignModal({ design, onClose, onSave }) {
           {/* Right: Code Editor + Preview */}
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
             {/* Code Tabs + Preview Toggle */}
-            <div className="flex items-center justify-between px-[16px] py-[10px] border-b border-white/[0.06] shrink-0">
-              <div className="flex items-center gap-[2px] bg-white/[0.03] rounded-[8px] p-[2px]">
+            <div className="flex items-center justify-between px-[16px] py-[12px] border-b border-white/[0.06] shrink-0">
+              <div className="flex items-center gap-[2px] bg-white/[0.05] rounded-[8px] p-[3px]">
                 {CODE_TABS.map(tab => (
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
-                    className={`px-[12px] py-[5px] rounded-[6px] text-[10px] font-medium transition-all ${
+                    className={`px-[14px] py-[6px] rounded-[6px] text-[11px] font-medium transition-all ${
                       activeTab === tab.key
-                        ? 'bg-white text-black'
-                        : 'text-[#666] hover:text-white'
+                        ? 'bg-[#4ade80] text-black'
+                        : 'text-[#888] hover:text-white hover:bg-white/[0.05]'
                     }`}
                   >
                     {tab.label}
@@ -243,18 +259,18 @@ function DesignModal({ design, onClose, onSave }) {
                 ))}
               </div>
               <div className="flex items-center gap-[8px]">
-                <button onClick={handleClear} className="px-[10px] py-[5px] rounded-[6px] text-[10px] text-[#666] hover:text-white border border-white/[0.06] hover:border-white/[0.15] transition-colors flex items-center gap-[4px]">
-                  <RotateCcw size={10} /> Clear
+                <button onClick={handleClear} className="px-[12px] py-[6px] rounded-[6px] text-[11px] text-[#888] hover:text-white border border-white/[0.10] hover:border-white/[0.20] transition-colors flex items-center gap-[4px]">
+                  <RotateCcw size={11} /> Clear
                 </button>
                 <button
                   onClick={() => setShowPreview(!showPreview)}
-                  className={`px-[10px] py-[5px] rounded-[6px] text-[10px] font-medium border transition-all flex items-center gap-[4px] ${
+                  className={`px-[12px] py-[6px] rounded-[6px] text-[11px] font-medium border transition-all flex items-center gap-[4px] ${
                     showPreview
-                      ? 'bg-white text-black border-white'
-                      : 'text-[#666] border-white/[0.06] hover:border-white/[0.15]'
+                      ? 'bg-[#4ade80] text-black border-[#4ade80]'
+                      : 'text-[#888] border-white/[0.10] hover:border-white/[0.20]'
                   }`}
                 >
-                  <Eye size={10} /> Preview
+                  <Eye size={11} /> Preview
                 </button>
               </div>
             </div>
@@ -273,24 +289,24 @@ function DesignModal({ design, onClose, onSave }) {
 
               {/* Live Preview */}
               {showPreview && (
-                <div className="w-1/2 flex flex-col min-h-0 bg-[#0d0d0d]">
-                  <div className="px-[12px] py-[8px] border-b border-white/[0.04] flex items-center gap-[6px] shrink-0">
-                    <div className="w-[6px] h-[6px] rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-[9px] text-[#555] uppercase tracking-wider font-medium">Live Preview</span>
+                <div className="w-1/2 flex flex-col min-h-0 bg-[#0a0a0a]">
+                  <div className="px-[14px] py-[10px] border-b border-white/[0.04] flex items-center gap-[6px] shrink-0">
+                    <div className="w-[8px] h-[8px] rounded-full bg-[#4ade80] animate-pulse" />
+                    <span className="text-[10px] text-[#888] uppercase tracking-wider font-medium">Live Preview</span>
                   </div>
-                  <div className="flex-1 p-[12px] min-h-0">
+                  <div className="flex-1 p-[14px] min-h-0">
                     {hasLiveCode ? (
                       <LivePreview
                         html={form.html_code}
                         css={form.css_code}
                         js={form.js_code}
-                        className="w-full h-full rounded-[8px] overflow-hidden border border-white/[0.05]"
+                        className="w-full h-full rounded-[8px] overflow-hidden border border-white/[0.08]"
                         title="admin-preview"
                       />
                     ) : (
-                      <div className="w-full h-full rounded-[8px] border border-dashed border-white/[0.08] flex flex-col items-center justify-center text-[#333] gap-[8px]">
-                        <Code size={24} />
-                        <span className="text-[11px]">Write HTML, CSS, or JS to see a live preview</span>
+                      <div className="w-full h-full rounded-[8px] border-2 border-dashed border-white/[0.10] flex flex-col items-center justify-center text-[#555] gap-[10px]">
+                        <Code size={28} />
+                        <span className="text-[12px]">Write HTML, CSS, or JS to see a live preview</span>
                       </div>
                     )}
                   </div>

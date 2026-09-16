@@ -9,6 +9,7 @@ urlpatterns = [
     path('designs/compare/', views.CompareDesignsView.as_view(), name='design-compare'),
     path('designs/<int:pk>/', views.DesignDetailView.as_view(), name='design-detail'),
     path('designs/<int:pk>/export/', views.DesignExportView.as_view(), name='design-export'),
+    path('designs/<int:pk>/mcp/', views.DesignMCPView.as_view(), name='design-mcp'),
     path('stats/', views.StatsView.as_view(), name='stats'),
     path('categories/', views.CategoryListView.as_view(), name='category-list'),
     path('contact/', views.ContactMessageView.as_view(), name='contact'),

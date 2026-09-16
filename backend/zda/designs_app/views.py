@@ -187,6 +187,138 @@ class DesignExportView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+class DesignMCPView(APIView):
+    """MCP endpoint for retrieving design code via Model Context Protocol"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request, pk=None):
+        try:
+            d = Design.objects.get(id=pk)
+        except Design.DoesNotExist:
+            return Response({'error': 'Design not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Track MCP retrieval
+        AnalyticsEvent.objects.create(
+            event_type='design_export',
+            design=d,
+            user=request.user if request.user.is_authenticated else None,
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+            metadata={'method': 'mcp'}
+        )
+        
+        d.exports += 1
+        d.save(update_fields=['exports'])
+        
+        # Generate framework-specific code
+        framework = request.query_params.get('framework', 'html').lower()
+        
+        code_map = {
+            'react': self._generate_react(d),
+            'vue': self._generate_vue(d),
+            'svelte': self._generate_svelte(d),
+            'astro': self._generate_astro(d),
+            'html': self._generate_html(d),
+        }
+        
+        generated_code = code_map.get(framework, self._generate_html(d))
+        
+        return Response({
+            'success': True,
+            'design': {
+                'id': d.id,
+                'name': d.name,
+                'category': d.category,
+                'framework': d.framework,
+                'description': d.description,
+            },
+            'code': {
+                'html': d.html_code,
+                'css': d.css_code,
+                'js': d.js_code,
+                'generated': generated_code,
+                'framework': framework,
+            },
+            'mcp': {
+                'command': f'npx zandeveloper-mcp --get {d.id}',
+                'export_command': f'npx zandeveloper-mcp --export {d.id} --format {framework}',
+            }
+        }, status=status.HTTP_200_OK)
+    
+    def _generate_react(self, d):
+        name = d.name.replace(' ', '').replace('-', '')
+        html = d.html_code or ''
+        css = d.css_code or ''
+        js = d.js_code or ''
+        
+        return f"""import React from 'react';
+
+{f'<style>{{`{css}`}}</style>' if css else ''}
+
+export default function {name}() {{
+  return (
+    <>
+      {html}
+    </>
+  );
+}}"""
+    
+    def _generate_vue(self, d):
+        html = d.html_code or ''
+        css = d.css_code or ''
+        js = d.js_code or ''
+        
+        return f"""<template>
+  {html}
+</template>
+
+{f'<script>{js}</script>' if js else ''}
+
+{f'<style scoped>{css}</style>' if css else ''}"""
+    
+    def _generate_svelte(self, d):
+        html = d.html_code or ''
+        css = d.css_code or ''
+        js = d.js_code or ''
+        
+        return f"""{f'<script>{js}</script>' if js else ''}
+
+{html}
+
+{f'<style>{css}</style>' if css else ''}"""
+    
+    def _generate_astro(self, d):
+        html = d.html_code or ''
+        css = d.css_code or ''
+        
+        return f"""---
+// {d.name}
+---
+
+{html}
+
+{f'<style>{css}</style>' if css else ''}"""
+    
+    def _generate_html(self, d):
+        html = d.html_code or ''
+        css = d.css_code or ''
+        js = d.js_code or ''
+        
+        return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{d.name}</title>
+  {f'<style>{css}</style>' if css else ''}
+</head>
+<body>
+  {html}
+  {f'<script>{js}</script>' if js else ''}
+</body>
+</html>"""
+
+
 class CompareDesignsView(APIView):
     def get(self, request):
         ids = request.query_params.get('ids', '')

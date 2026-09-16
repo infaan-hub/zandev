@@ -1,0 +1,123 @@
+{
+  "$schema": "https://opencode.ai/schema.json",
+  "name": "zandeveloper",
+  "version": "1.0.0",
+  "description": "Zandeveloper Design-to-Code Platform with UI MCP Integration",
+  "mcp": {
+    "servers": {
+      "zandeveloper": {
+        "command": "node",
+        "args": ["E:\\Zandeveloper\\zandeveloper-mcp\\src\\index.js"],
+        "env": {
+          "ZANDEV_API_URL": "https://zandev.onrender.com/api",
+          "ZANDEV_API_KEY": "",
+          "ZANDEV_STORAGE_PATH": "E:\\Zandeveloper\\zandeveloper-mcp\\storage",
+          "ZANDEV_DEBUG": "true"
+        },
+        "description": "Zandeveloper MCP - Main hub for layout management and MCP bridging"
+      },
+      "shadcn-ui": {
+        "command": "npx",
+        "args": ["-y", "@anthropic-ai/mcp-shadcn-ui@latest"],
+        "env": {
+          "SHADCN_DIR": "src/components/ui",
+          "SHADCN_STYLE": "default",
+          "SHADCN_TAILWIND_COLOR": "zinc"
+        },
+        "description": "shadcn/ui component generator and manager"
+      },
+      "radix-ui": {
+        "command": "npx",
+        "args": ["-y", "@anthropic-ai/mcp-radix-ui@latest"],
+        "env": {
+          "RADIX_DIR": "src/components/radix"
+        },
+        "description": "Radix UI primitives and accessible components"
+      },
+      "headless-ui": {
+        "command": "npx",
+        "args": ["-y", "@anthropic-ai/mcp-headless-ui@latest"],
+        "env": {
+          "HEADLESS_DIR": "src/components/headless"
+        },
+        "description": "Headless UI components for Tailwind CSS"
+      },
+      "ark-ui": {
+        "command": "npx",
+        "args": ["-y", "@anthropic-ai/mcp-ark-ui@latest"],
+        "env": {
+          "ARK_DIR": "src/components/ark"
+        },
+        "description": "Ark UI state machines for building UI components"
+      },
+      "mantine": {
+        "command": "npx",
+        "args": ["-y", "@anthropic-ai/mcp-mantine@latest"],
+        "env": {
+          "MANTINE_DIR": "src/components/mantine"
+        },
+        "description": "Mantine React components and hooks"
+      },
+      "chakra-ui": {
+        "command": "npx",
+        "args": ["-y", "@anthropic-ai/mcp-chakra-ui@latest"],
+        "env": {
+          "CHAKRA_DIR": "src/components/chakra"
+        },
+        "description": "Chakra UI accessible React components"
+      },
+      "park-ui": {
+        "command": "npx",
+        "args": ["-y", "@anthropic-ai/mcp-park-ui@latest"],
+        "env": {
+          "PARK_DIR": "src/components/park"
+        },
+        "description": "Park UI built on Ark UI and Tailwind"
+      },
+      "kibo-ui": {
+        "command": "npx",
+        "args": ["-y", "@anthropic-ai/mcp-kibo-ui@latest"],
+        "env": {
+          "KIBO_DIR": "src/components/kibo"
+        },
+        "description": "Kibo UI extended shadcn components"
+      },
+      "logic-ui": {
+        "command": "npx",
+        "args": ["-y", "@anthropic-ai/mcp-logic-ui@latest"],
+        "env": {
+          "LOGIC_DIR": "src/components/logic"
+        },
+        "description": "Logic UI components for React"
+      },
+      "xyflow": {
+        "command": "npx",
+        "args": ["-y", "@anthropic-ai/mcp-xyflow@latest"],
+        "env": {
+          "XYFLOW_DIR": "src/components/xyflow"
+        },
+        "description": "XY Flow node-based UI components"
+      }
+    }
+  },
+  "tools": {
+    "ui-components": {
+      "enabled": true,
+      "description": "UI component generation and management tools"
+    },
+    "design-system": {
+      "enabled": true,
+      "description": "Design system and theming tools"
+    },
+    "accessibility": {
+      "enabled": true,
+      "description": "Accessibility testing and validation tools"
+    }
+  },
+  "settings": {
+    "theme": "dark",
+    "autoSave": true,
+    "formatOnSave": true,
+    "lintOnSave": true
+  }
+}
