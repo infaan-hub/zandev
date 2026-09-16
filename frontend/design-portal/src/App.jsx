@@ -5,6 +5,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import Home from './pages/Home'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
+import ForgotPassword from './pages/ForgotPassword'
 import FreeTrial from './pages/FreeTrial'
 import Demo from './pages/Demo'
 import Tools from './pages/Tools'
@@ -59,6 +60,7 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/free-trial" element={<FreeTrial />} />
               <Route path="/demo" element={<Demo />} />
               <Route path="/tools" element={<Tools />} />

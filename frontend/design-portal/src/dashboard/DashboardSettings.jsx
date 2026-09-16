@@ -1,4 +1,4 @@
-import { User, Bell, Shield, Palette, Save, CreditCard, Globe, Key, CheckCircle, Download as DownloadIcon, Trash2 } from 'lucide-react'
+import { User, Bell, Shield, Palette, Save, Globe, Key, Download as DownloadIcon, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useDashboard } from './DashboardContext'
 
@@ -52,7 +52,6 @@ export default function DashboardSettings() {
     { key: 'profile', label: 'Profile', icon: User },
     { key: 'notifications', label: 'Notifications', icon: Bell },
     { key: 'security', label: 'Security', icon: Shield },
-    { key: 'billing', label: 'Billing', icon: CreditCard },
     { key: 'appearance', label: 'Appearance', icon: Palette },
     { key: 'data', label: 'Data', icon: DownloadIcon },
   ]
@@ -146,21 +145,6 @@ export default function DashboardSettings() {
                   {twoFactor ? 'Disable 2FA' : 'Enable 2FA'}
                 </button>
               </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'billing' && (
-          <div className={`p-[24px] rounded-[18px] border ${c.card}`}>
-            <div className="flex items-center gap-[10px] mb-[20px]"><CreditCard size={16} className={c.muted} /><div className={`text-[12px] font-semibold ${c.text}`}>Subscription Plan</div></div>
-            <div className={`p-[20px] rounded-[14px] border mb-[20px] ${isLight ? 'border-[#4ade80]/30 bg-[#f0fdf4]' : 'border-[#4ade80]/30 bg-[#4ade80]/5'}`}>
-              <div className="flex items-center gap-[8px] mb-[8px]"><CheckCircle size={14} className="text-[#4ade80]" /><span className={`text-[12px] font-semibold ${c.text}`}>Pro Plan</span></div>
-              <div className={`${c.body} text-[10px]`}>$19/month · Renews on Sep 15, 2026</div>
-              <div className="flex gap-[12px] mt-[12px] text-[9px]"><span className="text-[#4ade80]">✓ Unlimited downloads</span><span className="text-[#4ade80]">✓ All frameworks</span><span className="text-[#4ade80]">✓ Priority export</span></div>
-            </div>
-            <div className="flex gap-[8px]">
-              <button onClick={() => addToast('Plan management coming soon')} className={`px-[14px] py-[8px] rounded-[8px] text-[10px] font-medium border transition-colors ${c.btn}`}>Change Plan</button>
-              <button onClick={() => addToast('Cancellation flow coming soon', 'error')} className="px-[14px] py-[8px] rounded-[8px] text-[10px] font-medium text-[#ef4444] border border-[#ef4444]/20 hover:bg-[#ef4444]/10 transition-colors">Cancel Subscription</button>
             </div>
           </div>
         )}

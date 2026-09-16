@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +11,8 @@ import os
 import urllib.request
 import urllib.parse
 import json
+
+token_generator = PasswordResetTokenGenerator()
 
 
 GITHUB_CLIENT_ID = os.environ.get('GITHUB_CLIENT_ID', '')
@@ -106,9 +109,15 @@ class PasswordResetRequestView(APIView):
             return Response({'error': 'Email required'}, status=status.HTTP_400_BAD_REQUEST)
         user = User.objects.filter(email=email).first()
         if user:
-            token = uuid.uuid4().hex
-            user.profile = token
-            user.save()
+            token = token_generator.make_token(user)
+            # In production, send email with reset link
+            # For now, return token directly (dev mode)
+            return Response({
+                'success': True,
+                'message': 'If the email exists, a reset link has been sent',
+                'token': token,
+                'user_id': user.id,
+            })
         return Response({'success': True, 'message': 'If the email exists, a reset link has been sent'})
 
 
@@ -116,10 +125,19 @@ class PasswordResetConfirmView(APIView):
     def post(self, request):
         token = request.data.get('token', '')
         password = request.data.get('password', '')
-        if not token or not password:
-            return Response({'error': 'Token and password required'}, status=status.HTTP_400_BAD_REQUEST)
+        user_id = request.data.get('user_id')
+        if not token or not password or not user_id:
+            return Response({'error': 'Token, password, and user_id required'}, status=status.HTTP_400_BAD_REQUEST)
         if len(password) < 6:
             return Response({'error': 'Password must be at least 6 characters'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+        if not token_generator.check_token(user, token):
+            return Response({'error': 'Invalid or expired token'}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(password)
+        user.save()
         return Response({'success': True, 'message': 'Password reset successful'})
 
 

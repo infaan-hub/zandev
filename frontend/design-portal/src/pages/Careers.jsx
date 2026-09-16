@@ -1,12 +1,5 @@
 import PageLayout from '../components/PageLayout'
 
-const openings = [
-  { title: 'Senior Frontend Engineer', team: 'Engineering', location: 'Remote', type: 'Full-time' },
-  { title: 'Design Engineer', team: 'Design', location: 'Remote', type: 'Full-time' },
-  { title: 'Content Writer', team: 'Marketing', location: 'Remote', type: 'Full-time' },
-  { title: 'DevRel Lead', team: 'Developer Relations', location: 'Remote', type: 'Full-time' },
-]
-
 export default function Careers() {
   return (
     <PageLayout title="">
@@ -39,21 +32,10 @@ export default function Careers() {
       </div>
 
       {/* Openings */}
-      <div className="max-w-[920px] mx-auto">
-        <h2 className="text-[22px] tracking-[-0.04em] font-semibold mb-[24px]">Open Positions</h2>
-        <div className="flex flex-col gap-[8px]">
-          {openings.map((o) => (
-            <div key={o.title} className="flex flex-col md:flex-row md:items-center justify-between p-[20px] rounded-[14px] border border-white/[0.10] bg-[#080808] gap-[12px]">
-              <div>
-                <div className="text-[13px] font-semibold">{o.title}</div>
-                <div className="text-[#555] text-[10px] mt-[4px]">{o.team} · {o.location} · {o.type}</div>
-              </div>
-              <a href={`mailto:careers@zandeveloper.vercel.app?subject=Application: ${o.title}`} className="px-[16px] py-[8px] rounded-[8px] border border-white/[0.10] bg-white/[0.035] text-[10px] font-semibold text-white hover:bg-white/[0.08] transition-colors cursor-pointer whitespace-nowrap inline-block">
-                Apply
-              </a>
-            </div>
-          ))}
-        </div>
+      <div className="max-w-[920px] mx-auto text-center py-[60px] rounded-[18px] border border-white/[0.10] bg-gradient-to-br from-white/[0.035] to-white/[0.008]">
+        <h2 className="text-[22px] tracking-[-0.04em] font-semibold mb-[12px]">Open Positions</h2>
+        <p className="text-[#666] text-[12px] mb-[20px]">No open positions at the moment.</p>
+        <p className="text-[#555] text-[11px]">We&apos;re always interested in talented people. Send your resume to <a href="mailto:careers@zandeveloper.vercel.app" className="text-white hover:underline">careers@zandeveloper.vercel.app</a></p>
       </div>
     </PageLayout>
   )

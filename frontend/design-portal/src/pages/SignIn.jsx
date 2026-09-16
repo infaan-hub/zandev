@@ -194,6 +194,9 @@ export default function SignIn() {
                   className="w-full h-[40px] px-[14px] rounded-[8px] border border-white/[0.10] bg-white/[0.035] text-white text-[12px] placeholder-[#555] outline-none focus:border-white/[0.25] transition-colors"
                 />
               </div>
+              <div className="flex justify-end mb-[20px]">
+                <Link to="/forgot-password" className="text-[10px] text-[#888] hover:text-white transition-colors">Forgot password?</Link>
+              </div>
               <button
                 type="submit"
                 disabled={loading}

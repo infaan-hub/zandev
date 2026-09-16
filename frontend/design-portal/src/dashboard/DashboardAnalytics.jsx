@@ -1,10 +1,18 @@
 import { TrendingUp, Download, Eye, Code2, Clock, ArrowUpRight, ArrowDownRight } from 'lucide-react'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from './DashboardContext'
+import { api } from '../lib/api'
 
 export default function DashboardAnalytics() {
   const { downloads, isLight } = useDashboard()
   const [timeRange, setTimeRange] = useState('7d')
+  const [analytics, setAnalytics] = useState(null)
+
+  useEffect(() => {
+    api.getAnalyticsDashboard()
+      .then(data => setAnalytics(data))
+      .catch(() => {})
+  }, [])
 
   const c = {
     card: isLight ? 'bg-white border-black/[0.06]' : 'bg-[#080808] border-white/[0.10]',
@@ -20,21 +28,19 @@ export default function DashboardAnalytics() {
 
   const metrics = useMemo(() => {
     const totalDownloads = downloads.length
-    const totalExports = downloads.reduce((a, d) => a + d.exports, 0)
-    const totalViews = downloads.reduce((a, d) => a + Math.floor(d.exports * 6.5), 0)
+    const totalExports = downloads.reduce((a, d) => a + (d.exports || 0), 0)
+    const totalViews = downloads.reduce((a, d) => a + (d.views || 0), 0)
     const frameworks = [...new Set(downloads.map(d => d.framework))].length
     return [
-      { label: 'Total Components', value: totalDownloads.toString(), change: '+12.4%', up: true, icon: Download },
-      { label: 'Total Views', value: totalViews.toLocaleString(), change: '+24.1%', up: true, icon: Eye },
-      { label: 'Code Exports', value: totalExports.toString(), change: '+18.7%', up: true, icon: Code2 },
-      { label: 'Frameworks Used', value: frameworks.toString(), change: '+2', up: true, icon: Clock },
+      { label: 'Total Components', value: totalDownloads.toString(), change: '', up: true, icon: Download },
+      { label: 'Total Views', value: totalViews.toLocaleString(), change: '', up: true, icon: Eye },
+      { label: 'Code Exports', value: totalExports.toString(), change: '', up: true, icon: Code2 },
+      { label: 'Frameworks Used', value: frameworks.toString(), change: '', up: true, icon: Clock },
     ]
   }, [downloads])
 
   const topDesigns = useMemo(() => {
-    return [...downloads].sort((a, b) => b.exports - a.exports).slice(0, 5).map(d => ({
-      ...d, views: Math.floor(d.exports * 6.5), trend: `+${Math.floor(Math.random() * 20 + 5)}%`,
-    }))
+    return [...downloads].sort((a, b) => (b.exports || 0) - (a.exports || 0)).slice(0, 5)
   }, [downloads])
 
   const categoryBreakdown = useMemo(() => {
@@ -51,9 +57,23 @@ export default function DashboardAnalytics() {
 
   const weeklyData = useMemo(() => {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    const base = downloads.length
-    return days.map((day) => ({
-      day, downloads: Math.floor(base * (0.5 + Math.random() * 1.5)), views: Math.floor(base * (3 + Math.random() * 5)), exports: Math.floor(base * (0.3 + Math.random() * 0.8)),
+    const byDay = {}
+    downloads.forEach(d => {
+      if (d.downloaded_at) {
+        const date = new Date(d.downloaded_at)
+        const dayIdx = (date.getDay() + 6) % 7
+        const dayName = days[dayIdx]
+        if (!byDay[dayName]) byDay[dayName] = { downloads: 0, views: 0, exports: 0 }
+        byDay[dayName].downloads++
+        byDay[dayName].views += (d.views || 0)
+        byDay[dayName].exports += (d.exports || 0)
+      }
+    })
+    return days.map(day => ({
+      day,
+      downloads: byDay[day]?.downloads || 0,
+      views: byDay[day]?.views || 0,
+      exports: byDay[day]?.exports || 0,
     }))
   }, [downloads])
 
@@ -138,11 +158,10 @@ export default function DashboardAnalytics() {
                     <div className={`text-[11px] font-medium ${c.text}`}>{d.name}</div>
                     <div className={`${c.body} text-[8px]`}>{d.framework} · {d.category}</div>
                   </div>
-                  <span className="text-[#4ade80] text-[9px]">{d.trend}</span>
                 </div>
                 <div className={`flex gap-[14px] text-[9px] pl-[24px]`}>
-                  <span className={c.body}>{d.views.toLocaleString()} views</span>
-                  <span className={`font-semibold ${c.text}`}>{d.exports} exports</span>
+                  <span className={c.body}>{(d.views || 0).toLocaleString()} views</span>
+                  <span className={`font-semibold ${c.text}`}>{d.exports || 0} exports</span>
                 </div>
               </div>
             ))}

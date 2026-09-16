@@ -48,7 +48,17 @@ export default function DashboardOverview() {
     preview: isLight ? 'bg-[#f5f5f5]' : 'bg-[#0a0a0a]',
   }
 
-  const monthlyUsage = [120, 180, 145, 210, 195, 240, 220, 280, 260, 310, 290, downloads.length * 28]
+  const monthlyUsage = (() => {
+    const months = Array(12).fill(0)
+    downloads.forEach(d => {
+      if (d.downloaded_at) {
+        const date = new Date(d.downloaded_at)
+        const monthIdx = date.getMonth()
+        months[monthIdx]++
+      }
+    })
+    return months
+  })()
   const maxUsage = Math.max(...monthlyUsage)
 
   const frameworks = [
