@@ -24,7 +24,7 @@ try:
                 'action': action,
             }
         )
-except ImportError:
+except (ImportError, Exception):
     def broadcast_design_update(design_id, action, design_data=None):
         pass
 

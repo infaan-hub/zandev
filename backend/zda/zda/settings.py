@@ -14,14 +14,12 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 INSTALLED_APPS = [
-    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'channels',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
@@ -129,11 +127,3 @@ X_FRAME_OPTIONS = 'DENY'
 
 # Password reset settings
 PASSWORD_RESET_TIMEOUT = 3600
-
-# Django Channels
-ASGI_APPLICATION = 'zda.asgi.application'
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    },
-}
