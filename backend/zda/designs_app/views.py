@@ -7,7 +7,7 @@ from django.db.models import Count, Sum, Avg, Q
 from django.utils import timezone
 from datetime import timedelta
 from .models import (Design, ActivityLog, Category, ContactMessage, Collection,
-    CollectionDesign, DesignVersion, Review, DesignRemix, Webhook, WebhookDelivery,
+    CollectionDesign, DesignVersion, Review, Webhook, WebhookDelivery,
     AnalyticsEvent, AdminAuditLog, UserDownload)
 
 
@@ -46,7 +46,7 @@ class DesignListView(APIView):
             max_score = request.query_params.get('max_score')
             has_code = request.query_params.get('has_code')
 
-            qs = Design.objects.all()
+            qs = Design.objects.filter(published=True)
 
             if framework:
                 qs = qs.filter(framework__iexact=framework)
@@ -91,12 +91,15 @@ class DesignListView(APIView):
                     'views': d.views,
                     'exports': d.exports,
                     'preview': d.get_preview_url(),
+                    'preview_image': d.preview_image,
                     'file_type': d.file_type,
                     'description': d.description,
                     'html_code': d.html_code,
                     'css_code': d.css_code,
                     'js_code': d.js_code,
-                    'has_code': bool(d.html_code or d.css_code or d.js_code or d.code),
+                    'react_code': d.react_code,
+                    'has_code': bool(d.html_code or d.css_code or d.js_code or d.react_code or d.vue_code or d.svelte_code or d.astro_code or d.next_code or d.code),
+                    'version': d.version,
                     'review_count': d.review_count,
                     'avg_rating': d.avg_rating,
                 })
@@ -135,11 +138,25 @@ class DesignDetailView(APIView):
             'preview': d.get_preview_url(),
             'file_type': d.file_type,
             'description': d.description,
+            'prompt': d.prompt,
+            'preview_image': d.preview_image,
+            'gallery_image_1': d.gallery_image_1,
+            'gallery_image_2': d.gallery_image_2,
+            'gallery_image_3': d.gallery_image_3,
+            'gallery_image_4': d.gallery_image_4,
+            'gallery_image_5': d.gallery_image_5,
             'html_code': d.html_code,
             'css_code': d.css_code,
             'js_code': d.js_code,
+            'react_code': d.react_code,
+            'vue_code': d.vue_code,
+            'svelte_code': d.svelte_code,
+            'astro_code': d.astro_code,
+            'next_code': d.next_code,
             'code': d.code,
-            'has_code': bool(d.html_code or d.css_code or d.js_code or d.code),
+            'has_code': bool(d.html_code or d.css_code or d.js_code or d.react_code or d.vue_code or d.svelte_code or d.astro_code or d.next_code or d.code),
+            'version': d.version,
+            'published': d.published,
             'review_count': d.reviews.count(),
             'avg_rating': d.reviews.aggregate(avg=Avg('rating'))['avg'],
             'reviews': [{
@@ -150,6 +167,7 @@ class DesignDetailView(APIView):
                 'created_at': r.created_at.isoformat(),
             } for r in reviews],
             'created_at': d.created_at.isoformat(),
+            'updated_at': d.updated_at.isoformat(),
         }, status=status.HTTP_200_OK)
 
 
@@ -465,20 +483,6 @@ class ReviewListView(APIView):
         return Response({'id': r.id, 'success': True}, status=status.HTTP_201_CREATED)
 
 
-class RemixListView(APIView):
-    def get(self, request):
-        if not request.user.is_authenticated:
-            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
-        remixes = DesignRemix.objects.filter(user=request.user).select_related('parent_design', 'remix_design')[:50]
-        data = [{
-            'id': r.id,
-            'parent': {'id': r.parent_design.id, 'name': r.parent_design.name},
-            'remix': {'id': r.remix_design.id, 'name': r.remix_design.name},
-            'created_at': r.created_at.isoformat(),
-        } for r in remixes]
-        return Response({'remixes': data})
-
-
 class WebhookListView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
@@ -549,15 +553,11 @@ class UserDownloadsView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
             return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
-        downloads = UserDownload.objects.filter(user=request.user).select_related('design').order_by('-downloaded_at')
-        results = []
-        for d in downloads:
-            results.append({
-                'id': d.id,
-                'design_id': d.design.id if d.design else None,
-                'design_name': d.design.name if d.design else 'Unknown',
-                'framework': d.design.framework if d.design else '',
-                'downloaded_at': d.downloaded_at.isoformat(),
-                'download_type': d.download_type,
-            })
+        downloads = UserDownload.objects.filter(user=request.user).order_by('-downloaded_at')
+        results = [{
+            'id': d.id,
+            'design_id': d.design_id,
+            'design_name': d.design_name,
+            'downloaded_at': d.downloaded_at.isoformat(),
+        } for d in downloads]
         return Response({'results': results, 'count': len(results)})

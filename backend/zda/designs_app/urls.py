@@ -16,7 +16,6 @@ urlpatterns = [
     path('collections/', views.CollectionListView.as_view(), name='collection-list'),
     path('collections/<int:pk>/', views.CollectionDetailView.as_view(), name='collection-detail'),
     path('designs/<int:design_id>/reviews/', views.ReviewListView.as_view(), name='review-list'),
-    path('remixes/', views.RemixListView.as_view(), name='remix-list'),
     path('webhooks/', views.WebhookListView.as_view(), name='webhook-list'),
     path('webhooks/<int:pk>/', views.WebhookDeleteView.as_view(), name='webhook-delete'),
     path('analytics/dashboard/', views.AnalyticsDashboardView.as_view(), name='analytics-dashboard'),
@@ -49,6 +48,8 @@ urlpatterns = [
     path('admin-auth/designs/bulk/', admin_views.AdminBulkDesignsView.as_view(), name='admin-designs-bulk'),
     path('admin-auth/designs/<int:pk>/update/', admin_views.AdminDesignUpdateView.as_view(), name='admin-design-update'),
     path('admin-auth/designs/<int:pk>/delete/', admin_views.AdminDesignDeleteView.as_view(), name='admin-design-delete'),
+    path('admin-auth/designs/<int:pk>/publish/', admin_views.AdminDesignPublishView.as_view(), name='admin-design-publish'),
+    path('admin-auth/designs/<int:pk>/unpublish/', admin_views.AdminDesignUnpublishView.as_view(), name='admin-design-unpublish'),
     path('admin-auth/designs/<int:pk>/versions/', admin_views.AdminDesignVersionsView.as_view(), name='admin-design-versions'),
     path('admin-auth/contact-messages/', admin_views.AdminContactMessagesView.as_view(), name='admin-contact-messages'),
 ]

@@ -6,6 +6,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Design(models.Model):
     name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, blank=True, default='')
     category = models.CharField(max_length=100, default='Landing')
     framework = models.CharField(max_length=100, default='React')
     price = models.CharField(max_length=20, default='Free')
@@ -13,8 +14,14 @@ class Design(models.Model):
     views = models.IntegerField(default=0)
     exports = models.IntegerField(default=0)
     description = models.TextField(default='')
+    prompt = models.TextField(blank=True, default='')
     preview_image = models.URLField(max_length=500, blank=True, default='')
     uploaded_file = models.FileField(upload_to='designs/previews/', blank=True, default='')
+    gallery_image_1 = models.URLField(max_length=500, blank=True, default='')
+    gallery_image_2 = models.URLField(max_length=500, blank=True, default='')
+    gallery_image_3 = models.URLField(max_length=500, blank=True, default='')
+    gallery_image_4 = models.URLField(max_length=500, blank=True, default='')
+    gallery_image_5 = models.URLField(max_length=500, blank=True, default='')
     file_type = models.CharField(max_length=20, choices=[
         ('image', 'Image'),
         ('video', 'Video'),
@@ -24,6 +31,13 @@ class Design(models.Model):
     html_code = models.TextField(blank=True, default='')
     css_code = models.TextField(blank=True, default='')
     js_code = models.TextField(blank=True, default='')
+    react_code = models.TextField(blank=True, default='')
+    vue_code = models.TextField(blank=True, default='')
+    svelte_code = models.TextField(blank=True, default='')
+    astro_code = models.TextField(blank=True, default='')
+    next_code = models.TextField(blank=True, default='')
+    version = models.IntegerField(default=1)
+    published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -134,19 +148,6 @@ class Review(models.Model):
         return f"{self.user.username} - {self.design.name} ({self.rating}/5)"
 
 
-class DesignRemix(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='remixes')
-    parent_design = models.ForeignKey(Design, on_delete=models.CASCADE, related_name='child_remixes')
-    remix_design = models.OneToOneField(Design, on_delete=models.CASCADE, related_name='source_remix')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.user.username} remixed {self.parent_design.name}"
-
-
 class Webhook(models.Model):
     EVENT_CHOICES = [
         ('design.created', 'Design Created'),
@@ -193,7 +194,6 @@ class AnalyticsEvent(models.Model):
         ('signup', 'Sign Up'),
         ('login', 'Login'),
         ('review', 'Review'),
-        ('remix', 'Remix'),
     ]
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     event_type = models.CharField(max_length=30, choices=EVENT_TYPES)

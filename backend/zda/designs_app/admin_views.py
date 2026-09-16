@@ -11,6 +11,23 @@ from rest_framework.authtoken.models import Token
 from .models import (ActivityLog, BlockedIP, ThreatAlert, UserDownload, Design,
     AdminAuditLog, ContactMessage, Category, DesignVersion, Review)
 
+try:
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+    def broadcast_design_update(design_id, action, design_data=None):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            'designs',
+            {
+                'type': 'design_updated',
+                'design': design_data or {'id': design_id},
+                'action': action,
+            }
+        )
+except ImportError:
+    def broadcast_design_update(design_id, action, design_data=None):
+        pass
+
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'admin123'
 
@@ -336,10 +353,18 @@ def _design_to_dict(d):
         'id': d.id, 'name': d.name, 'category': d.category,
         'framework': d.framework, 'price': d.price, 'score': d.score,
         'views': d.views, 'exports': d.exports,
-        'description': d.description, 'preview': d.get_preview_url(),
+        'description': d.description, 'prompt': d.prompt,
+        'preview_image': d.preview_image, 'preview': d.get_preview_url(),
+        'gallery_image_1': d.gallery_image_1, 'gallery_image_2': d.gallery_image_2,
+        'gallery_image_3': d.gallery_image_3, 'gallery_image_4': d.gallery_image_4,
+        'gallery_image_5': d.gallery_image_5,
         'file_type': d.file_type, 'code': d.code,
         'html_code': d.html_code, 'css_code': d.css_code, 'js_code': d.js_code,
-        'created_at': d.created_at.isoformat(),
+        'react_code': d.react_code, 'vue_code': d.vue_code,
+        'svelte_code': d.svelte_code, 'astro_code': d.astro_code,
+        'next_code': d.next_code,
+        'version': d.version, 'published': d.published,
+        'created_at': d.created_at.isoformat(), 'updated_at': d.updated_at.isoformat(),
     }
 
 
@@ -362,11 +387,23 @@ class AdminDesignCreateView(APIView):
             price=request.data.get('price', 'Free'),
             score=int(request.data.get('score', 0)),
             description=request.data.get('description', ''),
+            prompt=request.data.get('prompt', ''),
             preview_image=request.data.get('preview_image', ''),
+            gallery_image_1=request.data.get('gallery_image_1', ''),
+            gallery_image_2=request.data.get('gallery_image_2', ''),
+            gallery_image_3=request.data.get('gallery_image_3', ''),
+            gallery_image_4=request.data.get('gallery_image_4', ''),
+            gallery_image_5=request.data.get('gallery_image_5', ''),
             code=request.data.get('code', ''),
             html_code=request.data.get('html_code', ''),
             css_code=request.data.get('css_code', ''),
             js_code=request.data.get('js_code', ''),
+            react_code=request.data.get('react_code', ''),
+            vue_code=request.data.get('vue_code', ''),
+            svelte_code=request.data.get('svelte_code', ''),
+            astro_code=request.data.get('astro_code', ''),
+            next_code=request.data.get('next_code', ''),
+            published=request.data.get('published', 'true').lower() == 'true',
         )
         uploaded = request.FILES.get('file')
         if uploaded:
@@ -377,6 +414,7 @@ class AdminDesignCreateView(APIView):
         d.save()
         log_activity('export', f'Created design: {d.name}', ip=_get_ip(request))
         audit_log(request.user, 'create_design', 'design', d.id, {'name': d.name}, _get_ip(request))
+        broadcast_design_update(d.id, 'create', _design_to_dict(d))
         return Response(_design_to_dict(d), status=status.HTTP_201_CREATED)
 
 
@@ -392,11 +430,24 @@ class AdminDesignUpdateView(APIView):
         d.price = request.data.get('price', d.price)
         d.score = int(request.data.get('score', d.score))
         d.description = request.data.get('description', d.description)
+        d.prompt = request.data.get('prompt', d.prompt)
         d.preview_image = request.data.get('preview_image', d.preview_image)
+        d.gallery_image_1 = request.data.get('gallery_image_1', d.gallery_image_1)
+        d.gallery_image_2 = request.data.get('gallery_image_2', d.gallery_image_2)
+        d.gallery_image_3 = request.data.get('gallery_image_3', d.gallery_image_3)
+        d.gallery_image_4 = request.data.get('gallery_image_4', d.gallery_image_4)
+        d.gallery_image_5 = request.data.get('gallery_image_5', d.gallery_image_5)
         d.code = request.data.get('code', d.code)
         d.html_code = request.data.get('html_code', d.html_code)
         d.css_code = request.data.get('css_code', d.css_code)
         d.js_code = request.data.get('js_code', d.js_code)
+        d.react_code = request.data.get('react_code', d.react_code)
+        d.vue_code = request.data.get('vue_code', d.vue_code)
+        d.svelte_code = request.data.get('svelte_code', d.svelte_code)
+        d.astro_code = request.data.get('astro_code', d.astro_code)
+        d.next_code = request.data.get('next_code', d.next_code)
+        if 'published' in request.data:
+            d.published = request.data.get('published', d.published)
         uploaded = request.FILES.get('file')
         if uploaded:
             if d.uploaded_file:
@@ -406,16 +457,18 @@ class AdminDesignUpdateView(APIView):
                     pass
             d.uploaded_file = uploaded
             d.file_type = _detect_file_type(uploaded.name)
+        d.version += 1
         d.save()
 
         DesignVersion.objects.create(
-            design=d, version_number=d.versions.count() + 1,
+            design=d, version_number=d.version,
             html_code=d.html_code, css_code=d.css_code, js_code=d.js_code,
             changelog=request.data.get('changelog', ''),
             created_by=request.user if request.user.is_authenticated else None,
         )
 
         audit_log(request.user, 'update_design', 'design', d.id, {'name': d.name}, _get_ip(request))
+        broadcast_design_update(d.id, 'update', _design_to_dict(d))
         return Response(_design_to_dict(d))
 
 
@@ -434,6 +487,7 @@ class AdminDesignDeleteView(APIView):
         d.delete()
         log_activity('delete_user', f'Deleted design: {name}', ip=_get_ip(request))
         audit_log(request.user, 'delete_design', 'design', pk, {'name': name}, _get_ip(request))
+        broadcast_design_update(pk, 'delete', {'id': pk, 'name': name})
         return Response({'success': True})
 
 
@@ -450,6 +504,30 @@ class AdminDesignVersionsView(APIView):
             'created_at': v.created_at.isoformat(),
         } for v in versions]
         return Response({'versions': data})
+
+
+class AdminDesignPublishView(APIView):
+    def post(self, request, pk):
+        try:
+            d = Design.objects.get(id=pk)
+        except Design.DoesNotExist:
+            return Response({'error': 'Design not found'}, status=status.HTTP_404_NOT_FOUND)
+        d.published = True
+        d.save(update_fields=['published', 'updated_at'])
+        broadcast_design_update(d.id, 'publish', _design_to_dict(d))
+        return Response(_design_to_dict(d))
+
+
+class AdminDesignUnpublishView(APIView):
+    def post(self, request, pk):
+        try:
+            d = Design.objects.get(id=pk)
+        except Design.DoesNotExist:
+            return Response({'error': 'Design not found'}, status=status.HTTP_404_NOT_FOUND)
+        d.published = False
+        d.save(update_fields=['published', 'updated_at'])
+        broadcast_design_update(d.id, 'unpublish', _design_to_dict(d))
+        return Response(_design_to_dict(d))
 
 
 def _run_security_scan():

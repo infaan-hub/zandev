@@ -17,7 +17,7 @@ const STYLE_DEFINITIONS = [
 
   // 11-20: Terminal & Code
   { id: 11, name: 'Terminal', component: 'TerminalCard', category: 'terminal', accent: '#22c55e', accentRgb: '34,197,94' },
-  { id: 12, name: 'Code Editor', component: 'CodeEditorCard', category: 'terminal', accent: '#3b82f6', accentRgb: '59,130,246' },
+  { id: 12, name: 'Code Editor', component: 'TerminalCard', category: 'terminal', accent: '#3b82f6', accentRgb: '59,130,246' },
   { id: 13, name: 'Blueprint', component: 'BlueprintCard', category: 'terminal', accent: '#06b6d4', accentRgb: '6,182,212' },
   { id: 14, name: 'Glitch', component: 'GlitchCard', category: 'terminal', accent: '#ec4899', accentRgb: '236,72,153' },
   { id: 15, name: 'ASCII Art', component: 'ASCIICard', category: 'terminal', accent: '#14b8a6', accentRgb: '20,184,166' },

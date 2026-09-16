@@ -3,7 +3,6 @@ import TiltCard from './cards/TiltCard';
 import FlipCard from './cards/FlipCard';
 import FloatCard from './cards/FloatCard';
 import TerminalCard from './cards/TerminalCard';
-import CodeEditorCard from './cards/CodeEditorCard';
 import MetricCard from './cards/MetricCard';
 import ProgressCard from './cards/ProgressCard';
 import StatCard from './cards/StatCard';
@@ -22,7 +21,6 @@ const CARD_MAP = {
   FlipCard,
   FloatCard,
   TerminalCard,
-  CodeEditorCard,
   MetricCard,
   ProgressCard,
   StatCard,
@@ -34,7 +32,6 @@ const CARD_MAP = {
   GlassCard,
   GradientCard,
   BaseCard,
-  // Aliases for styles referencing components not yet split into separate files
   CubeCard: TiltCard,
   MagneticCard: FloatCard,
   ZoomCard: FloatCard,
@@ -46,8 +43,8 @@ const CARD_MAP = {
   GlitchCard: MatrixCard,
   ASCIICard: TerminalCard,
   DebugCard: TerminalCard,
-  MinimapCard: CodeEditorCard,
-  DiffCard: CodeEditorCard,
+  MinimapCard: BaseCard,
+  DiffCard: BaseCard,
   SSHCard: TerminalCard,
   CompileCard: TerminalCard,
   KPICard: MetricCard,
@@ -126,7 +123,7 @@ const CARD_MAP = {
   OutlineCard: BaseCard,
   GradientTextCard: GradientCard,
   DropCapCard: BaseCard,
-  InlineCodeCard: CodeEditorCard,
+  InlineCodeCard: BaseCard,
   TagCloudCard: BaseCard,
   QuoteCard: BaseCard,
   HighlightCard: BaseCard,

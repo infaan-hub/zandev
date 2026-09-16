@@ -7,7 +7,7 @@ import { useAuth } from '../lib/AuthContext'
 
 export default function FreeTrial() {
   const navigate = useNavigate()
-  const { setUser } = useAuth()
+  const { login } = useAuth()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,7 +29,7 @@ export default function FreeTrial() {
     try {
       const res = await api.register({ username: name, email, password })
       localStorage.setItem('token', res.token)
-      setUser(res.user)
+      await login({ username: name, password })
       navigate('/dashboard')
     } catch (err) {
       setError(err.message || 'Registration failed')

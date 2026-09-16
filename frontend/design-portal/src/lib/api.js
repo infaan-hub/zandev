@@ -35,9 +35,6 @@ export const api = {
   confirmPasswordReset: (data) => fetchJSON('/auth/password-reset/confirm/', { method: 'POST', body: JSON.stringify(data) }),
 
   getUserDownloads: () => fetchJSON('/user-downloads/'),
-  addUserDownload: (designId) => fetchJSON('/user-downloads/', { method: 'POST', body: JSON.stringify({ design_id: designId }) }),
-  deleteUserDownload: (id) => fetchJSON(`/user-downloads/${id}/`, { method: 'DELETE' }),
-  toggleUserDownloadFavorite: (id) => fetchJSON(`/user-downloads/${id}/favorite/`, { method: 'PATCH' }),
 
   getDesigns: (params = {}) => {
     const query = new URLSearchParams(params).toString()
@@ -58,9 +55,6 @@ export const api = {
 
   getReviews: (designId) => fetchJSON(`/designs/${designId}/reviews/`),
   createReview: (designId, data) => fetchJSON(`/designs/${designId}/reviews/`, { method: 'POST', body: JSON.stringify(data) }),
-
-  getRemixes: () => fetchJSON('/remixes/'),
-  getUserDownloads: () => fetchJSON('/user-downloads/'),
 
   getWebhooks: () => fetchJSON('/webhooks/'),
   createWebhook: (data) => fetchJSON('/webhooks/', { method: 'POST', body: JSON.stringify(data) }),
@@ -89,6 +83,8 @@ export const api = {
   adminCreateDesign: (formData) => fetchUpload('/admin-auth/designs/create/', formData),
   adminUpdateDesign: (id, formData) => fetchUpload(`/admin-auth/designs/${id}/update/`, formData),
   adminDeleteDesign: (id) => fetchJSON(`/admin-auth/designs/${id}/delete/`, { method: 'POST' }),
+  adminPublishDesign: (id) => fetchJSON(`/admin-auth/designs/${id}/publish/`, { method: 'POST' }),
+  adminUnpublishDesign: (id) => fetchJSON(`/admin-auth/designs/${id}/unpublish/`, { method: 'POST' }),
   adminBulkDesigns: (data) => fetchJSON('/admin-auth/designs/bulk/', { method: 'POST', body: JSON.stringify(data) }),
   adminGetDesignVersions: (id) => fetchJSON(`/admin-auth/designs/${id}/versions/`),
   adminContactMessages: () => fetchJSON('/admin-auth/contact-messages/'),
