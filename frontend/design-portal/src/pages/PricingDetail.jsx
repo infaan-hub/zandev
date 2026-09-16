@@ -1,24 +1,40 @@
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import PageLayout from '../components/PageLayout'
+import { api } from '../lib/api'
 
-const plans = {
-  free: {
-    name: 'Free', price: '$0', desc: 'For developers trying out the platform.',
-    features: ['100+ free designs', 'Copy source code', 'Basic frameworks', 'Community access', 'Personal projects'],
-  },
-  pro: {
-    name: 'Pro', price: '$19', period: '/month', desc: 'For developers shipping production UIs.',
-    features: ['All 2,400+ designs', 'All frameworks', 'Priority export', 'Custom themes', 'Commercial license', 'Email support'],
-    featured: true,
-  },
-  team: {
-    name: 'Team', price: '$49', period: '/month', desc: 'For teams building together.',
-    features: ['Everything in Pro', 'Team workspaces', 'Custom design systems', 'Priority support', 'Admin controls', 'SSO'],
-  },
+const FALLBACK_PLANS = {
+  free: { name: 'Free', price: '$0', desc: 'For developers trying out the platform.', features: ['100+ free designs', 'Copy source code', 'Basic frameworks', 'Community access', 'Personal projects'], featured: false, slug: 'free' },
+  pro: { name: 'Pro', price: '$19', period: '/month', desc: 'For developers shipping production UIs.', features: ['All 2,400+ designs', 'All frameworks', 'Priority export', 'Custom themes', 'Commercial license', 'Email support'], featured: true, slug: 'pro' },
+  team: { name: 'Team', price: '$49', period: '/month', desc: 'For teams building together.', features: ['Everything in Pro', 'Team workspaces', 'Custom design systems', 'Priority support', 'Admin controls', 'SSO'], featured: false, slug: 'team' },
 }
 
 export default function PricingDetail() {
   const { plan } = useParams()
+  const [plans, setPlans] = useState(FALLBACK_PLANS)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.getPricingPlans()
+      .then(data => {
+        if (data && data.length > 0) {
+          const mapped = {}
+          data.forEach(p => {
+            mapped[p.slug] = {
+              ...p,
+              price: `$${p.price}`,
+              period: p.period === 'one-time' ? '' : `/${p.period}`,
+              desc: p.description,
+              featured: p.is_popular,
+            }
+          })
+          setPlans(mapped)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
   const p = plans[plan] || plans.pro
 
   return (

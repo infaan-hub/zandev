@@ -1,11 +1,31 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { api } from '../lib/api'
+
+const FALLBACK_PLANS = [
+  { name: 'Free', price: '0', period: '', description: 'For developers trying out the platform.', features: ['100+ free designs', 'Copy source code', 'Basic frameworks', 'Community access'], is_popular: false, slug: 'free' },
+  { name: 'Pro', price: '19', period: 'month', description: 'For developers shipping production UIs.', features: ['All 2,400+ designs', 'All frameworks', 'Priority export', 'Custom themes'], is_popular: true, slug: 'pro' },
+  { name: 'Team', price: '49', period: 'month', description: 'For teams building together.', features: ['Everything in Pro', 'Team workspaces', 'Custom design systems', 'Priority support'], is_popular: false, slug: 'team' },
+]
 
 export default function Pricing() {
-  const plans = [
-    { name: 'Free', price: '$0', desc: 'For developers trying out the platform.', features: ['100+ free designs', 'Copy source code', 'Basic frameworks', 'Community access'], featured: false, slug: 'free' },
-    { name: 'Pro', price: '$19', period: '/month', desc: 'For developers shipping production UIs.', features: ['All 2,400+ designs', 'All frameworks', 'Priority export', 'Custom themes'], featured: true, slug: 'pro' },
-    { name: 'Team', price: '$49', period: '/month', desc: 'For teams building together.', features: ['Everything in Pro', 'Team workspaces', 'Custom design systems', 'Priority support'], featured: false, slug: 'team' },
-  ]
+  const [plans, setPlans] = useState(FALLBACK_PLANS)
+
+  useEffect(() => {
+    api.getPricingPlans()
+      .then(data => {
+        if (data && data.length > 0) {
+          setPlans(data.map(p => ({
+            ...p,
+            price: `$${p.price}`,
+            period: p.period === 'one-time' ? '' : `/${p.period}`,
+            desc: p.description,
+            featured: p.is_popular,
+          })))
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   return (
     <section className="relative" style={{ padding: '130px 0' }} id="pricing">
@@ -42,10 +62,10 @@ export default function Pricing() {
                 )}
               </div>
               <p className={`text-[9px] leading-[1.6] mt-[8px] ${plan.featured ? 'text-[#555]' : 'text-[#666]'}`}>
-                {plan.desc}
+                {plan.desc || plan.description}
               </p>
               <ul className="list-none mt-[25px] flex flex-col gap-[9px]">
-                {plan.features.map((f) => (
+                {(plan.features || []).map((f) => (
                   <li key={f} className={`text-[9px] ${plan.featured ? 'text-[#444]' : 'text-[#737373]'}`}>
                     <span className="text-[#aaa] mr-[7px]">✓</span>
                     {f}
