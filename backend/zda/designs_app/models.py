@@ -41,6 +41,27 @@ class Design(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # New fields for enhanced design posts
+    style = models.CharField(max_length=100, blank=True, default='')
+    industry = models.CharField(max_length=100, blank=True, default='')
+    tags = models.JSONField(default=list, blank=True)
+    colors = models.JSONField(default=dict, blank=True)
+    typography = models.JSONField(default=dict, blank=True)
+    animations = models.CharField(max_length=100, blank=True, default='')
+    layout_type = models.CharField(max_length=100, blank=True, default='')
+    responsive = models.BooleanField(default=True)
+    accessibility = models.BooleanField(default=True)
+    browser_support = models.CharField(max_length=200, blank=True, default='Chrome, Firefox, Safari, Edge')
+    license = models.CharField(max_length=50, default='MIT')
+    difficulty = models.CharField(max_length=20, choices=[
+        ('beginner', 'Beginner'),
+        ('intermediate', 'Intermediate'),
+        ('advanced', 'Advanced'),
+    ], default='intermediate')
+    creator = models.CharField(max_length=100, blank=True, default='ZanDev')
+    pricing = models.JSONField(default=dict, blank=True)
+    gallery_images = models.JSONField(default=list, blank=True)
+
     class Meta:
         ordering = ['-score', '-created_at']
 
