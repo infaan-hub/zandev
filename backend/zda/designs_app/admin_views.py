@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from .models import (ActivityLog, BlockedIP, ThreatAlert, UserDownload, Design,
-    AdminAuditLog, ContactMessage, Category, DesignVersion, Review)
+    AdminAuditLog, ContactMessage, Category, DesignVersion, Review, PricingPlan)
 
 try:
     from channels.layers import get_channel_layer
@@ -576,3 +576,93 @@ def _run_security_scan():
     if blocked > 5:
         threats.append({'type': 'High Block Count', 'description': f'{blocked} IPs blocked.', 'severity': 'medium'})
     return threats
+
+
+class AdminPricingPlanListView(APIView):
+    def get(self, request):
+        plans = PricingPlan.objects.all()
+        data = [{
+            'id': p.id,
+            'name': p.name,
+            'slug': p.slug,
+            'price': str(p.price),
+            'period': p.period,
+            'description': p.description,
+            'features': p.features,
+            'design_limit': p.design_limit,
+            'is_popular': p.is_popular,
+            'is_active': p.is_active,
+            'order': p.order,
+            'created_at': p.created_at.isoformat(),
+        } for p in plans]
+        return Response(data)
+
+    def post(self, request):
+        name = request.data.get('name', '')
+        slug = request.data.get('slug', '') or slugify(name)
+        price = request.data.get('price', 0)
+        period = request.data.get('period', 'month')
+        description = request.data.get('description', '')
+        features = request.data.get('features', [])
+        design_limit = request.data.get('design_limit', 0)
+        is_popular = request.data.get('is_popular', False)
+        is_active = request.data.get('is_active', True)
+        order = request.data.get('order', 0)
+
+        if not name:
+            return Response({'error': 'Name required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        plan = PricingPlan.objects.create(
+            name=name, slug=slug, price=price, period=period,
+            description=description, features=features, design_limit=design_limit,
+            is_popular=is_popular, is_active=is_active, order=order,
+        )
+        return Response({
+            'id': plan.id, 'name': plan.name, 'slug': plan.slug,
+            'price': str(plan.price), 'period': plan.period,
+            'description': plan.description, 'features': plan.features,
+            'design_limit': plan.design_limit, 'is_popular': plan.is_popular,
+            'is_active': plan.is_active, 'order': plan.order,
+        })
+
+
+class AdminPricingPlanDetailView(APIView):
+    def get(self, request, pk):
+        try:
+            plan = PricingPlan.objects.get(id=pk)
+        except PricingPlan.DoesNotExist:
+            return Response({'error': 'Plan not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({
+            'id': plan.id, 'name': plan.name, 'slug': plan.slug,
+            'price': str(plan.price), 'period': plan.period,
+            'description': plan.description, 'features': plan.features,
+            'design_limit': plan.design_limit, 'is_popular': plan.is_popular,
+            'is_active': plan.is_active, 'order': plan.order,
+        })
+
+    def put(self, request, pk):
+        try:
+            plan = PricingPlan.objects.get(id=pk)
+        except PricingPlan.DoesNotExist:
+            return Response({'error': 'Plan not found'}, status=status.HTTP_404_NOT_FOUND)
+        for field in ['name', 'slug', 'price', 'period', 'description', 'features', 'design_limit', 'is_popular', 'is_active', 'order']:
+            if field in request.data:
+                setattr(plan, field, request.data[field])
+        if 'name' in request.data and 'slug' not in request.data:
+            plan.slug = slugify(request.data['name'])
+        plan.save()
+        return Response({
+            'id': plan.id, 'name': plan.name, 'slug': plan.slug,
+            'price': str(plan.price), 'period': plan.period,
+            'description': plan.description, 'features': plan.features,
+            'design_limit': plan.design_limit, 'is_popular': plan.is_popular,
+            'is_active': plan.is_active, 'order': plan.order,
+        })
+
+    def delete(self, request, pk):
+        try:
+            plan = PricingPlan.objects.get(id=pk)
+        except PricingPlan.DoesNotExist:
+            return Response({'error': 'Plan not found'}, status=status.HTTP_404_NOT_FOUND)
+        plan.delete()
+        return Response({'success': True})

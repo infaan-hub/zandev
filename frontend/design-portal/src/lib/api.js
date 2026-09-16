@@ -92,4 +92,10 @@ export const api = {
   adminGetDesignVersions: (id) => fetchJSON(`/admin-auth/designs/${id}/versions/`),
   adminContactMessages: () => fetchJSON('/admin-auth/contact-messages/'),
   adminMarkMessageRead: (id) => fetchJSON('/admin-auth/contact-messages/', { method: 'POST', body: JSON.stringify({ id }) }),
+
+  adminGetPricingPlans: () => fetchJSON('/admin-auth/pricing-plans/'),
+  adminCreatePricingPlan: (data) => fetchJSON('/admin-auth/pricing-plans/', { method: 'POST', body: JSON.stringify(data) }),
+  adminUpdatePricingPlan: (id, data) => fetchJSON(`/admin-auth/pricing-plans/${id}/`, { method: 'PUT', body: JSON.stringify(data) }),
+  adminDeletePricingPlan: (id) => fetchJSON(`/admin-auth/pricing-plans/${id}/`, { method: 'DELETE' }),
+  getPricingPlans: () => fetchJSON('/pricing-plans/'),
 }

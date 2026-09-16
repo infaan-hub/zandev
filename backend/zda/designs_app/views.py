@@ -9,7 +9,7 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import (Design, ActivityLog, Category, ContactMessage, Collection,
     CollectionDesign, DesignVersion, Review, Webhook, WebhookDelivery,
-    AnalyticsEvent, AdminAuditLog, UserDownload)
+    AnalyticsEvent, AdminAuditLog, UserDownload, PricingPlan)
 
 
 def _abs_url(path):
@@ -686,3 +686,21 @@ class AuditView(APIView):
                 'timestamp': l.timestamp.isoformat(),
             } for l in all_activity],
         })
+
+
+class PricingPlanPublicView(APIView):
+    def get(self, request):
+        plans = PricingPlan.objects.filter(is_active=True)
+        data = [{
+            'id': p.id,
+            'name': p.name,
+            'slug': p.slug,
+            'price': str(p.price),
+            'period': p.period,
+            'description': p.description,
+            'features': p.features,
+            'design_limit': p.design_limit,
+            'is_popular': p.is_popular,
+            'order': p.order,
+        } for p in plans]
+        return Response(data)

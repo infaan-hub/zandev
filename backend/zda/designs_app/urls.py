@@ -55,4 +55,7 @@ urlpatterns = [
     path('admin-auth/designs/<int:pk>/unpublish/', admin_views.AdminDesignUnpublishView.as_view(), name='admin-design-unpublish'),
     path('admin-auth/designs/<int:pk>/versions/', admin_views.AdminDesignVersionsView.as_view(), name='admin-design-versions'),
     path('admin-auth/contact-messages/', admin_views.AdminContactMessagesView.as_view(), name='admin-contact-messages'),
+    path('admin-auth/pricing-plans/', admin_views.AdminPricingPlanListView.as_view(), name='admin-pricing-plan-list'),
+    path('admin-auth/pricing-plans/<int:pk>/', admin_views.AdminPricingPlanDetailView.as_view(), name='admin-pricing-plan-detail'),
+    path('pricing-plans/', views.PricingPlanPublicView.as_view(), name='pricing-plan-public'),
 ]

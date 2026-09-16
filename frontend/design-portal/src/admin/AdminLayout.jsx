@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
-import { Shield, Activity, Users, Lock, AlertTriangle, LayoutDashboard, ExternalLink, Palette, ClipboardList } from 'lucide-react'
+import { Shield, Activity, Users, Lock, AlertTriangle, LayoutDashboard, ExternalLink, Palette, ClipboardList, DollarSign, ChevronDown, ChevronRight } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 
 const navItems = [
   { label: 'Overview', href: '/admin-dashboard', icon: LayoutDashboard },
   { label: 'Designs', href: '/admin-dashboard/designs', icon: Palette },
-  { label: 'Audit', href: '/admin-dashboard/audit', icon: ClipboardList },
-  { label: 'Activity Logs', href: '/admin-dashboard/logs', icon: Activity },
+  { label: 'Pricing', href: '/admin-dashboard/pricing', icon: DollarSign },
   { label: 'Users', href: '/admin-dashboard/users', icon: Users },
+]
+
+const auditItems = [
+  { label: 'Audit Dashboard', href: '/admin-dashboard/audit', icon: ClipboardList },
+  { label: 'Activity Logs', href: '/admin-dashboard/logs', icon: Activity },
   { label: 'Security', href: '/admin-dashboard/security', icon: Shield },
   { label: 'Threats', href: '/admin-dashboard/threats', icon: AlertTriangle },
   { label: 'Blocked IPs', href: '/admin-dashboard/blocked-ips', icon: Lock },
@@ -19,6 +23,17 @@ export default function AdminLayout() {
   const navigate = useNavigate()
   const { user, loading } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [auditOpen, setAuditOpen] = useState(false)
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/admin-dashboard/audit') ||
+        location.pathname.startsWith('/admin-dashboard/logs') ||
+        location.pathname.startsWith('/admin-dashboard/security') ||
+        location.pathname.startsWith('/admin-dashboard/threats') ||
+        location.pathname.startsWith('/admin-dashboard/blocked-ips')) {
+      setAuditOpen(true)
+    }
+  }, [location.pathname])
 
   useEffect(() => {
     if (loading) return
@@ -64,6 +79,36 @@ export default function AdminLayout() {
               </Link>
             )
           })}
+
+          {/* Audit Section */}
+          <button
+            onClick={() => setAuditOpen(!auditOpen)}
+            className="flex items-center gap-[10px] px-[12px] py-[10px] rounded-[8px] text-[11px] font-medium text-[#666] hover:text-[#aaa] hover:bg-white/[0.03] transition-colors w-full text-left"
+          >
+            <ClipboardList size={15} strokeWidth={1.5} />
+            Audit & Security
+            {auditOpen ? <ChevronDown size={13} className="ml-auto" /> : <ChevronRight size={13} className="ml-auto" />}
+          </button>
+          {auditOpen && (
+            <div className="ml-[10px] flex flex-col gap-[2px]">
+              {auditItems.map((item) => {
+                const active = location.pathname === item.href || (item.href !== '/admin-dashboard/audit' && location.pathname.startsWith(item.href))
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center gap-[10px] px-[12px] py-[8px] rounded-[8px] text-[11px] font-medium transition-colors ${
+                      active ? 'bg-white/[0.08] text-white' : 'text-[#666] hover:text-[#aaa] hover:bg-white/[0.03]'
+                    }`}
+                  >
+                    <item.icon size={14} strokeWidth={1.5} />
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </div>
+          )}
         </nav>
 
         <div className="p-[12px] border-t border-white/[0.06] flex flex-col gap-[6px]">
