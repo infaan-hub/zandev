@@ -120,7 +120,7 @@ export default function DashboardOverview() {
                 {/* Info */}
                 <div className="p-[14px]">
                   <h3 className={`${c.text} text-[12px] font-semibold mb-[4px] truncate`}>{design.name}</h3>
-                  <div className="flex items-center gap-[12px] text-[9px] ${c.body}`}>
+                  <div className={`flex items-center gap-[12px] text-[9px] ${c.body}`}>
                     <span className="flex items-center gap-[4px]">
                       <Eye size={10} />
                       {design.views || 0}
