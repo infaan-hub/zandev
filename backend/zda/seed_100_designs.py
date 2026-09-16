@@ -9,7 +9,7 @@ import django
 import random
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'zda.settings')
-sys.path.insert(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 django.setup()
 
 from designs_app.models import Design
