@@ -39,6 +39,7 @@ import AdminSecurity from './admin/AdminSecurity'
 import AdminThreats from './admin/AdminThreats'
 import AdminBlockedIPs from './admin/AdminBlockedIPs'
 import AdminDesigns from './admin/AdminDesigns'
+import AuditPage from './pages/AuditPage'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -89,6 +90,7 @@ export default function App() {
               <Route path="/admin-dashboard" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="designs" element={<AdminDesigns />} />
+                <Route path="audit" element={<AuditPage />} />
                 <Route path="logs" element={<AdminLogs />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="security" element={<AdminSecurity />} />

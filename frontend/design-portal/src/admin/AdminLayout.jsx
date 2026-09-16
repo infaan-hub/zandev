@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
-import { Shield, Activity, Users, Lock, AlertTriangle, LayoutDashboard, ExternalLink, Palette } from 'lucide-react'
+import { Shield, Activity, Users, Lock, AlertTriangle, LayoutDashboard, ExternalLink, Palette, ClipboardList } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 
 const navItems = [
   { label: 'Overview', href: '/admin-dashboard', icon: LayoutDashboard },
   { label: 'Designs', href: '/admin-dashboard/designs', icon: Palette },
+  { label: 'Audit', href: '/admin-dashboard/audit', icon: ClipboardList },
   { label: 'Activity Logs', href: '/admin-dashboard/logs', icon: Activity },
   { label: 'Users', href: '/admin-dashboard/users', icon: Users },
   { label: 'Security', href: '/admin-dashboard/security', icon: Shield },

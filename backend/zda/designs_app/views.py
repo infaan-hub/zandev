@@ -126,15 +126,6 @@ class DesignDetailView(APIView):
         except Design.DoesNotExist:
             return Response({'error': 'design not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        AnalyticsEvent.objects.create(
-            event_type='design_view',
-            design=d,
-            ip_address=request.META.get('REMOTE_ADDR'),
-            user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
-        )
-        d.views += 1
-        d.save(update_fields=['views'])
-
         reviews = d.reviews.select_related('user').all()[:10]
         return Response({
             'id': d.id,
@@ -571,3 +562,127 @@ class UserDownloadsView(APIView):
             'downloaded_at': d.downloaded_at.isoformat(),
         } for d in downloads]
         return Response({'results': results, 'count': len(results)})
+
+
+class AuditView(APIView):
+    def get(self, request):
+        if not request.user.is_authenticated or not request.user.is_staff:
+            return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
+
+        from django.contrib.auth.models import User
+        from django.utils import timezone
+        from datetime import timedelta
+
+        now = timezone.now()
+        days_7 = now - timedelta(days=7)
+        days_30 = now - timedelta(days=30)
+
+        # Real user logins from ActivityLog
+        login_logs = ActivityLog.objects.filter(
+            action='login', timestamp__gte=days_30
+        ).select_related('user').order_by('-timestamp')[:100]
+
+        # Real user signups from AnalyticsEvent
+        signups = AnalyticsEvent.objects.filter(
+            event_type='signup', created_at__gte=days_30
+        ).select_related('user').order_by('-created_at')[:100]
+
+        # Real design exports from AnalyticsEvent
+        exports = AnalyticsEvent.objects.filter(
+            event_type='design_export', created_at__gte=days_30
+        ).select_related('user', 'design').order_by('-created_at')[:100]
+
+        # Real design views from AnalyticsEvent
+        views = AnalyticsEvent.objects.filter(
+            event_type='design_view', created_at__gte=days_30
+        ).select_related('user', 'design').order_by('-created_at')[:100]
+
+        # All activity logs (login, register, export, view, block, etc.)
+        all_activity = ActivityLog.objects.filter(
+            timestamp__gte=days_7
+        ).order_by('-timestamp')[:200]
+
+        # Logins per day (last 30 days)
+        logins_by_day = []
+        for i in range(30):
+            day = (now - timedelta(days=29-i)).date()
+            count = ActivityLog.objects.filter(action='login', timestamp__date=day).count()
+            logins_by_day.append({'date': day.isoformat(), 'count': count})
+
+        # Signups per day (last 30 days)
+        signups_by_day = []
+        for i in range(30):
+            day = (now - timedelta(days=29-i)).date()
+            count = AnalyticsEvent.objects.filter(event_type='signup', created_at__date=day).count()
+            signups_by_day.append({'date': day.isoformat(), 'count': count})
+
+        # Active users (logged in within 7 days)
+        active_user_ids = ActivityLog.objects.filter(
+            action='login', timestamp__gte=days_7
+        ).values_list('user_id', flat=True).distinct()
+        active_users = User.objects.filter(id__in=active_user_ids).values('id', 'username', 'email', 'last_login')
+
+        # Summary
+        total_users = User.objects.count()
+        logins_7d = ActivityLog.objects.filter(action='login', timestamp__gte=days_7).count()
+        logins_30d = ActivityLog.objects.filter(action='login', timestamp__gte=days_30).count()
+        signups_7d = AnalyticsEvent.objects.filter(event_type='signup', created_at__gte=days_7).count()
+        signups_30d = AnalyticsEvent.objects.filter(event_type='signup', created_at__gte=days_30).count()
+        exports_7d = AnalyticsEvent.objects.filter(event_type='design_export', created_at__gte=days_7).count()
+        exports_30d = AnalyticsEvent.objects.filter(event_type='design_export', created_at__gte=days_30).count()
+        views_7d = AnalyticsEvent.objects.filter(event_type='design_view', created_at__gte=days_7).count()
+        views_30d = AnalyticsEvent.objects.filter(event_type='design_view', created_at__gte=days_30).count()
+
+        return Response({
+            'summary': {
+                'total_users': total_users,
+                'logins_7d': logins_7d,
+                'logins_30d': logins_30d,
+                'signups_7d': signups_7d,
+                'signups_30d': signups_30d,
+                'exports_7d': exports_7d,
+                'exports_30d': exports_30d,
+                'views_7d': views_7d,
+                'views_30d': views_30d,
+            },
+            'logins_by_day': logins_by_day,
+            'signups_by_day': signups_by_day,
+            'active_users': list(active_users),
+            'recent_logins': [{
+                'id': l.id,
+                'username': l.username,
+                'user_id': l.user_id,
+                'ip_address': l.ip_address or '',
+                'user_agent': l.user_agent[:100],
+                'timestamp': l.timestamp.isoformat(),
+            } for l in login_logs],
+            'recent_signups': [{
+                'id': e.id,
+                'username': e.user.username if e.user else '',
+                'user_id': e.user_id,
+                'ip_address': e.ip_address or '',
+                'timestamp': e.created_at.isoformat(),
+            } for e in signups],
+            'recent_exports': [{
+                'id': e.id,
+                'username': e.user.username if e.user else 'Anonymous',
+                'design_name': e.design.name if e.design else '',
+                'design_id': e.design_id,
+                'timestamp': e.created_at.isoformat(),
+            } for e in exports],
+            'recent_views': [{
+                'id': e.id,
+                'username': e.user.username if e.user else 'Anonymous',
+                'design_name': e.design.name if e.design else '',
+                'design_id': e.design_id,
+                'timestamp': e.created_at.isoformat(),
+            } for e in views],
+            'all_activity': [{
+                'id': l.id,
+                'username': l.username,
+                'action': l.action,
+                'detail': l.detail,
+                'ip_address': l.ip_address or '',
+                'timestamp': l.timestamp.isoformat(),
+            } for l in all_activity],
+        })

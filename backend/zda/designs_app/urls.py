@@ -19,10 +19,13 @@ urlpatterns = [
     path('webhooks/', views.WebhookListView.as_view(), name='webhook-list'),
     path('webhooks/<int:pk>/', views.WebhookDeleteView.as_view(), name='webhook-delete'),
     path('analytics/dashboard/', views.AnalyticsDashboardView.as_view(), name='analytics-dashboard'),
+    path('audit/', views.AuditView.as_view(), name='audit'),
     path('user-downloads/', views.UserDownloadsView.as_view(), name='user-downloads'),
 
     path('auth/register/', auth_views.RegisterView.as_view(), name='register'),
     path('auth/login/', auth_views.LoginView.as_view(), name='login'),
+    path('auth/github/', auth_views.GitHubLoginView.as_view(), name='github-login'),
+    path('auth/google/', auth_views.GoogleLoginView.as_view(), name='google-login'),
     path('auth/user/', auth_views.UserView.as_view(), name='user'),
     path('auth/user/update/', auth_views.UserUpdateView.as_view(), name='user-update'),
     path('auth/password-reset/', auth_views.PasswordResetRequestView.as_view(), name='password-reset'),

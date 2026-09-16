@@ -29,6 +29,8 @@ async function fetchUpload(url, formData) {
 export const api = {
   register: (data) => fetchJSON('/auth/register/', { method: 'POST', body: JSON.stringify(data) }),
   login: (data) => fetchJSON('/auth/login/', { method: 'POST', body: JSON.stringify(data) }),
+  githubLogin: (code) => fetchJSON('/auth/github/', { method: 'POST', body: JSON.stringify({ code }) }),
+  googleLogin: (credential) => fetchJSON('/auth/google/', { method: 'POST', body: JSON.stringify({ credential }) }),
   getUser: () => fetchJSON('/auth/user/'),
   updateUser: (data) => fetchJSON('/auth/user/update/', { method: 'PUT', body: JSON.stringify(data) }),
   requestPasswordReset: (data) => fetchJSON('/auth/password-reset/', { method: 'POST', body: JSON.stringify(data) }),
@@ -61,6 +63,7 @@ export const api = {
   deleteWebhook: (id) => fetchJSON(`/webhooks/${id}/`, { method: 'DELETE' }),
 
   getAnalyticsDashboard: () => fetchJSON('/analytics/dashboard/'),
+  getAudit: () => fetchJSON('/audit/'),
 
   adminLogin: (data) => fetchJSON('/admin-auth/login/', { method: 'POST', body: JSON.stringify(data) }),
   adminStats: () => fetchJSON('/admin-auth/stats/'),

@@ -328,7 +328,6 @@ function DesignDetail() {
                   ['Category', design.category],
                   ['Price', design.price],
                   ['Version', `v${design.version}`],
-                  ['Views', design.views || 0],
                   ['Exports', design.exports || 0],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between text-[11px]">
