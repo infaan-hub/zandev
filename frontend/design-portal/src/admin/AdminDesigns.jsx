@@ -79,6 +79,8 @@ function DesignModal({ design, onClose, onSave }) {
     }
     return emptyForm
   })
+  const [files, setFiles] = useState({ front: null, g1: null, g2: null, g3: null, g4: null, g5: null })
+  const [previews, setPreviews] = useState({})
   const [saving, setSaving] = useState(false)
   const [activeField, setActiveField] = useState('html_code')
   const [showPreview, setShowPreview] = useState(true)
@@ -96,7 +98,13 @@ function DesignModal({ design, onClose, onSave }) {
     setSaving(true)
     try {
       const fd = new FormData()
-      Object.entries(form).forEach(([k, v]) => fd.append(k, v || ''))
+      Object.entries(form).forEach(([k, v]) => { if (v) fd.append(k, v) })
+      if (files.front) fd.append('front_image', files.front)
+      if (files.g1) fd.append('gallery_image_1_file', files.g1)
+      if (files.g2) fd.append('gallery_image_2_file', files.g2)
+      if (files.g3) fd.append('gallery_image_3_file', files.g3)
+      if (files.g4) fd.append('gallery_image_4_file', files.g4)
+      if (files.g5) fd.append('gallery_image_5_file', files.g5)
       if (design?.id) {
         await api.adminUpdateDesign(design.id, fd)
       } else {
@@ -133,7 +141,7 @@ function DesignModal({ design, onClose, onSave }) {
   const hasLiveCode = fields.some(f => form[f])
 
   const inputCls = "w-full h-[40px] px-3 rounded-lg border border-white/[0.15] bg-white/[0.05] text-white text-[12px] placeholder-[#555] outline-none focus:border-[#4ade80] focus:ring-1 focus:ring-[#4ade80]/30 transition-all"
-  const selectCls = "w-full h-[40px] px-3 pr-8 rounded-lg border border-white/[0.15] bg-white/[0.05] text-white text-[12px] outline-none focus:border-[#4ade80] focus:ring-1 focus:ring-[#4ade80]/30 transition-all cursor-pointer appearance-none"
+  const selectCls = "w-full h-[40px] px-3 pr-8 rounded-lg border border-white/[0.15] bg-[#1a1a1a] text-white text-[12px] outline-none focus:border-[#4ade80] focus:ring-1 focus:ring-[#4ade80]/30 transition-all cursor-pointer appearance-none"
   const labelCls = "block text-[#aaa] text-[10px] font-semibold uppercase tracking-wider mb-1.5"
 
   return (
@@ -178,7 +186,7 @@ function DesignModal({ design, onClose, onSave }) {
                 <label className={labelCls}>Framework</label>
                 <div className="relative">
                   <select value={form.framework} onChange={e => setForm({...form, framework: e.target.value})} className={selectCls}>
-                    {FRAMEWORKS.map(f => <option key={f} value={f}>{f}</option>)}
+                    {FRAMEWORKS.map(f => <option key={f} value={f} style={{background:'#1a1a1a',color:'#fff'}}>{f}</option>)}
                   </select>
                   <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg></div>
                 </div>
@@ -187,7 +195,7 @@ function DesignModal({ design, onClose, onSave }) {
                 <label className={labelCls}>Category</label>
                 <div className="relative">
                   <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className={selectCls}>
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {CATEGORIES.map(c => <option key={c} value={c} style={{background:'#1a1a1a',color:'#fff'}}>{c}</option>)}
                   </select>
                   <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg></div>
                 </div>
@@ -196,7 +204,7 @@ function DesignModal({ design, onClose, onSave }) {
                 <label className={labelCls}>Price</label>
                 <div className="relative">
                   <select value={form.price} onChange={e => setForm({...form, price: e.target.value})} className={selectCls}>
-                    {PRICES.map(p => <option key={p} value={p}>{p}</option>)}
+                    {PRICES.map(p => <option key={p} value={p} style={{background:'#1a1a1a',color:'#fff'}}>{p}</option>)}
                   </select>
                   <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg></div>
                 </div>
@@ -205,10 +213,20 @@ function DesignModal({ design, onClose, onSave }) {
 
             <div>
               <label className={labelCls}>Front Image (Cover) *</label>
-              <input type="url" value={form.preview_image} onChange={e => setForm({...form, preview_image: e.target.value})} placeholder="https://example.com/image.jpg" className={inputCls} />
-              {form.preview_image && (
+              <label className={`${inputCls} flex items-center gap-2 cursor-pointer`}>
+                <Upload size={14} className="text-[#666]" />
+                <span className="text-[#666] text-[11px]">{files.front ? files.front.name : 'Choose JPG/PNG image...'}</span>
+                <input type="file" accept="image/*" className="hidden" onChange={e => {
+                  const f = e.target.files[0]
+                  if (f) {
+                    setFiles(prev => ({...prev, front: f}))
+                    setPreviews(prev => ({...prev, front: URL.createObjectURL(f)}))
+                  }
+                }} />
+              </label>
+              {(previews.front || form.preview_image) && (
                 <div className="mt-2 relative w-full h-20 rounded-lg overflow-hidden border border-white/[0.10]">
-                  <img src={form.preview_image} className="w-full h-full object-cover" alt="" onError={e => e.target.style.display='none'} />
+                  <img src={previews.front || form.preview_image} className="w-full h-full object-cover" alt="" />
                 </div>
               )}
             </div>
@@ -216,9 +234,30 @@ function DesignModal({ design, onClose, onSave }) {
             <div>
               <label className={labelCls}>Gallery Images (Optional, up to 5)</label>
               <div className="space-y-1.5">
-                {[1,2,3,4,5].map(i => (
-                  <input key={i} type="url" value={form[`gallery_image_${i}`]} onChange={e => setForm({...form, [`gallery_image_${i}`]: e.target.value})} placeholder={`Gallery image ${i} URL`} className={inputCls} />
-                ))}
+                {[1,2,3,4,5].map(i => {
+                  const key = `g${i}`
+                  const fieldKey = `gallery_image_${i}`
+                  return (
+                    <div key={i}>
+                      <label className={`${inputCls} flex items-center gap-2 cursor-pointer`}>
+                        <Upload size={12} className="text-[#666]" />
+                        <span className="text-[#666] text-[10px]">{files[key] ? files[key].name : `Gallery image ${i}`}</span>
+                        <input type="file" accept="image/*" className="hidden" onChange={e => {
+                          const f = e.target.files[0]
+                          if (f) {
+                            setFiles(prev => ({...prev, [key]: f}))
+                            setPreviews(prev => ({...prev, [key]: URL.createObjectURL(f)}))
+                          }
+                        }} />
+                      </label>
+                      {(previews[key] || form[fieldKey]) && (
+                        <div className="mt-1 w-full h-12 rounded overflow-hidden border border-white/[0.06]">
+                          <img src={previews[key] || form[fieldKey]} className="w-full h-full object-cover" alt="" />
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
 

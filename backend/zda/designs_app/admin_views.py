@@ -354,7 +354,7 @@ def _design_to_dict(d):
         'framework': d.framework, 'price': d.price, 'score': d.score,
         'views': d.views, 'exports': d.exports,
         'description': d.description, 'prompt': d.prompt,
-        'preview_image': d.preview_image, 'preview': d.get_preview_url(),
+        'preview_image': d.preview_image or d.get_preview_url(), 'preview': d.get_preview_url(),
         'gallery_image_1': d.gallery_image_1, 'gallery_image_2': d.gallery_image_2,
         'gallery_image_3': d.gallery_image_3, 'gallery_image_4': d.gallery_image_4,
         'gallery_image_5': d.gallery_image_5,
@@ -405,13 +405,27 @@ class AdminDesignCreateView(APIView):
             next_code=request.data.get('next_code', ''),
             published=request.data.get('published', 'true').lower() == 'true',
         )
-        uploaded = request.FILES.get('file')
-        if uploaded:
-            d.uploaded_file = uploaded
-            d.file_type = _detect_file_type(uploaded.name)
+        front = request.FILES.get('front_image')
+        if front:
+            d.uploaded_file = front
+            d.file_type = _detect_file_type(front.name)
         elif d.preview_image:
             d.file_type = 'url'
+        for i in range(1, 6):
+            f = request.FILES.get(f'gallery_image_{i}_file')
+            if f:
+                setattr(d, f'gallery_image_{i}', f.url if hasattr(f, 'url') else '')
         d.save()
+        for i in range(1, 6):
+            f = request.FILES.get(f'gallery_image_{i}_file')
+            if f:
+                setattr(d, f'gallery_image_{i}', f'/media/designs/gallery/{d.id}_{i}_{f.name}')
+                from django.core.files.storage import default_storage
+                import os
+                path = os.path.join('designs', 'gallery', f'{d.id}_{i}_{f.name}')
+                default_storage.save(path, f)
+                setattr(d, f'gallery_image_{i}', f'/media/{path}')
+        d.save(update_fields=['gallery_image_1', 'gallery_image_2', 'gallery_image_3', 'gallery_image_4', 'gallery_image_5', 'uploaded_file', 'file_type'])
         log_activity('export', f'Created design: {d.name}', ip=_get_ip(request))
         audit_log(request.user, 'create_design', 'design', d.id, {'name': d.name}, _get_ip(request))
         broadcast_design_update(d.id, 'create', _design_to_dict(d))
@@ -431,12 +445,6 @@ class AdminDesignUpdateView(APIView):
         d.score = int(request.data.get('score', d.score))
         d.description = request.data.get('description', d.description)
         d.prompt = request.data.get('prompt', d.prompt)
-        d.preview_image = request.data.get('preview_image', d.preview_image)
-        d.gallery_image_1 = request.data.get('gallery_image_1', d.gallery_image_1)
-        d.gallery_image_2 = request.data.get('gallery_image_2', d.gallery_image_2)
-        d.gallery_image_3 = request.data.get('gallery_image_3', d.gallery_image_3)
-        d.gallery_image_4 = request.data.get('gallery_image_4', d.gallery_image_4)
-        d.gallery_image_5 = request.data.get('gallery_image_5', d.gallery_image_5)
         d.code = request.data.get('code', d.code)
         d.html_code = request.data.get('html_code', d.html_code)
         d.css_code = request.data.get('css_code', d.css_code)
@@ -448,15 +456,30 @@ class AdminDesignUpdateView(APIView):
         d.next_code = request.data.get('next_code', d.next_code)
         if 'published' in request.data:
             d.published = request.data.get('published', d.published)
-        uploaded = request.FILES.get('file')
-        if uploaded:
+        front = request.FILES.get('front_image')
+        if front:
             if d.uploaded_file:
                 try:
+                    import os
                     os.remove(d.uploaded_file.path)
                 except OSError:
                     pass
-            d.uploaded_file = uploaded
-            d.file_type = _detect_file_type(uploaded.name)
+            d.uploaded_file = front
+            d.file_type = _detect_file_type(front.name)
+        from django.core.files.storage import default_storage
+        import os
+        for i in range(1, 6):
+            f = request.FILES.get(f'gallery_image_{i}_file')
+            if f:
+                old = getattr(d, f'gallery_image_{i}')
+                if old and old.startswith('/media/'):
+                    try:
+                        default_storage.delete(old.replace('/media/', ''))
+                    except Exception:
+                        pass
+                path = os.path.join('designs', 'gallery', f'{d.id}_{i}_{f.name}')
+                default_storage.save(path, f)
+                setattr(d, f'gallery_image_{i}', f'/media/{path}')
         d.version += 1
         d.save()
 
