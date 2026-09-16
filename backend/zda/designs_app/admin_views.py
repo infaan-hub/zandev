@@ -348,16 +348,25 @@ class AdminBulkDesignsView(APIView):
         return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+def _abs_url(path):
+    if not path:
+        return ''
+    if path.startswith('http://') or path.startswith('https://'):
+        return path
+    base = os.environ.get('BACKEND_URL', 'https://zandev.onrender.com')
+    return base + path
+
+
 def _design_to_dict(d):
     return {
         'id': d.id, 'name': d.name, 'category': d.category,
         'framework': d.framework, 'price': d.price, 'score': d.score,
         'views': d.views, 'exports': d.exports,
         'description': d.description, 'prompt': d.prompt,
-        'preview_image': d.preview_image or d.get_preview_url(), 'preview': d.get_preview_url(),
-        'gallery_image_1': d.gallery_image_1, 'gallery_image_2': d.gallery_image_2,
-        'gallery_image_3': d.gallery_image_3, 'gallery_image_4': d.gallery_image_4,
-        'gallery_image_5': d.gallery_image_5,
+        'preview_image': _abs_url(d.preview_image) or _abs_url(d.get_preview_url()), 'preview': _abs_url(d.get_preview_url()),
+        'gallery_image_1': _abs_url(d.gallery_image_1), 'gallery_image_2': _abs_url(d.gallery_image_2),
+        'gallery_image_3': _abs_url(d.gallery_image_3), 'gallery_image_4': _abs_url(d.gallery_image_4),
+        'gallery_image_5': _abs_url(d.gallery_image_5),
         'file_type': d.file_type, 'code': d.code,
         'html_code': d.html_code, 'css_code': d.css_code, 'js_code': d.js_code,
         'react_code': d.react_code, 'vue_code': d.vue_code,

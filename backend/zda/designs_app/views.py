@@ -1,3 +1,4 @@
+import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,6 +10,15 @@ from datetime import timedelta
 from .models import (Design, ActivityLog, Category, ContactMessage, Collection,
     CollectionDesign, DesignVersion, Review, Webhook, WebhookDelivery,
     AnalyticsEvent, AdminAuditLog, UserDownload)
+
+
+def _abs_url(path):
+    if not path:
+        return ''
+    if path.startswith('http://') or path.startswith('https://'):
+        return path
+    base = os.environ.get('BACKEND_URL', 'https://zandev.onrender.com')
+    return base + path
 
 
 class StandardPagination(PageNumberPagination):
@@ -90,8 +100,8 @@ class DesignListView(APIView):
                     'score': d.score,
                     'views': d.views,
                     'exports': d.exports,
-                    'preview': d.get_preview_url(),
-                    'preview_image': d.preview_image or d.get_preview_url(),
+                    'preview': _abs_url(d.get_preview_url()),
+                    'preview_image': _abs_url(d.preview_image) or _abs_url(d.get_preview_url()),
                     'file_type': d.file_type,
                     'description': d.description,
                     'html_code': d.html_code,
@@ -135,16 +145,16 @@ class DesignDetailView(APIView):
             'score': d.score,
             'views': d.views,
             'exports': d.exports,
-            'preview': d.get_preview_url(),
-            'preview_image': d.preview_image or d.get_preview_url(),
+            'preview': _abs_url(d.get_preview_url()),
+            'preview_image': _abs_url(d.preview_image) or _abs_url(d.get_preview_url()),
             'file_type': d.file_type,
             'description': d.description,
             'prompt': d.prompt,
-            'gallery_image_1': d.gallery_image_1,
-            'gallery_image_2': d.gallery_image_2,
-            'gallery_image_3': d.gallery_image_3,
-            'gallery_image_4': d.gallery_image_4,
-            'gallery_image_5': d.gallery_image_5,
+            'gallery_image_1': _abs_url(d.gallery_image_1),
+            'gallery_image_2': _abs_url(d.gallery_image_2),
+            'gallery_image_3': _abs_url(d.gallery_image_3),
+            'gallery_image_4': _abs_url(d.gallery_image_4),
+            'gallery_image_5': _abs_url(d.gallery_image_5),
             'html_code': d.html_code,
             'css_code': d.css_code,
             'js_code': d.js_code,
@@ -404,7 +414,7 @@ class CollectionListView(APIView):
             'id': c.id, 'name': c.name, 'description': c.description,
             'is_public': c.is_public, 'design_count': c.design_count,
             'created_at': c.created_at.isoformat(),
-            'designs': [{'id': cd.design.id, 'name': cd.design.name, 'preview': cd.design.get_preview_url()} for cd in c.designs.select_related('design')[:20]],
+            'designs': [{'id': cd.design.id, 'name': cd.design.name, 'preview': _abs_url(cd.design.get_preview_url())} for cd in c.designs.select_related('design')[:20]],
         } for c in collections]
         return Response({'collections': data})
 

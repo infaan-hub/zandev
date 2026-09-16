@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+echo "Creating media directory..."
+mkdir -p media/designs/gallery media/designs/previews
+
 echo "Running migrations..."
 python manage.py migrate --noinput
 
