@@ -1,13 +1,16 @@
 import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Eye, Copy, Check } from 'lucide-react';
+import { Download, Eye, Copy, Check, Lock } from 'lucide-react';
 import { cn, formatNumber } from '../utils';
+import { useAuth } from '../../lib/AuthContext';
 
 function LiveCodeCard({ tool, style, onExport, onClick, index }) {
   const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
   const [isHovered, setIsHovered] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const cardRef = useRef(null);
+  const { user } = useAuth();
 
   const handleMouseMove = useCallback((e) => {
     if (!cardRef.current) return;
@@ -20,6 +23,7 @@ function LiveCodeCard({ tool, style, onExport, onClick, index }) {
 
   const handleCopy = useCallback((e) => {
     e.stopPropagation();
+    if (!user) { setShowLoginModal(true); return; }
     const parts = [];
     if (tool.html_code) parts.push(`<!-- HTML -->\n${tool.html_code}`);
     if (tool.css_code) parts.push(`/* CSS */\n${tool.css_code}`);
@@ -28,13 +32,14 @@ function LiveCodeCard({ tool, style, onExport, onClick, index }) {
     navigator.clipboard.writeText(parts.join('\n\n'));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }, [tool]);
+  }, [tool, user]);
 
   const accentRgb = style.accentRgb || '99,102,241';
   const accent = style.accent || '#6366f1';
   const hasLiveCode = Boolean(tool.html_code || tool.css_code || tool.js_code);
 
   return (
+    <>
     <motion.div
       ref={cardRef}
       initial={{ opacity: 0, y: 20 }}
@@ -128,7 +133,7 @@ function LiveCodeCard({ tool, style, onExport, onClick, index }) {
                 {copied ? <Check size={11} className="text-green-400" /> : <Copy size={11} className="text-[#aaa]" />}
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); onExport?.(tool); }}
+                onClick={(e) => { e.stopPropagation(); if (!user) { setShowLoginModal(true); return; } onExport?.(tool); }}
                 className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
                 style={{ backgroundColor: `rgba(${accentRgb}, 0.1)` }}
               >
@@ -139,6 +144,26 @@ function LiveCodeCard({ tool, style, onExport, onClick, index }) {
         </div>
       </div>
     </motion.div>
+    {showLoginModal && (
+      <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setShowLoginModal(false)}>
+        <div className="w-full max-w-[360px] p-6 rounded-2xl border border-white/[0.10] bg-[#0a0a0a] text-center" onClick={e => e.stopPropagation()}>
+          <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center mx-auto mb-4">
+            <Lock size={20} className="text-[#4ade80]" />
+          </div>
+          <h3 className="text-[16px] font-semibold text-white mb-2">Login Required</h3>
+          <p className="text-[12px] text-[#666] mb-6">Sign in to copy code and download files.</p>
+          <div className="flex gap-3">
+            <a href="/signin" className="flex-1 h-[40px] rounded-lg bg-white text-black text-[12px] font-semibold flex items-center justify-center hover:-translate-y-0.5 transition-transform">
+              Sign In
+            </a>
+            <a href="/signup" className="flex-1 h-[40px] rounded-lg border border-white/[0.10] text-white text-[12px] font-semibold flex items-center justify-center hover:bg-white/[0.05] transition-colors">
+              Sign Up
+            </a>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 

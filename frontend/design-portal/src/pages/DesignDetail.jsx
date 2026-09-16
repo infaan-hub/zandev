@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, memo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Copy, Check, Download, Eye, Terminal, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { ArrowLeft, Copy, Check, Download, Eye, Terminal, ChevronDown, ChevronUp, X, Lock } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import { api } from '../lib/api';
+import { useAuth } from '../lib/AuthContext';
 import MCPDownloadModal from '../components/MCPDownloadModal';
 
 const FRAMEWORKS = [
@@ -41,6 +42,7 @@ function highlightCode(code, lang) {
 function DesignDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [design, setDesign] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -50,6 +52,7 @@ function DesignDetail() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -93,23 +96,26 @@ function DesignDetail() {
   ].filter(Boolean);
 
   const handleCopy = useCallback((field) => {
+    if (!user) { setShowLoginModal(true); return; }
     navigator.clipboard.writeText(design?.[field] || '');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }, [design]);
+  }, [design, user]);
 
   const handleCopyAll = useCallback(() => {
+    if (!user) { setShowLoginModal(true); return; }
     const parts = codeFields.map(f => `/* ${f.label} */\n${design[f.key]}`).join('\n\n');
     navigator.clipboard.writeText(parts);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }, [design, codeFields]);
+  }, [design, codeFields, user]);
 
   const handleCopyPrompt = useCallback(() => {
+    if (!user) { setShowLoginModal(true); return; }
     navigator.clipboard.writeText(design?.prompt || '');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }, [design]);
+  }, [design, user]);
 
   const downloadFile = (name, content) => {
     const blob = new Blob([content], { type: 'text/plain' });
@@ -122,13 +128,14 @@ function DesignDetail() {
   };
 
   const handleDownload = useCallback(() => {
+    if (!user) { setShowLoginModal(true); return; }
     const name = (design?.name || 'design').toLowerCase().replace(/\s+/g, '-');
     codeFields.forEach(f => {
       const ext = f.lang === 'jsx' ? 'jsx' : f.lang === 'js' ? 'js' : f.lang === 'css' ? 'css' : f.lang === 'html' ? 'html' : 'txt';
       downloadFile(`${name}.${ext}`, design[f.key]);
     });
     setShowDownloadModal(false);
-  }, [design, codeFields]);
+  }, [design, codeFields, user]);
 
   if (loading) {
     return (
@@ -161,10 +168,10 @@ function DesignDetail() {
             <ArrowLeft size={14} /> Back to Tools
           </button>
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowDownloadModal(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-medium bg-white text-black hover:-translate-y-0.5 transition-transform">
+            <button onClick={() => { if (!user) { setShowLoginModal(true); return; } setShowDownloadModal(true); }} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-medium bg-white text-black hover:-translate-y-0.5 transition-transform">
               <Download size={12} /> Download
             </button>
-            <button onClick={() => setShowMCPModal(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-medium bg-gradient-to-r from-violet-500/20 to-blue-500/20 border border-violet-500/20 text-violet-300 hover:-translate-y-0.5 transition-transform">
+            <button onClick={() => { if (!user) { setShowLoginModal(true); return; } setShowMCPModal(true); }} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-medium bg-gradient-to-r from-violet-500/20 to-blue-500/20 border border-violet-500/20 text-violet-300 hover:-translate-y-0.5 transition-transform">
               <Terminal size={12} /> MCP
             </button>
           </div>
@@ -257,7 +264,7 @@ function DesignDetail() {
             <div className="rounded-2xl border border-white/[0.08] bg-[#080808] p-5">
               <h3 className="text-[13px] font-semibold mb-4">Get This Design</h3>
               <div className="space-y-2">
-                <button onClick={() => setShowDownloadModal(true)}
+                <button onClick={() => { if (!user) { setShowLoginModal(true); return; } setShowDownloadModal(true); }}
                   className="w-full p-3 rounded-xl border border-white/[0.08] text-left hover:bg-white/[0.03] transition-colors">
                   <div className="flex items-center gap-2">
                     <Download size={14} className="text-[#4ade80]" />
@@ -277,7 +284,7 @@ function DesignDetail() {
                     </div>
                   </div>
                 </button>
-                <button onClick={() => setShowMCPModal(true)}
+                <button onClick={() => { if (!user) { setShowLoginModal(true); return; } setShowMCPModal(true); }}
                   className="w-full p-3 rounded-xl border border-violet-500/20 bg-gradient-to-r from-violet-500/5 to-blue-500/5 text-left hover:from-violet-500/10 hover:to-blue-500/10 transition-colors">
                   <div className="flex items-center gap-2">
                     <Terminal size={14} className="text-violet-400" />
@@ -309,7 +316,7 @@ function DesignDetail() {
                         className="flex items-center gap-1 px-2.5 py-1 rounded text-[9px] text-[#888] hover:text-white border border-white/[0.06] hover:border-white/[0.15] transition-colors">
                         {copied ? <Check size={10} className="text-[#4ade80]" /> : <Copy size={10} />} Copy Prompt
                       </button>
-                      <button onClick={() => downloadFile(`${design.name}-prompt.txt`, design.prompt)}
+                      <button onClick={() => { if (!user) { setShowLoginModal(true); return; } downloadFile(`${design.name}-prompt.txt`, design.prompt); }}
                         className="flex items-center gap-1 px-2.5 py-1 rounded text-[9px] text-[#888] hover:text-white border border-white/[0.06] hover:border-white/[0.15] transition-colors">
                         <Download size={10} /> Download
                       </button>
@@ -361,6 +368,26 @@ function DesignDetail() {
                 <div className="text-[11px] font-semibold text-white">Copy All Code</div>
                 <div className="text-[9px] text-[#666] mt-0.5">Copy all source to clipboard</div>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLoginModal && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setShowLoginModal(false)}>
+          <div className="w-full max-w-[360px] p-6 rounded-2xl border border-white/[0.10] bg-[#0a0a0a] text-center" onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center mx-auto mb-4">
+              <Lock size={20} className="text-[#4ade80]" />
+            </div>
+            <h3 className="text-[16px] font-semibold text-white mb-2">Login Required</h3>
+            <p className="text-[12px] text-[#666] mb-6">Sign in to copy code, download files, get MCP, and view prompts.</p>
+            <div className="flex gap-3">
+              <Link to="/signin" className="flex-1 h-[40px] rounded-lg bg-white text-black text-[12px] font-semibold flex items-center justify-center hover:-translate-y-0.5 transition-transform">
+                Sign In
+              </Link>
+              <Link to="/signup" className="flex-1 h-[40px] rounded-lg border border-white/[0.10] text-white text-[12px] font-semibold flex items-center justify-center hover:bg-white/[0.05] transition-colors">
+                Sign Up
+              </Link>
             </div>
           </div>
         </div>
