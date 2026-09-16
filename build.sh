@@ -13,10 +13,12 @@ mkdir -p media/designs/gallery media/designs/previews
 
 echo "Copying gallery images..."
 if [ -d "../media/designs/gallery" ]; then
-    cp -r ../media/designs/gallery/* media/designs/gallery/ 2>/dev/null || true
-    echo "Copied $(ls media/designs/gallery/*.jpg 2>/dev/null | wc -l) images"
+    cp -r ../media/designs/gallery/* media/designs/gallery/
+    COPIED=$(ls media/designs/gallery/*.jpg 2>/dev/null | wc -l)
+    echo "Copied $COPIED images to media/designs/gallery/"
 else
-    echo "Source gallery not found at ../media/designs/gallery"
+    echo "ERROR: Source gallery not found at ../media/designs/gallery"
+    echo "Contents of backend/media: $(ls ../media/ 2>/dev/null)"
 fi
 
 python manage.py migrate --noinput
