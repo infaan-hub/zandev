@@ -2,7 +2,7 @@ services:
   - type: web
     name: zandev
     runtime: python
-    buildCommand: mkdir -p backend/media/designs/gallery && pip install -r requirements.txt && cd backend/zda && mkdir -p media/designs/gallery media/designs/previews && cp -r ../media/designs/gallery/* media/designs/gallery/ 2>/dev/null; echo "Copied $(ls media/designs/gallery/*.jpg 2>/dev/null | wc -l) images" && python manage.py migrate --noinput && python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('admin','admin@zandev.dev','admin123') if not User.objects.filter(username='admin').exists() else None" && python keep_alive.py && python manage.py seed_designs && python manage.py collectstatic --noinput
+    buildCommand: bash build.sh
     startCommand: cd backend/zda && export DJANGO_SETTINGS_MODULE=zda.settings && export DATABASE_URL="postgresql://neondb_owner:npg_pBYIbFKm7H0f@ep-morning-king-axkqo4hc-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require" && gunicorn zda.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
