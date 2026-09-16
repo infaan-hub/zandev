@@ -8,6 +8,8 @@ echo "Copying gallery images..."
 if [ -d "../media/designs/gallery" ]; then
     cp -r ../media/designs/gallery/* media/designs/gallery/ 2>/dev/null || true
     echo "Copied $(ls media/designs/gallery/*.jpg 2>/dev/null | wc -l) images from repo"
+else
+    echo "Source gallery not found at ../media/designs/gallery"
 fi
 
 echo "Running migrations..."
