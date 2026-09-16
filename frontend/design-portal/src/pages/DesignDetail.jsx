@@ -201,6 +201,7 @@ function DesignDetail() {
                     html={design.html_code}
                     css={design.css_code}
                     js={design.js_code}
+                    reactCode={design.react_code}
                     className="w-full h-full"
                     title={design.name}
                   />

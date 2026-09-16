@@ -23,6 +23,7 @@ function DesignCard({ design }) {
             html={d.html_code}
             css={d.css_code}
             js={d.js_code}
+            reactCode={d.react_code}
             className="w-full h-full"
             title={`card-${d.id}`}
           />
